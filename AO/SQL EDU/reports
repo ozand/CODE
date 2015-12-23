@@ -1,0 +1,10 @@
+SELECT COUNT(DISTINCT seminars.id) AS count
+
+FROM seminars
+
+JOIN seminar_users ON seminars.id = seminar_users.seminar_id
+JOIN users ON seminar_users.user_id = users.id
+LEFT JOIN salons ON users.salon_id = salons.id
+LEFT JOIN cities ON seminars.city_id = cities.id
+LEFT JOIN regions ON cities.region_id = regions.id
+WHERE (seminars.studio_id IS NOT NULL OR seminars.city_id IS NOT NULL)

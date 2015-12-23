@@ -1,0 +1,8 @@
+aLinks = ActiveWorkbook.LinkSources(xlExcelLinks)
+If Not IsEmpty(aLinks) Then
+For i = 1 To UBound(aLinks)
+ActiveWorkbook.BreakLink _
+Name:=aLinks(i), _
+Type:=xlLinkTypeExcelLinks
+Next i
+End If

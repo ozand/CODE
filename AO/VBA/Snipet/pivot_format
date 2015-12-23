@@ -1,0 +1,20 @@
+Private Sub formatAllPivotTableDataArea()
+Dim ws As Worksheet
+Dim pvtTable As PivotTable
+Dim pvtField As PivotField
+
+
+Application.ScreenUpdating = False
+For Each pvtTable In ActiveSheet.PivotTables
+For Each pvtField In pvtTable.DataFields
+
+pvtField.Function = xlSum
+pvtField.NumberFormat = "[Blue]+### ### ##0;[Red]-### ### ##0"
+Next pvtField
+
+pvtTable.PivotCache.Refresh
+
+Next pvtTable
+
+
+End Sub

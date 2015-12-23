@@ -1,0 +1,377 @@
+Function Replace_symbols(ByVal txt As String) As String
+    St$ = "~!@/\#$%^:?&*=|`;"""
+    For i% = 1 To Len(St$)
+        txt = Replace(txt, Mid(St$, i, 1), "_")
+        txt = Replace(txt, Chr(10), "_")
+    Next
+    Replace_symbols = txt
+End Function
+
+Sub data_TR_in_FC()
+
+Dim ar_nmHead(150), ar_heir_Competitors(), patchTR, map_sln, nm_FLSM, nm_Mreg, nm_SREP As String
+Dim comp_colo, comp_rev, st_cmp, nmFile, disk, map_search As String
+Dim num_ar_Brand, num_Competitors, b, iii, i, nc, ee, cdMonth, cdYear As Integer
+Dim eee As Integer
+Dim NF, actTR, in_data As String
+Dim ar_Data()
+Dim discount, koef As Double
+Dim ar_LastRow(4), ar_brand()
+  
+ar_brand = Array("MX", "ES", "LP", "KR", "RD")
+status_head = 0
+
+NF = ActiveWorkbook.Name
+   
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+' Creat Array Total Russia CA
+'---------------------------------------------------------
+
+
+ar_heir_Competitors = Array("Estel", "Schwarzkopf", "Wella", "Londa", "Keune", "Revlon", "Goldwell", "Cutrin", "Kadus", "Indola", "Paul Mitchell", "Label", ",Syoss", "Chi", "Seah", "Kydra", "Sebastian", "American Crew", "Alterna", "Others")
+num_Competitors = UBound(ar_heir_Competitors)
+
+str_PYper_PRTN_VAL = 79
+str_TYper_PRTN_VAL = 66
+
+ar_tps_partners = array(931001490, 931010839, 931012808, 931020896, 931021246, 931022457, 932022349, "P001", 932022200, 931010907)
+
+map_sln = "https://maps.yandex.ru/?text="
+
+
+
+
+For b = 0 To 4
+        
+patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(b) & "\Top Russia Total 2015 " & ar_brand(b) & ".xlsm"
+in_data = "in_PPD"
+
+Workbooks.Open Filename:=patchTR, Notify:=False
+actTR = ActiveWorkbook.Name
+Sheets(ar_brand(b)).Select
+ActiveSheet.AutoFilterMode = False
+ar_LastRow(b) = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1  
+
+
+ReDim ar_Data(ar_LastRow(b) - 4, 150) ' num_colums)s
+   iii = 0
+
+'-----------------------------------------------------------
+   
+
+   
+    For i = 4 To ar_LastRow(b)
+    
+If IsNumeric(Cells(i, 1).Value) And Len(Cells(i, 2)) = 9 Then
+
+    num_colums = 0
+    nm_brand = ar_brand(b)
+    ar_Data(iii, num_colums) = nm_brand '
+    if iii = 0 then ar_nmHead(num_colums) = "brand"
+    
+    num_colums = num_colums + 1
+    unvCD = Cells(i, 2)
+    ar_Data(iii, num_colums) =  unvCD'
+    if iii = 0 then ar_nmHead(num_colums) = "unvCD"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Replace_symbols(Trim(Left(Cells(i, 9), 30)) & ". " & Trim(Left(Cells(i, 12), 50) & " " & Left(Cells(i, 13), 30)) & " " & Cells(i, 11))
+    if iii = 0 then ar_nmHead(num_colums) = "salons"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Replace_symbols(Trim(Left(Cells(i, 10), 30))) '
+    if iii = 0 then ar_nmHead(num_colums) = "offname"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = "phone: " & Trim(Left(Cells(i, 20), 50) & " | email: " & Left(Cells(i, 21), 50) & " | site: " & Left(Cells(i, 22), 50)) 'contact salons
+    if iii = 0 then ar_nmHead(num_colums) = "contacts_sln"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Trim(Left(Cells(i, 16), 30)) & " |email: " & Cells(i, 14) & " |phone: " & Cells(i, 15) 'contact
+    if iii = 0 then ar_nmHead(num_colums) = "contact_cont"
+    
+    nm_Mreg = Right(Cells(i, 4), Len(Cells(i, 4)) - 3)
+    nm_FLSM = Trim(Cells(i, 165))
+    nm_SREP = Trim(Cells(i, 7))
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = nm_Mreg & " - " & Cells(i, 5) & "(" & nm_FLSM & ")" & " - " & Cells(i, 6) & "(" & nm_SREP & ")" 'mreg
+    if iii = 0 then ar_nmHead(num_colums) = "L_reg"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 167)
+    if iii = 0 then ar_nmHead(num_colums) = "nmPartner"
+
+            
+    ' Create list of Competitors
+    '----------------------------------------------
+    nc = 0
+    comp_colo = ""
+    comp_rev = ""
+    
+    For ee = 44 To 63
+    st_cmp = Cells(i, ee)
+    Select Case st_cmp
+    Case "К"
+    comp_colo = ar_heir_Competitors(nc) & " " & comp_colo
+    Case "К/У"
+    comp_colo = ar_heir_Competitors(nc) & " " & comp_colo
+    comp_rev = ar_heir_Competitors(nc) & " " & comp_rev
+    Case "У"
+    comp_rev = ar_heir_Competitors(nc) & " " & comp_rev
+    End Select
+    nc = nc + 1
+    Next ee
+   '----------------------------------------------
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Trim(comp_colo)
+    if iii = 0 then ar_nmHead(num_colums) = "comp_col"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Trim(comp_rev)
+    if iii = 0 then ar_nmHead(num_colums) = "comp_rev"
+    '---------------------------------------------------------------------------------------------------------
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 18)
+    if iii = 0 then ar_nmHead(num_colums) = "type_cln"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 8)
+    if iii = 0 then ar_nmHead(num_colums) = "is_act"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 19)
+    if iii = 0 then ar_nmHead(num_colums) = "nm_chain"
+       
+    '---------------------------------------------------------------------------------------------------------
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = nm_brand & unvCD
+    if iii = 0 then ar_nmHead(num_colums) = "brand_unvCode"
+    
+    '---------------------------------------------------------------------------------------------------------
+    num_colums = num_colums + 1
+    If Cells(i, 161) <> "" Then cdMonth = Cells(i, 161) Else cdMonth = 1
+    If IsNumeric(Cells(i, 65)) Then cdYear = Cells(i, 65) Else cdYear = 1
+    ar_Data(iii, 14) = cdMonth & "-" & cdYear ' CNQ_Y
+    if iii = 0 then ar_nmHead(num_colums) = "conq_data"
+    ''---------------------------------------------------------------------------------------------------------
+    
+    num_colums = num_colums + 1
+  
+    
+    cdPartners = Cells(i, 173)
+    ar_Data(iii, num_colums) = cdPartners ' cd_Partner
+    if iii = 0 then ar_nmHead(num_colums) = "cd_partners"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 160) 'MAG
+    if iii = 0 then ar_nmHead(num_colums) = "mag"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 27) ' WRK_PLACE
+    if iii = 0 then ar_nmHead(num_colums) = "wrk_place"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 28) '  HDinDAY
+    if iii = 0 then ar_nmHead(num_colums) = "hd_empl"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 156) '  AVG_color
+    if iii = 0 then ar_nmHead(num_colums) = "avg_colo"
+    
+    '---------------------------------------------------------------------------------------------------------
+    
+    num_colums = num_colums + 1
+    If IsNumeric(Cells(i, 29)) Then
+    ar_Data(iii, num_colums) = nm_brand & Cells(i, 29) 
+        Else
+    ar_Data(iii, num_colums) = ""
+    End If
+    if iii = 0 then ar_nmHead(num_colums) = "ecad"
+    
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 30) & "|" & Cells(i, 33)
+    if iii = 0 then ar_nmHead(num_colums) = "alltime"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 31) & "|" & Cells(i, 34)
+    if iii = 0 then ar_nmHead(num_colums) = "edu_PY"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 32) & "|" & Cells(i, 35)
+    if iii = 0 then ar_nmHead(num_colums) = "edu_TY"
+    
+    '---------------------------------------------------------------------------------------------------------
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = "\CARDS\" & nm_Mreg & "\" & nm_FLSM & "\" & "Clients Cards" & "\" & nm_SREP & "\" ' office
+    if iii = 0 then ar_nmHead(num_colums) = "path_office"
+    
+    '---------------------------------------------------------------------------------------------------------
+          
+    nmFile = "fc_" & Replace_symbols(Trim(Left(Cells(i, 9), 30)) & ". " & Trim(Left(Cells(i, 12), 50) & " " & Left(Cells(i, 13), 30)) & " " & Cells(i, 11)) & ".pdf"
+    disk = "\\RUCORPRUWKS0665"
+        
+    num_colums = num_colums + 1
+    If Len(Cells(i, 2)) >= 9 Then
+    ar_Data(iii, num_colums) = disk & "\CARDS\" & nm_Mreg & "\"  & nm_FLSM & "\" & "Clients Cards" & "\" & nm_SREP & "\" & nmFile
+    Else
+    ar_Data(iii, num_colums) = 0
+    End If
+    if iii = 0 then ar_nmHead(num_colums) = "link2File"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Trim(Cells(i, 9))
+    if iii = 0 then ar_nmHead(num_colums) = "sln_name"
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Trim(Cells(i, 11)) 
+    if iii = 0 then ar_nmHead(num_colums) = "city"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Trim(Cells(i, 12)) 
+    if iii = 0 then ar_nmHead(num_colums) = "adress"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = nm_SREP 
+    if iii = 0 then ar_nmHead(num_colums) = "srep"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = nm_FLSM 
+    if iii = 0 then ar_nmHead(num_colums) = "flsm"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = disk & "\CARDS\" & nm_Mreg & "\" & nm_FLSM & "\" & "Clients Cards" & "\" & nm_SREP
+    if iii = 0 then ar_nmHead(num_colums) = "link2FLSM2CLN_CARD"
+        
+    num_colums = num_colums + 1
+    nmFile_REG_CARD = "rc_SREP_" & ar_brand(b) & "_" & nm_Mreg & "_" & nm_SREP & ".pdf"
+    disk = "\\RUCORPRUWKS0665"
+    ar_Data(iii, num_colums) = disk & "\CARDS\" & nm_Mreg & "\" &  nm_FLSM & "\" & "Region_Cards" & "\"  & nmFile_REG_CARD
+    if iii = 0 then ar_nmHead(num_colums) = "link2File_reg_card"
+    
+    
+    num_colums = num_colums + 1
+    nmFile_SREP_CARD = "fe_" & "SREP" & "_" & nm_SREP & ".pdf"
+    ar_Data(iii, num_colums) = disk & "\CARDS\" & nm_Mreg & "\" & nm_FLSM & "\" & "COACH"  & "\" & nmFile_SREP_CARD  
+    if iii = 0 then ar_nmHead(num_colums) = "link2FLSM2EMPL_CARD"
+     
+    '---------------------------------------------------------------------------------------------------------    
+     
+     
+  '---------------------------------------------------------------------------------------------------------            
+    num_colums = num_colums + 1
+    
+    for f_p = 0 to UBound(ar_tps_partners)
+        if ar_tps_partners(f_p) = cdPartners Then 
+            tps_status = "TPS"
+            exit for 
+           Else
+           tps_status = "WSOT"
+        end if
+    next f_p
+    
+    ar_Data(iii, num_colums) = tps_status
+    ar_nmHead(num_colums) = "PRTN_STAT"
+    
+        
+    '----------------------------------------------------------------------------------------------------------
+        
+'---------------------------------------------------------------------------------------------------------
+'creat ca val partners monthly
+'---------------------------------------------------------------------------------------------------------
+
+    For f_m = 0 To 11
+    num_colums = num_colums + 1
+    clm_m = str_PYper_PRTN_VAL + f_m
+    
+    prtnr_val = Cells(i, clm_m)
+    If isNumeric(prtnr_val) Then
+    m_val = Cells(i, clm_m) / 1000
+    Else
+    m_val = Empty
+    End If
+    
+    ar_Data(iii, num_colums) = m_val
+    ar_nmHead(num_colums) = "CA_PY_M" & f_m + 1
+
+    Next f_m
+    
+
+    For f_m = 0 To 11
+    num_colums = num_colums + 1
+    clm_m = str_TYper_PRTN_VAL + f_m
+    prtnr_val = Cells(i, clm_m)
+    If isNumeric(prtnr_val) Then
+    m_val = Cells(i, clm_m) / 1000
+    Else
+    m_val = Empty
+    End If
+    
+    ar_Data(iii, num_colums) = m_val
+    ar_nmHead(num_colums) = "CA_TY_M" & f_m + 1
+
+    Next f_m
+     
+ 
+
+    
+    
+    iii = iii + 1
+  
+End If
+
+Next i
+
+ActiveWindow.Close
+Application.DisplayAlerts = False
+
+Workbooks(NF).Activate
+Sheets(in_data).Activate
+
+'clear sheet & create head & create name OR fiil data
+'---------------------------------------------------------------------------------------------------------
+If status_head = 0 Then
+ActiveSheet.UsedRange.Cells.ClearContents
+end_POS = iii + 1
+start_POS = 2
+
+
+For t = 0 To num_colums
+Cells(1, t + 1) = ar_nmHead(t)
+Cells(1, t + 1).Select
+ActiveWorkbook.Names.Add Name:=ar_nmHead(t), RefersTo:="=" & ActiveSheet.Name & "!" & ActiveCell.Address()
+Next t
+
+Else
+start_POS = end_POS + 1
+end_POS = start_POS + iii - 1
+End If
+
+ActiveSheet.Cells(start_POS, 1).Resize(end_POS - start_POS + 1, num_colums + 1) = ar_Data()
+status_head = 1
+Next b
+
+
+'---------------------------------------------------------------------------------------------------------
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+    
+End Sub
+

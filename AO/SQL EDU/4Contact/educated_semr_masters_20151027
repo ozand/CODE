@@ -1,0 +1,6 @@
+select *
+from seminar_users as smu
+left join seminars as smr ON smu.seminar_id = smr.id
+left join seminar_types as smt ON smr.seminar_type_id = smt.id
+left join users as usr ON smu.user_id = usr.id
+where smt.id in ('113','116','115','114', '125', '123', '122', '117', '124')

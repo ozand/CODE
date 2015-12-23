@@ -1,0 +1,378 @@
+Sub data_CC_in_GC()
+
+
+Dim pathc2file As String
+Dim ar_code_Brand(4, 1)
+Dim LastRow_CC, LastColumns_CC As Integer
+Dim num_month
+
+num_month = InputBox("M")
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+
+
+ar_code_Brand(0, 0) = "C2"
+ar_code_Brand(1, 0) = "C4"
+ar_code_Brand(2, 0) = "C6"
+ar_code_Brand(3, 0) = "C8"
+ar_code_Brand(4, 0) = "CE"
+ar_code_Brand(0, 1) = "LP"
+ar_code_Brand(1, 1) = "KR"
+ar_code_Brand(2, 1) = "MX"
+ar_code_Brand(3, 1) = "RD"
+ar_code_Brand(4, 1) = "ES"
+ 
+LastRow_CC = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+LastColumns_CC = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+
+ReDim ar_data_ValWSOT(LastRow_CC, LastColumns_CC)
+
+    For f_i = 1 To LastRow_CC
+    If Cells(f_i, 3) = "LOR mSeries Store" Then
+    num_start_row_CA_3Y = f_i + 1
+    Exit For
+    End If
+    Next f_i
+
+
+iii = 0
+    For f_i = num_start_row_CA_3Y To LastRow_CC
+
+sum_PPY = 0
+sum_PY = 0
+sum_PYTD = 0
+sum_YTD = 0
+
+    For f_j = 2 To LastColumns_CC
+    cdBrand = Null
+    If f_j = 2 Then
+        signBrand = Cells(f_i, 2)
+        For y = 0 To 4
+        signMath = ar_code_Brand(y, 0)
+        cdMath = ar_code_Brand(y, 1)
+        If signBrand = signMath Then
+        cdBrand = cdMath
+        End If
+        Next y
+        ar_data_ValWSOT(iii, 0) = cdBrand
+        
+        End If
+    
+    If f_j = 3 Then
+    ar_data_ValWSOT(iii, 1) = Cells(f_i, 3)
+    
+    End If
+    
+    If f_j = 4 Then
+    ar_data_ValWSOT(iii, 2) = Cells(f_i, 4)
+    
+    End If
+     
+    If f_j > 4 And f_j <= 16 Then
+    sum_PPY = sum_PPY + Cells(f_i, f_j)
+    
+    End If
+    
+    
+    If f_j > 16 And f_j <= 28 Then
+    sum_PY = sum_PY + Cells(f_i, f_j)
+    
+    End If
+    
+    
+    If f_j > 16 And f_j <= 16 + num_month Then
+    sum_PYTD = sum_PYTD + Cells(f_i, f_j)
+    
+    End If
+    
+    
+     If f_j > 28 And f_j <= 28 + num_month Then
+    sum_YTD = sum_YTD + Cells(f_i, f_j)
+        End If
+    Next f_j
+    ar_data_ValWSOT(iii, 3) = sum_PPY
+    ar_data_ValWSOT(iii, 4) = sum_PY
+    ar_data_ValWSOT(iii, 5) = sum_PYTD
+    ar_data_ValWSOT(iii, 6) = sum_YTD
+    
+    If sum_PYTD = 0 Then
+    ev_YTD = 0
+    Else
+    ev_YTD = (sum_YTD / sum_PYTD) - 1
+    End If
+    ar_data_ValWSOT(iii, 7) = ev_YTD
+        
+    If Len(ar_data_ValWSOT(iii, 1)) <> 9 Then
+    iii = iii
+    Else
+    iii = iii + 1
+    End If
+    Next f_i
+    
+    Workbooks.Add
+    
+    
+    
+With ActiveSheet
+.UsedRange.Cells.ClearContents
+.Cells(2, 1).Resize(iii + 1, 8) = ar_data_ValWSOT()
+End With
+
+
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+End Sub
+
+
+	
+
+
+ar_CC_CA 
+
+
+
+
+
+
+
+ar_nm_status_sheets = CA_3Y 
+ar_nm_Sheets = Array("G_YTD","","","")
+
+num_ar_Brand = UBound(ar_brand)
+ 
+NF = ActiveWorkbook.Name
+   
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+' Creat Array Total Russia CA
+'---------------------------------------------------------
+ar_Colmn = Array("nb_row", "mreg", "sec", "reg", "salons", "contacts_sln_mail", "contact_sln_phone", "contact_sln_name", "cln_type", "SLN_phone", "SLN_mail", "SLN_site", "DOGOVOR", "CLUB", "CLUB2014", "ECAD", "edu_ALLTIME", "EDU_2014", "EDU_2015", "CA_Q1", "CA_Q2", "CA_Q3", "CA_Q4")
+num_ar_Colmn = UBound(ar_Colmn)
+ar_Competitors = Array("Estel", "Schwarzkopf", "Wella", "Londa", "Keune", "Revlon", "Goldwell", "Cutrin", "Kadus", "Indola", "Paul Mitchell", "Label", ",Syoss", "Chi", "Seah", "Kydra", "Sebastian", "American Crew", "Alterna", "Others")
+num_Competitors = UBound(ar_Competitors)
+
+ReDim ar_LastRow(num_ar_Brand)
+
+For b = 0 To num_ar_Brand ' öèêë ïî TR
+        
+patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(b) & "\Top Russia Total 2015 " & ar_brand(b) & ".xlsm"
+in_data = "Печать" & ar_brand(b)
+
+
+with Workbooks 
+.Open Filename:=patchTR, Notify:=False
+actTR = .Name
+.Sheets(ar_brand(b)).Select
+ActiveSheet.AutoFilterMode = False
+end with
+
+map_sln = "https://maps.yandex.ru/?text="
+
+ar_LastRow(b) = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1   ' ïîñëåäíÿÿ ÿ÷åéêà
+ReDim ar_Data(ar_LastRow(b), num_ar_Colmn)
+'-----------------------------------------------------------
+   
+    iii = 0
+   
+    For i = 4 To ar_LastRow(b)
+    
+If IsNumeric(Cells(i, 1).Value) Then
+
+    ar_Data(iii, 0) = ar_brand(b) 'brand
+    ar_Data(iii, 1) = Cells(i, 2) 'unvCD
+    ar_Data(iii, 2) = Trim(Left(Cells(i, 9), 30)) & ". " & Trim(Left(Cells(i, 12), 50) & " " & Left(Cells(i, 13), 30)) & " " & Cells(i, 11) ' salon'
+    ar_Data(iii, 3) = Trim(Left(Cells(i, 10), 30)) ' off.name
+    ar_Data(iii, 4) = "phone: " & Trim(Left(Cells(i, 20), 50) & " | email: " & Left(Cells(i, 21), 50) & " | site: " & Left(Cells(i, 22), 50)) 'contact salons
+    ar_Data(iii, 5) = Trim(Left(Cells(i, 16), 30)) & " |email: " & Cells(i, 14) & " |phone: " & Cells(i, 15) 'contact
+    
+    nm_Mreg = Right(Cells(i, 4), Len(Cells(i, 4)) - 3)
+    nm_FLSM = Trim(Cells(i, 165))
+    nm_SREP = Trim(Cells(i, 7))
+    
+    ar_Data(iii, 6) = nm_Mreg & " - " & Cells(i, 5) & "(" & nm_FLSM & ")" & " - " & Cells(i, 6) & "(" & nm_SREP & ")" 'mreg
+    ar_Data(iii, 7) = Cells(i, 167) 'nmPartner
+            
+    ' ñîçäàíèÿ ñïèñêà êîíêóðåíòîâ
+    '----------------------------------------------
+    nc = 0
+    comp_colo = ""
+    comp_rev = ""
+    
+    For ee = 44 To 63
+    st_cmp = Cells(i, ee)
+    Select Case st_cmp
+    Case "К"
+    comp_colo = ar_Competitors(nc) & " " & comp_colo
+    Case "К/У"
+    comp_colo = ar_Competitors(nc) & " " & comp_colo
+    comp_rev = ar_Competitors(nc) & " " & comp_rev
+    Case "У"
+    comp_rev = ar_Competitors(nc) & " " & comp_rev
+    End Select
+    nc = nc + 1
+    Next ee
+   '----------------------------------------------
+    ar_Data(iii, 8) = Trim(comp_colo) '   comp_colo
+    ar_Data(iii, 9) = Trim(comp_rev) '  comp_rev
+    '---------------------------------------------------------------------------------------------------------
+    
+    ar_Data(iii, 10) = Cells(i, 18) 'type_CLN
+    ar_Data(iii, 11) = Cells(i, 8) 'is_act
+    ar_Data(iii, 12) = Cells(i, 19) 'cln_chain
+       
+       
+    '---------------------------------------------------------------------------------------------------------
+    If Len(Cells(i, 119).Value) >= 1 Then
+    On Error Resume Next
+    discount = Cells(i, 119)
+    Else
+    discount = 0
+    End If
+    koef = Round(WorksheetFunction.Sum(discount, Cells(i, 120)), 2)
+    ar_Data(iii, 13) = koef
+    '---------------------------------------------------------------------------------------------------------
+    
+    If Cells(i, 161) <> "" Then cdMonth = Cells(i, 161) Else cdMonth = 1
+    If Cells(i, 65) <> "" Then cdYear = Cells(i, 65) Else cdYear = 1
+    ar_Data(iii, 14) = cdMonth & "-" & cdYear ' CNQ_Y
+    ''---------------------------------------------------------------------------------------------------------
+    
+    if IsNumeric(cdPartners) then 
+    dim cdPartners as Integer
+    else
+    dim cdPartners as String
+    end if
+    
+    cdPartners = Cells(i, 173)
+    
+    ar_Data(iii, 15) = cdPartners ' cd_Partner
+    ar_Data(iii, 16) = Cells(i, 160) 'MAG
+    ar_Data(iii, 17) = Cells(i, 27) ' WRK_PLACE
+    ar_Data(iii, 18) = Cells(i, 28) '  HDinDAY
+    ar_Data(iii, 19) = Cells(i, 156) '  AVG_color
+    
+    '---------------------------------------------------------------------------------------------------------
+        
+    If IsNumeric(Cells(i, 29)) Then
+    ar_Data(iii, 20) = Cells(i, 29) 'id_ECAD
+        Else
+    ar_Data(iii, 20) = ""
+    End If
+    ar_Data(iii, 21) = Cells(i, 30) 'EDU_ALLTIME
+    ar_Data(iii, 22) = Cells(i, 31) 'EDU_2014
+    ar_Data(iii, 23) = Cells(i, 32) 'EDU_2015
+  
+    
+    '---------------------------------------------------------------------------------------------------------
+    
+    ar_Data(iii, 24) = "\Dropbox\For Regions Commercial Team\SREP\" & nm_Mreg & "\" & nm_SREP & "\" & "Clients Cards" & "\" ' REPS
+    ar_Data(iii, 25) = "\Dropbox\CARDS\" & nm_Mreg & "\" & "Clients Cards" & "\" & nm_FLSM & "\" & nm_SREP & "\" ' office
+    ar_Data(iii, 26) = "\Dropbox\For Regions Commercial Team\Partners\" & cdPartners & "\" & "Clients Cards" & "\" & nm_SREP & "\" 'Partners
+    '---------------------------------------------------------------------------------------------------------
+          
+    nmFile = "fc_" & Replace_symbols(Trim(Left(Cells(i, 9), 30)) & ". " & Trim(Left(Cells(i, 12), 50) & " " & Left(Cells(i, 13), 30)) & " " & Cells(i, 11)) & ".pdf"
+    disk = "\\RUCORPRUWKS0665"
+    
+    If Len(Cells(i, 2)) >= 9 Then
+    ar_Data(iii, 27) = disk & "\Dropbox\CARDS\" & nm_Mreg & "\" & "Clients Cards" & "\" & nm_FLSM & "\" & nm_SREP & "\" & nmFile
+    Else
+    ar_Data(iii, 27) = 0
+    End If
+    
+    ar_Data(iii, 28) = Trim(Cells(i, 9)) ' íàçâàíèå ñàëîíà
+    ar_Data(iii, 29) = Trim(Cells(i, 11)) ' ãîðîä
+    ar_Data(iii, 30) = Trim(Cells(i, 12)) ' àäðåñ
+    ar_Data(iii, 31) = nm_SREP ' SREP
+    ar_Data(iii, 32) = nmFLSM ' FLSM
+    ar_Data(iii, 33) = disk & "\Dropbox\CARDS\" & nm_Mreg & "\" & "Clients Cards" & "\" & nm_FLSM  ' link2folderFLSM
+        
+    
+    iii = iii + 1
+  
+End If
+
+Next i
+
+
+'insert hyperlink to Total Russia CA
+'--------------------------------------------------------------------------------------------------------- 
+
+iii = 0
+For eee = 4 To ar_LastRow(b)
+If ar_Data(iii, 27) <> 0 Then
+With Cells(eee, 9)
+.Select
+.ClearFormats
+.ClearHyperlinks
+.Hyperlinks.Add Anchor:=Selection, Address:=ar_Data(iii, 27), TextToDisplay:=ar_Data(iii, 28)
+End With
+Else
+With Cells(eee, 9)
+.Value = ar_Data(iii, 28)
+.ClearFormats
+.ClearHyperlinks
+End With
+End If
+
+With Cells(eee, 12) ' îòîáðàæåíèå íà êàðòå
+map_search = map_sln & ar_Data(iii, 29) & " " & ar_Data(iii, 30)
+.Select
+.ClearFormats
+.ClearHyperlinks
+.Hyperlinks.Add Anchor:=Selection, Address:=map_search, TextToDisplay:=ar_Data(iii, 30)
+End With
+
+iii = iii + 1
+Next eee
+
+if thisworkbook.name <> NF then
+with ActiveWorkbook
+.save
+.close SaveChanges:=True
+end with
+end if
+
+'ActiveWorkbook.Save
+'ActiveWindow.Close
+    
+Application.Workbooks(NF).WorkSheets(in_data).Activate
+
+With ActiveSheet
+.UsedRange.Cells.ClearContents
+For t = 0 To num_ar_Colmn
+Cells(1, t + 1) = ar_Colmn(t)
+Next t
+.Cells(2, 1).Resize(UBound(ar_Data), num_ar_Colmn + 1) = ar_Data()
+End With
+
+Next b
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+    
+End Sub

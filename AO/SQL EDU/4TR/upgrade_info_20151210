@@ -1,0 +1,13 @@
+select sln.id, sln.name, '', '', sln.address, '','', sln.city_name,  sln.city_name_geographic, '','',  phone,  '','', sln.email, '','', 
+
+
+sln.manager, sln.contact_person,
+(select usr.full_name from users as usr where usr.id = sln.salon_manager_id) as Manager,
+'','',
+
+sln.manager_phone, 
+(select usr.mobile_number from users as usr where usr.id = sln.salon_manager_id) as Manager,
+'','',
+(select count(usr.id) from users as usr where sln.id = usr.salon_id) as Empl
+
+from salons as sln

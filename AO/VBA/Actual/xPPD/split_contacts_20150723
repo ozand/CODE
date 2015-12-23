@@ -1,0 +1,233 @@
+Sub data_CC_in_GC()
+
+Dim patchTR, actTR, ar_LastRow, in_data, status_head   As String
+Dim f_b  As Integer
+Dim ar_nmAVG_Order()
+
+'Dim  As Worksheet
+Dim ar_Data(), ar_brand(), ar_nmHead()
+
+act_month = InputBox("Month")
+act_month = CInt(act_month)
+
+If act_month >=1 and act_month <=9 Then
+act_monthF = "0" & act_month
+Else
+act_monthF = act_month
+End if
+
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+status_head = 0
+
+NF = ActiveWorkbook.Name
+
+ar_brand = Array("LP", "KR", "RD", "MX", "ES")
+
+
+ 
+For f_sh = 1 To 3
+chek_name = 0
+status_head = 0
+enm_end_f = 0
+
+For f_b = 0 To enm_end_f
+sts_exit = 0
+    
+Select Case f_sh
+    Case 1
+    patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(f_b) & "\Top Russia Total 2015 " & ar_brand(f_b) & ".xlsm"
+    start_clmn = 2
+    last_clmn = 186
+    out_data = "PPD"
+    in_data = ar_brand(f_b)
+    strt_row = 4
+    strt_row_head = 2
+    enm_end_f = 4
+    Case 2
+    patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(f_b) & "\Top Russia Total 2015 " & ar_brand(f_b) & ".xlsm"
+    start_clmn = 1
+    last_clmn = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count
+    in_data = "Contacts"
+    out_data = "Contact_SREPs"
+    strt_row = 2
+    strt_row_head = 1
+    enm_end_f = 4
+    Case 3
+    patchTR = "p:\DPP\Business development\Book commercial\DPP\Point " & act_month & "\Coaching & LSA\cопровождение для DRs " & act_monthF & "2015.xlsm"
+    start_clmn = 1
+    last_clmn = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count
+    in_data = "Contacts"
+    out_data = "Contact_FLSMs"
+    strt_row = 3
+    strt_row_head = 1
+    enm_end_f = 0
+    
+    
+End Select
+
+
+Workbooks.Open Filename:=patchTR, Notify:=False
+actTR = ActiveWorkbook.Name
+
+
+
+Workbooks(actTR).Activate
+Sheets(in_data).Select
+ActiveSheet.AutoFilterMode = False
+ar_LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+
+'---------------------------------------------------------------------------------------------------------
+'creat head
+'---------------------------------------------------------------------------------------------------------
+
+If status_head = 0 then
+ReDim ar_nmHead(1 To last_clmn + 1 )
+
+xClnmF = 1
+    For xClmn = 1 To last_clmn
+
+Select Case out_data 
+       
+       Case "PPD"
+           If xClmn = last_clmn Then 
+               val_row_head = "BrandRow" 
+           Else
+           val_row_head = Trim(Cells(2, xClmn))  & "_" & Trim(Cells(3, xClmn))
+           End If
+       
+       Case "Contact_SREPs"   
+           If xClmn = 1 Then 
+               val_row_head = "Brand"
+           else
+           val_row_head = Trim(Cells(1, xClmn-1))
+           End If    
+
+       Case "Contact_FLSMs"   
+           val_row_head = Trim(Cells(1, xClmn))  & "_" & Trim(Cells(2, xClmn))
+End Select
+
+        ar_nmHead(xClmn) = val_row_head
+        
+    Next xClmn
+
+
+ENd if
+'---------------------------------------------------------------------------------------------------------
+
+ReDim ar_Data(ar_LastRow - strt_row, 1 To last_clmn)
+
+    iii = 0
+    num_colums = 0
+    
+    For xRow = strt_row To ar_LastRow
+    For xClmn = 1 To last_clmn
+
+If out_data = "PPD" Then
+    Select Case xClmn
+    Case 1
+    val_Cell = ar_brand(f_b)
+    Case last_clmn
+    val_Cell = ar_brand(f_b) & Cells(xRow, 1)
+    Case Else
+    val_Cell = Cells(xRow, xClmn)
+    End Select
+End If
+    
+If out_data = "Contact_SREPs" Then
+Select Case xClmn
+    Case 1
+    val_Cell = ar_brand(f_b)
+    Case Else
+    val_Cell = Cells(xRow, xClmn-1)
+    End Select
+End If
+
+If out_data = "Contact_FLSMs" Then
+    val_Cell = Cells(xRow, xClmn)
+End If
+
+
+    ar_Data(iii, xClmn) = val_Cell
+        
+    Next xClmn
+    iii = iii + 1
+    Next xRow
+    
+
+Application.DisplayAlerts = False
+
+'---------------------------------------------------------------------------------------------------------
+ActiveWindow.Close
+Workbooks(NF).Activate
+
+
+'---------------------------------------------------------------------------------------------------------
+'check Sheets and if not - add
+'---------------------------------------------------------------------------------------------------------
+
+For Each Sh In ThisWorkbook.Worksheets
+If Sh.Name = out_data Then
+chek_name = chek_name + 1
+Else
+chek_name = chek_name + 0
+End If
+
+Next Sh
+
+If chek_name = 0 Then
+Set Sh = Worksheets.Add()
+Sh.Name = out_data
+End If
+
+Sheets(out_data).Activate
+
+If f_b = 0 Then
+start_POS = 2
+end_POS = iii + 1
+Else
+start_POS = end_POS + 1
+end_POS = start_POS + iii - 1
+End If
+
+
+ActiveSheet.Cells(start_POS, 1).Resize(end_POS - start_POS + 1, last_clmn) = ar_Data()
+
+
+
+Next f_b
+
+if status_head = 0 Then
+    For f_t = 1 To last_clmn
+    Cells(1, f_t) = ar_nmHead(f_t)
+    Cells(1, f_t).Select
+    status_head = 1
+    'ActiveWorkbook.Names.Add Name:=ar_nmHead(f_t), RefersToR1C1:="=" & ActiveSheet.Name & "!" & "R1" & "C" & t & ":" & "R" & end_POS - 1 & "C" & t
+    Next f_t
+end if
+
+
+Next f_sh
+
+'---------------------------------------------------------------------------------------------------------
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+End Sub
+
+
+
+

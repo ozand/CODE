@@ -1,0 +1,114 @@
+Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" (ByVal hwnd As Long, ByVal pszPath As String, ByVal psa As Any) As Long
+                                      
+Sub CreateFolderWithSubfolders(ByVal PatchCreateFolder$)
+ 
+   If Len(Dir(PatchCreateFolder$, vbDirectory)) = 0 Then  
+       SHCreateDirectoryEx Application.hwnd, PatchCreateFolder$, ByVal 0&   
+   End If
+End Sub
+
+Function Replace_symbols(ByVal txt As String) As String
+    St$ = "~!@/\#$%^&*=|`-"""
+    For i% = 1 To Len(St$)
+        txt = Replace(txt, Mid(St$, i, 1), "_")
+    Next
+    Replace_symbols = txt
+End Function
+
+Dim arr1()
+Dim arr2()
+Dim num_row(2) , ar_Split()
+Dim j As Long
+Dim i As Long
+Dim iColumns As Integer
+Dim f_ar_a, f_b, f_c, f_d, f_ar_i, f_r, LastRow,  colum As Integer
+Dim lRangeDel As Range
+Dim lRangeH As Range
+Dim nm_Mreg, nm_findVAl, NF , val_Cell_This, val_Cell_Previous As String
+Sub KPI_DR_FLSM(), ar_nm_month ()
+Dim NF, NFW, lPath, nMreg, nmPatch, LastRowFM, LastRow, nEmployer, nmCreatPatch2, nmCreatPatch, nMonth, nYear, LP, KR, RD, MX, SHEF, FN As String
+Dim lRangeDel As Range
+Dim lRangeH As Range
+Dim oWbk As Workbook
+
+
+'---------------------------------------------------------------------------------------------------------- 
+With Application
+.Calculation = xlCalculationManual
+.DisplayAlerts = False
+.ScreenUpdating = False
+End With
+NF = ActiveWorkbook.Name
+act_month = InputBox("Month")
+act_month = CInt(act_month)
+ar_nm_month = Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+nm_month = ar_nm_month(act_month-1)
+
+'---------------------------------------------------------------------------------------------------------
+    '---------------------------------------------------------------------------------------------------------
+    in_data = "in_TR"
+    Sheets(in_data).Select
+    ActiveSheet.AutoFilterMode = False
+    LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1   
+    LastColmn = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+    
+    ReDim DynMas(LastRow - 1, LastColmn - 1) 
+    
+    '---------------------------------------------------------------------------------------------------------
+    
+    iii = 0 
+    
+For xRow = 2 To LastRow 
+For yy = 0 To LastColmn - 1
+DynMas(iii, yy) = Cells(xRow, yy + 1)
+Next yy
+iii = iii + 1 
+Next xRow
+longT = iii
+ReDim Preserve DynMas(longT, LastColmn - 1) '?????????? ?????? ?????
+
+'--------------------------------------------------------------------------------------------------------- 
+'uniq split type
+'---------------------------------------------------------------------------------------------------------
+
+ReDim ar_Split(LastRow - 1, 2)
+
+For f_ar_a = 0 to 1
+select case f_ar_a
+case 0   
+clm_split = 4
+case 1 
+clm_split = 7
+end select
+
+val_Previous = 0
+f_ar_i = 0
+
+
+For f_b = 0 to longT
+val_Cell_This = DynMas(f_b, clm_split)
+If val_Cell_This <> val_Previous then
+ar_Split(f_ar_i, f_ar_a) = val_Cell_This
+f_ar_i =f_ar_i + 1
+End if
+val_Previous = val_Cell_This
+next f_b
+
+num_row(f_ar_a) = f_ar_i
+
+msgbox(num_row(f_ar_a))
+next f_ar_a
+
+
+With Application
+            .ScreenUpdating = True
+            .Calculation = xlCalculationAutomatic
+            .EnableEvents = True
+            .DisplayStatusBar = True
+            .DisplayAlerts = True
+End With
+
+End Sub
+
+
+

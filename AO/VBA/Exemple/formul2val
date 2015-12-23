@@ -1,0 +1,24 @@
+Макрос для превращения всех формул в значения в выделенном диапазоне (или нескольких диапазонах, выделенных одновременно с Ctrl) выглядит так:
+
+Sub Formulas_To_Values_Selection()
+'преобразование формул в значения в выделенном диапазоне(ах)
+    Dim smallrng As Range
+    For Each smallrng In Selection.Areas
+        smallrng.Value = smallrng.Value
+    Next smallrng
+End Sub
+Если вам нужно преобразовать в значения текущий лист, то макрос будет таким:
+
+
+Sub Formulas_To_Values_Sheet()
+'преобразование формул в значения на текущем листе
+    ActiveSheet.UsedRange.Value = ActiveSheet.UsedRange.Value
+End Sub
+И, наконец, для превращения всех формул в книге на всех листах придется использовать вот такую конструкцию:
+
+Sub Formulas_To_Values_Book()
+'преобразование формул в значения во всей книге
+    For Each ws In ActiveWorkbook.Worksheets
+        ws.UsedRange.Value = ActiveSheet.UsedRange.Value
+    Next ws
+End Sub

@@ -1,0 +1,213 @@
+
+Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" (ByVal hwnd As Long, ByVal pszPath As String, ByVal psa As Any) As Long
+                                    
+Sub CreateFolderWithSubfolders(ByVal PatchCreateFolder$)
+ 
+   If Len(Dir(PatchCreateFolder$, vbDirectory)) = 0 Then
+       SHCreateDirectoryEx Application.hwnd, PatchCreateFolder$, ByVal 0&
+   End If
+End Sub
+'--------------------------------------------------------------------------------------------------------- 
+Function Replace_symbols(ByVal txt As String) As String
+    St$ = "~!@/\#$%^:?&*=|`;"""
+    For i% = 1 To Len(St$)
+        txt = Replace(txt, Mid(St$, i, 1), "_")
+        txt = Replace(txt, Chr(10), "_")
+    Next
+    Replace_symbols = txt
+End Function
+'--------------------------------------------------------------------------------------------------------- 
+Sub FishCreate()
+
+Dim xRow, longT, endBrand, nmBrand, l, k, r, m, b, i, sl, xxx, endPos, ratingLine, testCode, nKof, nPrint, startPos, mKode, rReperOrsers, rAVGOrder, rEvol, rISMScolo, nDress, nCha, rISMSret, rSKU, rWTtech, nAverCost, rMAG, rExcl, rTRating, WHO As Integer
+Dim comp_colo, comp_rev, distr_type, nmPatch, startBrand, nmdisc, mKodeP, nmCreatPatchPartners, nmCreatPatch, nMreg, nmMAG, nReg, nSec, nRep, nSalon, nOfName, nStreet, nDom, nTel, nmCity, nCont, nQ, nFLSM, nmAct, nmStatus, cdPartners, cdPartnersCh, LastColmn, LastRow As String
+Dim DynMas()
+Dim ar_Competitors, ar_inRange(), ar_link2TR()
+Dim shtP As Worksheet, shtF, actSH As Worksheet
+Dim dic_brand: Set dic_brand = CreateObject("Scripting.Dictionary")
+
+map_sln = "https://maps.yandex.ru/?text="
+
+With dic_brand
+        .Add "MX", "MX"
+        .Add "LP", "LP"
+        .Add "KR", "KR"
+        .Add "RD", "RD"
+        .Add "ES", "ES"
+End With
+
+num_dic_brand = dic_brand.Count
+
+ar_inRange = Array("N80", "D2", "D3", "G2", "D4", "D5", "D6", "N2", "G7", "G8", "V8", "Y2", "V3", "AG3", "V7", "U2", "V4", "V6", "V1", "V5", "C2")
+num_ar_inRange = UBound(ar_inRange)
+ReDim Preserve ar_inRange(num_ar_inRange)
+
+ Calculate
+ Sheets("Fiche").Select
+ NF = ActiveWorkbook.Name
+ nmCreatPatch1 = 0
+ nmCreatPatch2 = 0
+ 
+ nmdisc = "C:"
+ nm_partner = "P001"
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+
+'---------------------------------------------------------
+
+
+    '---------------------------------------------------------------------------------------------------------
+    in_data = "in_PPD"
+    Sheets(in_data).Select
+    ActiveSheet.AutoFilterMode = False
+    
+    LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+    LastColmn = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+    
+    ReDim DynMas(LastRow - 1, LastColmn - 1)
+    '---------------------------------------------------------------------------------------------------------
+    
+    iii = 0
+    
+For xRow = 2 To LastRow
+
+Select Case Len(nm_partner)
+Case Is > 1
+If Cells(xRow, 8) = nm_partner Then
+For yy = 0 To LastColmn - 1
+DynMas(iii, yy) = Cells(xRow, yy + 1)
+Next yy
+iii = iii + 1
+End If
+
+Case Else
+For yy = 0 To LastColmn - 1
+DynMas(iii, yy) = Cells(xRow, yy + 1)
+Next yy
+iii = iii + 1
+
+End Select
+
+Next xRow
+    
+longT = iii
+    
+ReDim Preserve DynMas(longT, LastColmn - 1)
+    
+'---------------------------------------------------------------------------------------------------------
+Sheets("Fiche").Select
+
+For i = 17740 To longT
+Dim nm_arr_brand As String
+nm_arr_brand = DynMas(i, 0)
+If dic_brand.Exists(nm_arr_brand) Then
+Application.StatusBar = "LastRow: " & LastRow & " longT : " & longT & " iii: " & iii & "              Calculate" & nm_arr_brand & ": " & i & " to " & iii & " " & DynMas(i, 4) & " " & DynMas(i, 11)
+
+For qqq = 0 To num_ar_inRange
+     
+    nm_range = ar_inRange(qqq)
+     
+    Select Case nm_range
+    
+    Case "D3"
+    With Range(nm_range)
+    .Select
+    .WrapText = False
+   ' .ClearFormats
+   ' .ClearHyperlinks
+    .Hyperlinks.Add Anchor:=Selection, Address:=map_sln & DynMas(i, 29) & " " & DynMas(i, 30), TextToDisplay:=DynMas(i, qqq)
+   ' .InsertIndent 2
+    End With
+
+    Case "D6"
+    With Range(nm_range)
+    .Select
+    .WrapText = False
+   ' .ClearHyperlinks
+    .Hyperlinks.Add Anchor:=Selection, Address:=DynMas(i, 34), TextToDisplay:=DynMas(i, qqq)
+    End With
+    
+    Case "C2"
+    With Range(nm_range)
+    .Select
+    .WrapText = False
+   '.ClearHyperlinks
+    .Hyperlinks.Add Anchor:=Selection, Address:=DynMas(i, 35), TextToDisplay:="SREP"
+    End With
+      
+        
+    Case Else
+    Range(nm_range) = DynMas(i, qqq)
+    With Range(nm_range)
+    .Select
+    .WrapText = False
+    End With
+    
+    End Select
+       
+       
+Next qqq
+
+        
+    ActiveSheet.Calculate
+    ActiveSheet.PageSetup.PrintArea = "$C$2:$AE$80"
+    nmPatch = DynMas(i, 24)
+    If nmCreatPatch1 <> nmdisc & nmPatch Then
+    nmCreatPatch1 = nmdisc & nmPatch
+    CreateFolderWithSubfolders nmCreatPatch1
+    End If
+    
+    nmFile = "fc_" & Replace_symbols(DynMas(i, 2))
+    link1 = nmCreatPatch1 & nmFile & ".pdf"
+      
+           ActiveSheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:=link1, Quality _
+            :=xlQualityMinimum, IncludeDocProperties:=True, IgnorePrintAreas:=False, _
+            OpenAfterPublish:=False
+   
+    nmPatch = DynMas(i, 25)
+    
+    If nmCreatPatch2 <> nmdisc & nmPatch Then
+    nmCreatPatch2 = nmdisc & nmPatch
+    CreateFolderWithSubfolders nmCreatPatch2
+    End If
+    
+    nmFile = "fc_" & Replace_symbols(DynMas(i, 2))
+    link2 = nmCreatPatch2 & nmFile & ".pdf"
+     
+    
+    ActiveSheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:=link2, Quality _
+            :=xlQualityMinimum, IncludeDocProperties:=True, IgnorePrintAreas:=False, _
+            OpenAfterPublish:=False
+
+End If
+Next i
+
+
+
+With Application
+            .ScreenUpdating = True
+            .Calculation = xlCalculationAutomatic
+            .EnableEvents = True
+            .DisplayStatusBar = True
+            .DisplayAlerts = True
+           
+End With
+End Sub
+
+
+
+
+
+
+
+
+
+
+

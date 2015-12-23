@@ -1,0 +1,866 @@
+Sub data_CC_in_GC()
+
+
+Dim pathc2file As String
+Dim ar_code_Brand(4, 1)
+Dim LastRow_CC, LastColumns_CC As Integer
+Dim num_month
+
+Dim patchTR, actTR, ar_LastRow(4), in_data, status_head   As String
+Dim ALLTIME, EDU_PY, EDU_TY, place, AVG_HD As Variant
+Dim b, iii, i, x, y, frqOrder   As Integer
+dim ar_nmAVG_Order() 
+
+'Dim   As Worksheet
+Dim ar_Data(), ar_brand(), ar_nmHead(150), ar_PYPer_PART_VAL, ar_TYPer_PART_VAL, ar_PYPer_LOR_VAL(), ar_TYPer_LOR_VAL(), ar_nm_month(), ar_nmMregEN(), ar_nmMregLT()
+
+NF = ActiveWorkbook.Name
+act_month = InputBox("Month")
+act_month = CInt(act_month)
+
+'colums CA PARTN VAL for LTM
+'---------------------------------------------------------------------------------------------------------
+ar_PYPer_PART_VAL = Array(0, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90)
+ar_TYPer_PART_VAL = Array(0, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77)
+
+
+'colums CA LOREAL VAL
+str_PYper_LOR_VAL = 106
+str_TYper_LOR_VAL = 93
+
+ar_nm_month = Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+ar_nmMregEN = Array("MOSCOW", "GR", "NORTHWEST", "CENTER", "VOLGA", "SOUTH", "URAL", "SIBERIA", "FAR EAST")
+ar_nmMregLT = Array("Moscou", "GR", "Nord-Ouest", "Centre", "Volga-Centre", "Sud", "Oural", "Siberie", "EO")
+
+ar_nmAVG_Order = array(0, 2.5, 5, 10, 15, 20, 25, 30, 50, 60, 70, 100000)
+'---------------------------------------------------------------------------------------------------------
+
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+status_head = 0
+
+
+ar_brand = Array("LP", "KR", "RD", "MX", "ES")
+
+For b = 0 To 4 ' ???? ?? TR
+        
+patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(b) & "\Top Russia Total 2015 " & ar_brand(b) & ".xlsm"
+in_data = "in_TR"
+
+Workbooks.Open Filename:=patchTR, Notify:=False
+actTR = ActiveWorkbook.Name
+Sheets(ar_brand(b)).Select
+ActiveSheet.AutoFilterMode = False
+ar_LastRow(b) = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1  ' ????????? ??????
+
+
+ReDim ar_Data(ar_LastRow(b) - 4, 150) ' num_colums)
+
+    iii = 0
+    
+    For i = 4 To ar_LastRow(b)
+   num_colums = 0
+    ar_Data(iii, num_colums) = ar_brand(b)
+    ar_nmHead(num_colums) = "brand"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 1)
+    ar_nmHead(num_colums) = "rowTR"
+    
+    yy = num_colums + 1
+    cd_brand_row = ar_brand(b) & Cells(i, 1)
+    ar_Data(iii, num_colums) = cd_brand_row
+    ar_nmHead(num_colums) = "BRAND_rowTR"
+     
+    num_colums = num_colums + 1
+    cd_Univers = Cells(i, 2) 
+    if isNumeric(cd_Univers) then
+    cd_Univers = cd_Univers
+    else
+    cd_Univers = cd_brand_row
+    end if     
+    ar_Data(iii, num_colums) = cd_Univers
+    ar_nmHead(num_colums) = "unvCD"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = ar_brand(b) & Cells(i, 2)
+    ar_nmHead(num_colums) = "BRAND_unvCD"
+    
+    num_colums = num_colums + 1
+    nm_mreg = Right(Cells(i, 4), Len(Cells(i, 4).Value) - 3)
+    ar_Data(iii, num_colums) = nm_mreg
+    ar_nmHead(num_colums) = "mreg"
+    
+'Mreg LT-> EN + split Moscou GR
+'---------------------------------------------------------------------------------------------------------
+            
+    num_colums = num_colums + 1
+    textPos = 0
+    
+    If nm_mreg = "Moscou GR" Then
+    nm_reg = Cells(i, 5)
+    textPos = InStr(nm_reg, "MSK")
+    textPos = InStr(nm_reg, "Moscou") + textPos
+        If textPos > 0 Then
+        nm_mreg = "Moscou"
+        Else
+        nm_mreg = "GR"
+
+        End If
+    End If
+    
+    For f_mr = 0 To UBound(ar_nmMregLT)
+    If ar_nmMregLT(f_mr) = nm_mreg Then
+    nm_mreg = ar_nmMregEN(f_mr)
+    End If
+    Next f_mr
+    
+    ar_Data(iii, num_colums) = nm_mreg
+    ar_nmHead(num_colums) = "mreg_EXT"
+    
+'---------------------------------------------------------------------------------------------------------
+        
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 5)
+    ar_nmHead(num_colums) = "REG"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 165)
+    ar_nmHead(num_colums) = "FLSM"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 6)
+    ar_nmHead(num_colums) = "SEC"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 7)
+    ar_nmHead(num_colums) = "SREP"
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Cells(i, 9), 40) & ". " & Left(Cells(i, 12), 50) & ", " & Left(Cells(i, 13), 20) & ", " & Left(Cells(i, 11), 20)
+    ar_nmHead(num_colums) = "salon"
+    
+     num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 11)
+    ar_nmHead(num_colums) = "city"
+    
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 18)
+    ar_nmHead(num_colums) = "type_SLN"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 153)
+    ar_nmHead(num_colums) = "type_SLN_SHORT"
+          
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 42)
+    ar_nmHead(num_colums) = "type_CLUB"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 41)
+    ar_nmHead(num_colums) = "type_emotion"
+        
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 174)
+    ar_nmHead(num_colums) = "type_competitors"
+    
+    
+    cm1 = Null
+    cm2 = Null
+    cm3 = Null
+    
+    
+    num_colums = num_colums + 1
+    If Len(Cells(i, 44)) >= 1 Then
+    cm1 = 1
+    Else
+    cm1 = Null
+    End If
+    ar_Data(iii, num_colums) = cm1
+    ar_nmHead(num_colums) = "comp_Estel"
+    
+      
+    num_colums = num_colums + 1
+    If Len(Cells(i, 45)) >= 1 Then
+    cm2 = 1
+    Else
+    cm1 = Null
+    End If
+    ar_Data(iii, num_colums) = cm2
+    ar_nmHead(num_colums) = "comp_Schwarzkopf"
+        
+    num_colums = num_colums + 1
+    If Len(Cells(i, 46)) >= 1 Then
+    cm3 = 1
+    Else
+    cm1 = Null
+    End If
+    ar_Data(iii, num_colums) = cm3
+    ar_nmHead(num_colums) = "comp_Wella"
+    
+    
+    num_colums = num_colums + 1
+        If Cells(i, 161) <> "" Then cdMonth = Cells(i, 161) Else cdMonth = 1
+        If Len(Cells(i, 65)) = 4 Then cdYear = Cells(i, 65) Else cdYear = 2008
+    
+    ar_Data(iii, num_colums) = cdMonth & "-" & cdYear
+    ar_nmHead(num_colums) = "date_CNQ_Y"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = cdMonth
+    ar_nmHead(num_colums) = "date_month_num"
+    
+    
+    num_colums = num_colums + 1
+
+    For f_m = 0 To 11
+    If cdMonth - 1 = f_m Then
+    nmMonth = ar_nm_month(f_m)
+    Exit For
+    End If
+    Next f_m
+    
+	ar_Data(iii, num_colums) = nmMonth
+    ar_nmHead(num_colums) = "date_month_name"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = cdYear
+    ar_nmHead(num_colums) = "date_year"
+    
+'---------------------------------------------------------------------------------------------------------
+
+Select Case CInt(cdYear)
+
+    Case 2015
+    GA_Y = "CNQ_TY"
+
+    Case 2014
+    GA_Y = "CNQ_PY"
+
+    Case Else
+    GA_Y = "PPY"
+
+End Select
+  
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = GA_Y
+    ar_nmHead(num_colums) = "GA_YEAR"
+    
+        
+    num_colums = num_colums + 1
+    vl_mag = Cells(i, 160)
+    If Len(vl_mag) <> 2 Then vl_mag = Null
+    ar_Data(iii, num_colums) = vl_mag
+    ar_nmHead(num_colums) = "type_MAG"
+    
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 156)
+    ar_nmHead(num_colums) = "MAG_PRICE"
+    
+    num_colums = num_colums + 1
+      ar_Data(iii, num_colums) = Cells(i, 158)
+    ar_nmHead(num_colums) = "type_MAG_PRICE"
+    
+    num_colums = num_colums + 1
+      ar_Data(iii, num_colums) = Cells(i, 159)
+    ar_nmHead(num_colums) = "type_MAG_type_place"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 157)
+    ar_nmHead(num_colums) = "MAG_place"
+    
+    
+    num_colums = num_colums + 1
+    st_dn_cln = Cells(i, 8)
+    ar_Data(iii, num_colums) = st_dn_cln
+    ar_nmHead(num_colums) = "status_DN_num"
+    
+    num_colums = num_colums + 1
+    If Cells(i, 8) = 1 Then
+    st_cln_base = "Active"
+
+    Else
+    st_cln_base = "Closed"
+
+    End If
+    ar_Data(iii, num_colums) = st_cln_base
+    ar_nmHead(num_colums) = "status_DN_name"
+       
+'---------------------------------------------------------------------------------------------------------
+'   calculate LTM AVG CA & FrqRate
+'---------------------------------------------------------------------------------------------------------
+    sumCA12M = 0
+    frqOrder = 0
+    
+    
+    For iq = act_month To 11
+    
+    
+        If IsNumeric(Cells(i, ar_PYPer_PART_VAL(iq))) Then
+        CA = Cells(i, ar_PYPer_PART_VAL(iq))
+        Else
+        CA = 0
+        End If
+        
+        sumCA12M = sumCA12M + CA
+        If Cells(i, ar_PYPer_PART_VAL(iq)) <> "" And Cells(i, ar_PYPer_PART_VAL(iq)) > 0 Then
+        frqOrder = frqOrder + 1
+        End If
+    
+    Next iq
+    
+    For iw = 1 To act_month
+    
+    If IsNumeric(Cells(i, ar_TYPer_PART_VAL(iw))) Then
+        CA = Cells(i, ar_TYPer_PART_VAL(iw))
+        Else
+        CA = 0
+        End If
+    
+    sumCA12M = sumCA12M + CA
+        If Cells(i, ar_TYPer_PART_VAL(iw)) <> "" And Cells(i, ar_TYPer_PART_VAL(iw)) > 0 Then
+        frqOrder = frqOrder + 1
+        End If
+    
+    Next iw
+            
+        If sumCA12M <> 0 Then
+        AVG_CA_LTM = Round(sumCA12M / 12 / 1000, 1)
+        Else
+        AVG_CA_LTM = ""
+        End If
+'---------------------------------------------------------------------------------------------------------
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = AVG_CA_LTM
+    ar_nmHead(num_colums) = "CA_AVG_LTM"
+   
+   
+   
+    num_colums = num_colums + 1
+    for f_avg = 1 to ubound(ar_nmAVG_Order())
+        if AVG_CA_LTM <= ar_nmAVG_Order(f_avg) and AVG_CA_LTM > ar_nmAVG_Order(f_avg-1) then
+        nm_avg_CA = ar_nmAVG_Order(f_avg)
+        exit for
+        else
+        nm_avg_CA = Null
+        end if
+    next f_avg
+    
+        if nm_avg_CA = 100000 then nm_avg_CA = ">70"
+       
+    
+    ar_Data(iii, num_colums) = nm_avg_CA
+    ar_nmHead(num_colums) = "CA_AVG_LTM_name"
+    
+    
+    
+
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = frqOrder & "\12" '
+    ar_nmHead(num_colums) = "frq_order_LTM"
+    
+    
+    num_colums = num_colums + 1
+        ev_ca = Cells(i, 92)
+
+        If IsNumeric(ev_ca) Then
+        ev_ca = Round(ev_ca, 2)
+
+
+
+        Else
+        ev_ca = Null
+        End If
+    ar_Data(iii, num_colums) = ev_ca
+    ar_nmHead(num_colums) = "CA_ev"
+   
+ ' ev CA vector
+ '---------------------------------------------------------------------------------------------------------
+        num_colums = num_colums + 1
+        ev_ca = Cells(i, 92)
+
+
+
+        If IsNumeric(ev_ca) Then
+        Select Case ev_ca
+        Case Is > 0
+        nm_ev_ca = "+"
+
+        Case Is < 0
+        nm_ev_ca = "-"
+
+        Case Else
+        nm_ev_ca = Null
+
+
+        End Select
+        Else
+        nm_ev_ca = Null
+
+        End If
+                 
+    ar_Data(iii, num_colums) = nm_ev_ca
+    ar_nmHead(num_colums) = "CA_ev_name"
+ '---------------------------------------------------------------------------------------------------------
+    
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 29)
+    ar_nmHead(num_colums) = "EDU_id_ECAD"
+    
+    num_colums = num_colums + 1
+    EDU_ALLTIME = Cells(i, 30)
+        If IsNumeric(EDU_ALLTIME) And Cells(i, 30) <> 0 Then
+        EDU_ALLTIME = Round(Cells(i, 30), 0)
+        Else
+        EDU_ALLTIME = ""
+        End If
+    ar_Data(iii, num_colums) = EDU_ALLTIME
+    ar_nmHead(num_colums) = "EDU_ALLTIME"
+    
+    num_colums = num_colums + 1
+    EDU_PY = Cells(i, 31)
+        If IsNumeric(EDU_PY) And Cells(i, 31) <> 0 Then
+        EDU_PY = Round(Cells(i, 31), 0)
+        Else
+        EDU_PY = ""
+        End If
+    ar_Data(iii, num_colums) = EDU_PY
+    ar_nmHead(num_colums) = "EDU_PY"
+    
+    num_colums = num_colums + 1
+    EDU_TY = Cells(i, 32)
+        If IsNumeric(EDU_TY) And Cells(i, 32) <> 0 Then
+        EDU_TY = Round(Cells(i, 32), 0)
+        Else
+        EDU_TY = ""
+        End If
+    ar_Data(iii, num_colums) = EDU_TY
+    ar_nmHead(num_colums) = "EDU_TY"
+    
+    num_colums = num_colums + 1
+    place = Cells(i, 27)
+        If IsNumeric(place) Then
+        place = Round(place, 0)
+        Else
+        place = ""
+        End If
+    ar_Data(iii, num_colums) = place
+    ar_nmHead(num_colums) = "type_place_HD"
+    
+    num_colums = num_colums + 1
+    AVG_HD = Cells(i, 28)
+        If IsNumeric(AVG_HD) Then
+        AVG_HD = Round(AVG_HD, 0)
+        Else
+        place = ""
+        End If
+    ar_Data(iii, num_colums) = AVG_HD
+    ar_nmHead(num_colums) = "type_AVG_HD"
+    
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 209)
+    ar_nmHead(num_colums) = "com_KPI"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 167)
+    ar_nmHead(num_colums) = "nm_partner"
+          
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 173)
+    ar_nmHead(num_colums) = "cd_partner"
+'---------------------------------------------------------------------------------------------------------
+'creat ca val loreal monthly
+'---------------------------------------------------------------------------------------------------------
+
+    For f_m = 0 To 11
+    num_colums = num_colums + 1
+    clm_m = str_PYper_LOR_VAL + f_m
+    If Cells(i, clm_m) = 0 Then
+    m_val = Null
+
+    Else
+    m_val = Cells(i, clm_m) / 1000
+
+    End If
+    ar_Data(iii, num_colums) = m_val
+    ar_nmHead(num_colums) = "CA_PY_M" & f_m + 1
+    
+
+    Next f_m
+    
+
+    For f_m = 0 To 11
+    num_colums = num_colums + 1
+    clm_m = str_TYper_LOR_VAL + f_m
+    If Cells(i, clm_m) = 0 Then
+    m_val = Null
+
+    Else
+    m_val = Cells(i, clm_m) / 1000
+
+    End If
+    ar_Data(iii, num_colums) = m_val
+    ar_nmHead(num_colums) = "CA_TY_M" & f_m + 1
+
+    Next f_m
+ '---------------------------------------------------------------------------------------------------------
+  'creat ca val loreal cumul
+'---------------------------------------------------------------------------------------------------------
+    
+    m_valP = 0
+
+    For f_m = 0 To 11
+    num_colums = num_colums + 1
+    clm_m = str_PYper_LOR_VAL + f_m
+    m_val = (Cells(i, clm_m) / 1000) + m_valP
+    
+    
+    If m_val = 0 Then  ' del 0 value out
+    ar_Data(iii, num_colums) = Null
+
+    Else
+    ar_Data(iii, num_colums) = m_val
+
+    End If
+    
+    ar_nmHead(num_colums) = "CA_PY_YTD" & f_m + 1
+    m_valP = m_val
+
+    Next f_m
+    
+    
+    m_valP = 0
+    For f_m = 0 To 11  ' limit tange by actuale period
+    num_colums = num_colums + 1
+    If f_m < CInt(act_month) Then
+    clm_m = str_TYper_LOR_VAL + f_m
+    m_val = (Cells(i, clm_m) / 1000) + m_valP
+
+    Else
+    m_val = Null
+
+    End If
+    
+    If m_val = 0 Then  ' del 0 value out
+    ar_Data(iii, num_colums) = Null
+
+    Else
+    ar_Data(iii, num_colums) = m_val
+
+    End If
+    
+    ar_nmHead(num_colums) = "CA_TY_YTD" & f_m + 1
+    m_valP = m_val
+
+    Next f_m
+    
+'---------------------------------------------------------------------------------------------------------
+'creat  ca val loreal Quarter
+'---------------------------------------------------------------------------------------------------------
+ 
+    q_m_c = 0
+    For f_q = 0 To 3
+    num_colums = num_colums + 1
+    m_val_q = 0
+    m_val = 0
+    
+        For f_m = 0 To 2
+        clm_m = str_PYper_LOR_VAL + q_m_c
+        m_val = Cells(i, clm_m)
+        m_val_q = m_val_q + m_val
+        
+        q_m_c = q_m_c + 1
+        
+        Next f_m
+        
+        If m_val_q = 0 Then
+        m_val_q = Null
+
+        Else
+        m_val_q = m_val_q / 1000
+        End If
+           
+    ar_Data(iii, num_colums) = m_val_q
+    ar_nmHead(num_colums) = "CA_PY_Q_" & f_q + 1
+    Next f_q
+    
+    
+   q_m_c = 0
+    For f_q = 0 To 3
+    num_colums = num_colums + 1
+    m_val_q = 0
+    m_val = 0
+    
+        For f_m = 0 To 2
+        clm_m = str_TYper_LOR_VAL + q_m_c
+        m_val = Cells(i, clm_m)
+        m_val_q = m_val_q + m_val
+        
+        q_m_c = q_m_c + 1
+        
+        Next f_m
+        
+        If m_val_q = 0 Then
+        m_val_q = Null
+
+        Else
+        m_val_q = m_val_q / 1000
+        End If
+           
+    ar_Data(iii, num_colums) = m_val_q
+    ar_nmHead(num_colums) = "CA_TY_Q" & f_q + 1
+    Next f_q
+    
+ '---------------------------------------------------------------------------------------------------------
+ ' first conq order
+ '---------------------------------------------------------------------------------------------------------
+    
+    fst_order = Null
+    num_colums = num_colums + 1
+    If CInt(cdYear) = 2014  and  cdMonth <= CInt(act_month) Then
+    fst_order = Cells(i, str_PYper_LOR_VAL + cdMonth - 1) / 1000
+
+    Else
+    fst_order = Null
+
+    End If
+    ar_Data(iii, num_colums) = fst_order
+    ar_nmHead(num_colums) = "PY_CNQ_Order"
+    
+    fst_order = Null
+    num_colums = num_colums + 1
+    If CInt(cdYear) = 2015 and  cdMonth <= CInt(act_month) Then
+    fst_order = Cells(i, str_TYper_LOR_VAL + cdMonth - 1) / 1000
+
+    Else
+    fst_order = Null
+
+    End If
+    ar_Data(iii, num_colums) = fst_order
+    ar_nmHead(num_colums) = "TY_CNQ_Order"
+    
+  
+'---------------------------------------------------------------------------------------------------------
+  'creat ca val loreal PYvsTY YTD
+'---------------------------------------------------------------------------------------------------------
+    
+    
+    num_colums = num_colums + 1
+    m_valP = 0
+    For f_m = 0 To 11  ' limit tange by actuale period
+    If f_m < CInt(act_month) Then
+    clm_m = str_PYper_LOR_VAL + f_m
+    m_val = (Cells(i, clm_m) / 1000) + m_valP
+
+
+
+    Else
+    Exit For
+    End If
+      
+    m_valP = m_val
+
+    Next f_m
+    
+    If m_val = 0 Then  ' del 0 value out
+    ar_Data(iii, num_colums) = Null
+
+    Else
+    ar_Data(iii, num_colums) = m_val
+
+    End If
+    ar_nmHead(num_colums) = "CA_PY_YTD"
+    ca_ytd_PY = m_val
+    
+    
+    num_colums = num_colums + 1
+    m_valP = 0
+    For f_m = 0 To 11  ' limit tange by actuale period
+    If f_m < CInt(act_month) Then
+    clm_m = str_TYper_LOR_VAL + f_m
+    m_val = (Cells(i, clm_m) / 1000) + m_valP
+
+
+
+    Else
+    Exit For
+    End If
+    
+    m_valP = m_val
+
+    Next f_m
+    
+    If m_val = 0 Then  ' del 0 value out
+    ar_Data(iii, num_colums) = Null
+
+    Else
+    ar_Data(iii, num_colums) = m_val
+
+    End If
+    ar_nmHead(num_colums) = "CA_TY_YTD"
+    ca_ytd_TY = m_val
+    
+'---------------------------------------------------------------------------------------------------------
+'dt_constante
+'---------------------------------------------------------------------------------------------------------
+    num_colums = num_colums + 1
+    dt_st = 0
+    
+    If ca_ytd_PY > 0 Then dt_st = dt_st + 1
+    If ca_ytd_TY > 0 Then dt_st = dt_st + 1
+    If st_dn_cln = 1 Then dt_st = dt_st + 1
+    If GA_Y = "PPY" Then dt_st = dt_st + 1
+
+    If dt_st = 4 Then
+    dt_st_nm = 1
+
+    Else
+    dt_st_nm = 0
+
+    End If
+    ar_Data(iii, num_colums) = dt_st_nm
+    ar_nmHead(num_colums) = "LfL"
+ 
+    '---------------------------------------------------------------------------------------------------------
+    If dt_st_nm = 1 Then
+    ca_ytd_PY_dt = ca_ytd_PY
+    ca_ytd_TY_dt = ca_ytd_TY
+    Else
+    ca_ytd_PY_dt = Null
+    ca_ytd_TY_dt = Null
+
+    End If
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = ca_ytd_PY_dt
+    ar_nmHead(num_colums) = "CA_PY_LfL"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = ca_ytd_TY_dt
+    ar_nmHead(num_colums) = "CA_TY_LfL"
+
+'---------------------------------------------------------------------------------------------------------
+'CA YTD split by GA
+
+
+    For f_qe = 1 To 3
+    
+
+
+        Select Case f_qe
+        Case 1
+        find_GA_Y = "PPY"
+
+        Case 2
+        find_GA_Y = "CNQ_PY"
+
+        Case 3
+        find_GA_Y = "CNQ_TY"
+
+        End Select
+
+    If GA_Y = find_GA_Y Then
+    ca_ytd_PY_GA = ca_ytd_PY
+    ca_ytd_TY_GA = ca_ytd_TY
+
+    Else
+    ca_ytd_PY_GA = Null
+    ca_ytd_TY_GA = Null
+
+    End If
+          
+    if ca_ytd_PY_GA = 0 then ca_ytd_PY_GA = null
+    if ca_ytd_TY_GA = 0 then ca_ytd_TY_GA = null
+    
+         
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = ca_ytd_PY_GA
+    ar_nmHead(num_colums) = "CA_PY_" & find_GA_Y
+ 
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = ca_ytd_TY_GA
+    ar_nmHead(num_colums) = "CA_TY_" & find_GA_Y
+    
+
+    Next f_qe
+
+
+
+
+iii = iii + 1
+Next i
+
+    
+ActiveWindow.Close
+Application.DisplayAlerts = False
+  
+    
+Workbooks(NF).Activate
+Sheets(in_data).Activate
+
+'clear sheet & create head & create name OR fiil data
+'---------------------------------------------------------------------------------------------------------
+If status_head = 0 Then
+ActiveSheet.UsedRange.Cells.ClearContents
+end_POS = iii + 1
+start_POS = 2
+
+Dim n As Name
+For Each n In ThisWorkbook.Names
+    On Error Resume Next
+    n.Delete
+    Next n
+
+For t = 0 To num_colums
+Cells(1, t + 1) = ar_nmHead(t)
+Cells(1, t + 1).Select
+ActiveWorkbook.Names.Add Name:=ar_nmHead(t), RefersTo:="=" & ActiveSheet.Name & "!" & ActiveCell.Address()
+Next t
+
+Else
+start_POS = end_POS + 1
+end_POS = start_POS + iii - 1
+End If
+
+ActiveSheet.Cells(start_POS, 1).Resize(end_POS - start_POS + 1, num_colums + 1) = ar_Data()
+status_head = 1
+Next b
+
+ActiveWorkbook.Names.Add Name:="SOURCE", RefersToR1C1:= "=OFFSET(in_TR!R1C1,0,0,COUNTA(in_TR!R1C1:R65535C1),COUNTA(in_TR!R1C1:R1C255))"
+ActiveWorkbook.RefreshAll
+ActiveWorkbook.Save
+'---------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+End Sub

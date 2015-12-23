@@ -1,0 +1,261 @@
+
+Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" (ByVal hwnd As Long, ByVal pszPath As String, ByVal psa As Any) As Long
+                                      
+                                    
+                                      
+Sub CreateFolderWithSubfolders(ByVal ÏóòüÑîçäàâàåìîéÏàïêè$)
+    ' ôóíêöèÿ ïîëó÷àåò â êà÷åñòâå ïàðàìåòðà ïóòü ê ïàïêå
+   ' åñëè òàêîé ïàïêè åù¸ íåò - îíà ñîçäà¸òñÿ
+   ' ìîæåò ñîçäàâàòüñÿ ñðàçó íåñêîëüêî ïîäïàïîê
+   If Len(Dir(ÏóòüÑîçäàâàåìîéÏàïêè$, vbDirectory)) = 0 Then    ' åñëè ïàïêà îòñóòñòâóåò
+       SHCreateDirectoryEx Application.hwnd, ÏóòüÑîçäàâàåìîéÏàïêè$, ByVal 0&    ' ñîçäà¸ì ïóòü
+   End If
+End Sub
+
+Function Replace_symbols(ByVal txt As String) As String
+    st$ = "~!@/\#$%^&*=|`-"""
+    For i% = 1 To Len(st$)
+        txt = Replace(txt, Mid(st$, i, 1), "_")
+    Next
+    Replace_symbols = txt
+End Function
+
+
+
+Sub RegFishkSTART()
+
+
+Dim patchTR, actTR, ms_LastRow(4), in_data, status_head   As String
+Dim ALLTIME, EDU_PY, EDU_TY, place, AVG_HD As Variant
+Dim b, iii, i, x, y, frqOrder   As Integer
+'Dim   As Worksheet
+Dim ms_Data(), ms_nmRow(26), ms_brand(4) As String
+
+
+'ìàññèâ ìàðêè
+ms_brand(0) = "ES"
+ms_brand(1) = "LP"
+ms_brand(2) = "KR"
+ms_brand(3) = "RD"
+ms_brand(4) = "MX"
+
+
+ms_nmRow(0) = "brand"
+ms_nmRow(1) = "rowTR"
+ms_nmRow(2) = "unvCD"
+ms_nmRow(3) = "mreg"
+ms_nmRow(4) = "reg"
+ms_nmRow(5) = "flsm"
+ms_nmRow(6) = "sec"
+ms_nmRow(7) = "srep"
+ms_nmRow(8) = "type_CLN"
+ms_nmRow(9) = "salon"
+ms_nmRow(10) = "CNQ_DATA"
+ms_nmRow(11) = "MAG"
+ms_nmRow(12) = "DN"
+ms_nmRow(13) = "AVG_CA_M"
+ms_nmRow(14) = "evCA"
+ms_nmRow(15) = "frq"
+ms_nmRow(16) = "id_ECAD"
+ms_nmRow(17) = "EDU_ALL"
+ms_nmRow(18) = "EDU_PY"
+ms_nmRow(19) = "EDU_TY"
+ms_nmRow(20) = "WRK_PLACE"
+ms_nmRow(21) = "HDinDAY"
+ms_nmRow(22) = "CLUB"
+ms_nmRow(23) = "nmPArtner"
+ms_nmRow(24) = "COMPETITORS"
+ms_nmRow(25) = "year"
+
+num_colums = UBound(ms_nmRow())
+
+With Application
+
+.Calculation = xlCalculationManual
+.DisplayAlerts = False
+.ScreenUpdating = False
+End With
+
+NF = ActiveWorkbook.Name
+status_head = 0
+
+        For b = 0 To 4 ' öèêë ïî TR
+        
+patchTR = "p:\DPP\Business development\Book commercial\" & ms_brand(b) & "\Top Russia Total 2015 " & ms_brand(b) & ".xlsm"
+
+in_data = "in_TR"
+
+Workbooks.Open Filename:=patchTR, Notify:=False
+   
+actTR = ActiveWorkbook.Name
+    
+Sheets(ms_brand(b)).Select
+
+ActiveSheet.AutoFilterMode = False
+ms_LastRow(b) = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1  ' ïîñëåäíÿÿ ÿ÷åéêà
+
+ReDim ms_Data(ms_LastRow(b) - 4, num_colums)
+
+
+
+    iii = 0
+    For i = 4 To ms_LastRow(b)
+    
+If IsNumeric(Cells(i, 1).Value) Then
+
+    ms_Data(iii, 0) = ms_brand(b) 'brand
+    ms_Data(iii, 1) = Cells(i, 1) 'rowTR
+    ms_Data(iii, 2) = Cells(i, 2) 'unvCD
+    ms_Data(iii, 3) = Right(Cells(i, 4), Len(Cells(i, 4).Value) - 3)  'mreg
+        ms_Data(iii, 4) = Cells(i, 5) 'reg
+    ms_Data(iii, 5) = Cells(i, 165) 'flsm
+    ms_Data(iii, 6) = Cells(i, 6) 'sec
+    ms_Data(iii, 7) = Cells(i, 7) 'srep
+    ms_Data(iii, 8) = Cells(i, 18) 'typeSLN
+    ms_Data(iii, 9) = Left(Cells(i, 9), 40) & ". " & Left(Cells(i, 12), 50) & ", " & Left(Cells(i, 13), 20) & ", " & Left(Cells(i, 11), 20)  ' salon
+    
+    If Cells(i, 161) <> "" Then cdMonth = Cells(i, 161) Else cdMonth = 1
+    If Cells(i, 65) <> "" Then cdYear = Cells(i, 65) Else cdYear = 1
+    
+    ms_Data(iii, 10) = cdMonth & "-" & cdYear ' CNQ_Y
+    ms_Data(iii, 11) = Cells(i, 160) 'MAG
+    ms_Data(iii, 12) = Cells(i, 8) 'DN
+    
+            If IsNumeric(Cells(i, 91)) Then
+        AVG_CA_PY = Cells(i, 91) / 12 / 1000
+        Else
+        AVG_CA_PY = ""
+        End If
+        
+    ms_Data(iii, 13) = AVG_CA_PY  'AVG CA PY
+    ms_Data(iii, 14) = Cells(i, 92) 'ev_CA
+    
+    
+    Set sh = Range(Cells(i, 79), Cells(i, 90))
+    Dim cel As Range
+    frqOrder = 0
+        
+    For Each cel In sh
+          If cel <> "" Then
+          frqOrder = frqOrder + 1
+          End If
+    Next
+    
+    ms_Data(iii, 15) = frqOrder & "\12" ' frq
+    
+    ms_Data(iii, 16) = Cells(i, 29) 'id_ECAD
+    
+    
+    EDU_ALLTIME = Cells(i, 30)
+    If IsNumeric(EDU_ALLTIME) And Cells(i, 30) <> 0 Then
+    EDU_ALLTIME = Round(Cells(i, 30), 0)
+    Else
+    EDU_ALLTIME = ""
+    End If
+    ms_Data(iii, 17) = EDU_ALLTIME 'EDU_ALLTIME
+    
+    
+    EDU_PY = Cells(i, 31)
+    If IsNumeric(EDU_PY) And Cells(i, 31) <> 0 Then
+    EDU_PY = Round(Cells(i, 31), 0)
+    Else
+    EDU_PY = ""
+    End If
+    ms_Data(iii, 18) = EDU_PY 'EDU_PY
+    
+    
+    EDU_TY = Cells(i, 32)
+    If IsNumeric(EDU_TY) And Cells(i, 32) <> 0 Then
+    EDU_TY = Round(Cells(i, 32), 0)
+    Else
+    EDU_TY = ""
+    End If
+    ms_Data(iii, 19) = EDU_TY 'EDU_TY
+    
+    
+    place = Cells(i, 27)
+    If IsNumeric(place) Then
+    place = Round(place, 0)
+    Else
+    place = ""
+    End If
+    ms_Data(iii, 20) = place 'place
+    
+    
+    AVG_HD = Cells(i, 28)
+    If IsNumeric(AVG_HD) Then
+    AVG_HD = Round(AVG_HD, 0)
+    Else
+    place = ""
+    End If
+    ms_Data(iii, 21) = AVG_HD 'AVG_HD
+    
+    
+        
+    ms_Data(iii, 22) = Cells(i, 131) 'CLUB
+    ms_Data(iii, 23) = Cells(i, 167) 'partner
+    ms_Data(iii, 24) = Cells(i, 174) 'competitors
+    
+    Select Case cdYear
+    Case cdYear = 2015
+    GA_Year = 2015
+    
+    Case cdYear = 2014
+    GA_Year = 2014
+    
+    Case Else
+    GA_Year = "2013"
+    End Select
+    
+    ms_Data(iii, 25) = GA_Year 'year
+        
+    iii = iii + 1
+    
+    
+
+End If
+
+
+
+
+
+
+Next i
+
+
+    ActiveWindow.Close
+    Application.DisplayAlerts = False
+    
+    
+Workbooks(NF).Activate
+Sheets(in_data).Activate
+
+If status_head = 0 Then
+ActiveSheet.UsedRange.Cells.ClearContents
+end_POS = UBound(ms_Data) + 1
+start_POS = 2
+For t = 0 To num_colums
+Cells(1, t + 1) = ms_nmRow(t)
+Next t
+
+Else
+start_POS = end_POS + 1
+end_POS = start_POS + UBound(ms_Data)
+End If
+
+
+
+ActiveSheet.Cells(start_POS, 1).Resize(end_POS - start_POS + 1, num_colums + 1) = ms_Data()
+status_head = 1
+Next b
+
+
+Application.Calculation = xlCalculationAutomatic
+Application.DisplayAlerts = True
+Application.ScreenUpdating = True
+
+
+End Sub
+
+
+

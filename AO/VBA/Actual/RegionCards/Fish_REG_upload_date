@@ -1,0 +1,309 @@
+
+Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" (ByVal hwnd As Long, ByVal pszPath As String, ByVal psa As Any) As Long
+
+Function Replace_symbols(ByVal txt As String) As String
+    St$ = "~!@/\#$%^:?&*=|`;"""
+    For i% = 1 To Len(St$)
+        txt = Replace(txt, Mid(St$, i, 1), "_")
+        txt = Replace(txt, Chr(10), "_")
+    Next
+    Replace_symbols = txt
+End Function
+
+Sub uploadRegFish()
+
+Dim patchTR, actTR, ar_LastRow(4), in_data   As String
+Dim f_b, iii, f_i, x, y, frqOrder, act_month As Integer
+Dim ar_Data(), ar_nmHead()
+Dim ar_brand, ar_PYPer, ar_TYPer
+
+
+ar_brand = Array("LP", "KR", "RD", "MX", "ES")
+num_brand = UBound(ar_brand)
+
+
+'colums CA
+'---------------------------------------------------------------------------------------------------------
+ar_PYPer = Array(0, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90)
+ar_TYPer = Array(0, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77)
+'---------------------------------------------------------------------------------------------------------
+
+With Application
+.Calculation = xlCalculationManual
+.EnableEvents = False
+.DisplayAlerts = False
+.ScreenUpdating = False
+End With
+
+
+NF = ActiveWorkbook.Name
+
+act_month = InputBox("Month")
+act_month = CInt(act_month)
+ar_nm_month = Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+nm_month = ar_nm_month(act_month - 1)
+
+        For f_b = 0 To num_brand ' цикл по TR
+      
+        
+patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(f_b) & "\Top Russia Total 2015 " & ar_brand(f_b) & ".xlsm"
+
+in_data = "in_TR_" & ar_brand(f_b)
+
+Workbooks.Open Filename:=patchTR, Notify:=False
+   
+actTR = ActiveWorkbook.Name
+    
+Sheets(ar_brand(f_b)).Select
+
+
+ActiveSheet.AutoFilterMode = False
+ar_LastRow(f_b) = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1   ' последняя ячейка
+
+ReDim ar_Data(ar_LastRow(f_b), 50)
+ReDim ar_nmHead(50)
+
+    iii = 0
+    For f_i = 4 To ar_LastRow(f_b)
+ 
+    num_colums = 0
+    ar_Data(iii, num_colums) = ar_brand(f_b) 'brand
+    ar_nmHead(num_colums) = "brand"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 1) 'rowTR
+    ar_nmHead(num_colums) = "rowTR"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 2) 'unvCD
+    ar_nmHead(num_colums) = "unvCD"
+    
+    num_colums = num_colums + 1
+    nm_Mreg = Right(Cells(f_i, 4), Len(Cells(f_i, 4)) - 3)
+    ar_Data(iii, num_colums) = nm_Mreg 'mreg
+    ar_nmHead(num_colums) = "mreg"
+   
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 5) 'reg
+    ar_nmHead(num_colums) = "reg"
+   
+    num_colums = num_colums + 1
+    nm_FLSM = Cells(f_i, 165)
+    ar_Data(iii, num_colums) = nm_FLSM 'flsm
+    ar_nmHead(num_colums) = "flsm"
+   
+   
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 6) 'sec
+    ar_nmHead(num_colums) = "sec"
+    
+    num_colums = num_colums + 1
+    nm_SREP = Cells(f_i, 7)
+    ar_Data(iii, num_colums) = nm_SREP 'srep
+    ar_nmHead(num_colums) = "SREP"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 18) 'typeSLN
+    ar_nmHead(num_colums) = "type"
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Trim(Left(Cells(f_i, 9), 40) & ". " & Left(Cells(f_i, 12), 50) & " " & Left(Cells(f_i, 13), 20) & " " & Left(Cells(f_i, 11), 20))  ' salon
+    ar_nmHead(num_colums) = "salon"
+    
+    num_colums = num_colums + 1
+    If Cells(f_i, 161) <> "" Then cdMonth = Cells(f_i, 161) Else cdMonth = 1
+    If Cells(f_i, 65) <> "" Then cdYear = Cells(f_i, 65) Else cdYear = 2011
+    ar_Data(iii, num_colums) = cdMonth & "-" & cdYear ' CNQ_Y
+    ar_nmHead(num_colums) = "CNQ_Y"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 160) 'MAG
+    ar_nmHead(num_colums) = "MAG"
+
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 8) 'DN
+    ar_nmHead(num_colums) = "DN"
+
+    
+'calculate LTM AVG CA & FrqRate
+'---------------------------------------------------------------------------------------------------------
+
+    sumCA12M = 0
+    frqOrder = 0
+    
+    
+    For iq = act_month To 11
+    
+    
+        If IsNumeric(Cells(f_i, ar_PYPer(iq))) Then
+        CA = Cells(f_i, ar_PYPer(iq))
+        Else
+        CA = 0
+        End If
+        
+        sumCA12M = sumCA12M + CA
+        If Cells(f_i, ar_PYPer(iq)) <> "" And Cells(f_i, ar_PYPer(iq)) > 0 Then
+        frqOrder = frqOrder + 1
+        End If
+    
+    Next iq
+    
+    For iw = 1 To act_month
+    
+    If IsNumeric(Cells(f_i, ar_TYPer(iw))) Then
+        CA = Cells(f_i, ar_TYPer(iw))
+        Else
+        CA = 0
+        End If
+    
+    sumCA12M = sumCA12M + CA
+        If Cells(f_i, ar_TYPer(iw)) <> "" And Cells(f_i, ar_TYPer(iw)) > 0 Then
+        frqOrder = frqOrder + 1
+        End If
+    
+    Next iw
+            
+        If sumCA12M <> 0 Then
+        AVG_CA_PY = sumCA12M / 12 / 1000
+        Else
+        AVG_CA_PY = ""
+        End If
+'---------------------------------------------------------------------------------------------------------
+
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = AVG_CA_PY  'AVG CA PY
+    ar_nmHead(num_colums) = "AVG_CA_LTM"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 92) 'ev_CA
+    ar_nmHead(num_colums) = "ev CA TY/PY YTD"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = frqOrder & "\12" ' frq
+    ar_nmHead(num_colums) = "freq_LTM"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 29) 'id_ECAD
+    ar_nmHead(num_colums) = "id_ECAD"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 30) 'EDU_ALLTIME
+    ar_nmHead(num_colums) = "EDU_ALLTIME"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 31) 'EDU_2014
+    ar_nmHead(num_colums) = "EDU_PY"
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 32) 'EDU_2015
+    ar_nmHead(num_colums) = "EDU_TY"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 27) 'place
+    ar_nmHead(num_colums) = "WRK_PLACE"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 28) 'VAVG_HD
+    ar_nmHead(num_colums) = "HDinDAY"
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 42) 'CLUB
+    ar_nmHead(num_colums) = "CLUB"
+
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 167) 'partner
+    ar_nmHead(num_colums) = "nmPArtner"
+
+
+
+    num_colums = num_colums + 1
+    nmFile = "fc_" & Replace_symbols(Trim(Left(Cells(f_i, 9), 30)) & ". " & Trim(Left(Cells(f_i, 12), 50) & " " & Left(Cells(f_i, 13), 30)) & " " & Cells(f_i, 11)) & ".pdf"
+    disk = "\\RUCORPRUWKS0665"
+    ar_Data(iii, num_colums) = disk & "\CARDS\" & nm_Mreg & "\" & nm_FLSM & "\" & "Clients Cards" & "\" & nm_SREP & "\" & nmFile
+    ar_nmHead(num_colums) = "link2File"
+
+    iii = iii + 1
+
+Next f_i
+
+
+
+
+ActiveWindow.Close
+Application.DisplayAlerts = False
+    
+Workbooks(NF).Activate
+Sheets(in_data).Activate
+
+ActiveSheet.UsedRange.Cells.ClearContents
+ActiveSheet.UsedRange.NumberFormat = "General"
+'Cells.Select
+'Selection.ClearContents
+'Selection.Delete Shift:=xlUp
+
+ReDim Preserve ar_nmHead(num_colums)
+
+Dim n As Name
+For Each n In ThisWorkbook.Names
+    On Error Resume Next
+    n.Delete
+    Next n
+
+For t = 0 To num_colums
+Cells(1, t + 1) = ar_nmHead(t)
+Cells(1, t + 1).Select
+ActiveWorkbook.Names.Add Name:=ar_nmHead(t), RefersTo:="=" & ActiveSheet.Name & "!" & ActiveCell.Address()
+Next t
+
+ActiveSheet.Cells(2, 1).Resize(UBound(ar_Data), num_colums + 1) = ar_Data()
+
+Next f_b
+
+'ar_FC = Array("SKU_YTD", "G_PPY", "G_PY", "G_PYTD", "G_YTD")
+'
+'For Z = 1 To 5
+'
+'Sheets(ar_FC(Z)).Select
+'
+'ActiveSheet.AutoFilterMode = False
+'
+'ar_LastRow(zz) = ActiveSheet.Cells(13, 2).Row - 1 + ActiveSheet.UsedRange.Rows.Count - 1  ' последняя ячейка
+'
+'ReDim ar_Data_FC(ar_LastRow(zz), 150)
+'
+'
+'
+'
+'
+'
+'
+'
+'patchFC = "p:\DPP\Business development\book commercial\dpp\расчётные\фишка клиента v2015.xlsm"
+'Workbooks.Open Filename:=patchTR, Notify:=False
+'
+'actTR = ActiveWorkbook.Name
+'
+'Sheets(ar_brand(f_b)).Select
+
+
+
+Application.Calculation = xlCalculationAutomatic
+Application.DisplayAlerts = True
+Application.ScreenUpdating = True
+
+
+
+
+
+
+
+
+
+End Sub
+
+
+
+
+
+

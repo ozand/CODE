@@ -1,0 +1,23 @@
+select id, 	city_id, 	name, 	address, 	phone, 	manager, 	law_name, 	inn, 	salon_code, 	salon_type, 	description, 	created_at, 	updated_at, 	city_name, 	free_certificate_count, 	active_certificate_count, 	partner_code, 	is_closed, 	grade, 	contact_person, 	brand, 	open_date, 	representative_id, 	representative_full_name, 	street, 	house, 	ext_address, 	discount, 	open_month, 	open_year, 	chain_name, 	city_name_geographic, 	which_club, 	barber_chairs, 	color_cost, 	com_mreg, 	com_reg, 	com_sect, 	client_type, 	crer, 	hide, 	technolog_full_name, 	region_id, 	users_count, 	region_name, 	technolog_id, 	megaregion_name, 	user_counter, 	mag, 	megaregion_id, 	site, 	email, 	partner, 	partner_private_code, 	manager_phone, 	manager_mail, 	salon_conquer, 	fias_id, 	salon_manager_id, 	show_on_locator, 	
+(select count(DISTINCT smu.user_id) 
+from seminar_users as smu 
+left join users as usr ON smu.user_id = usr.id
+where sln.id = usr.salon_id) as EDU_SLN_USR, 
+
+(select count(DISTINCT usr2.id) from users as usr2 
+where sln.id = usr2.salon_id) as SLN_USR,
+
+(select count(smr.id) 
+from seminars as smr
+where smr.salon_id = sln.id 
+) as cnt_sln
+
+
+
+
+
+
+from salons as sln
+
+ORDER by sln.id
+

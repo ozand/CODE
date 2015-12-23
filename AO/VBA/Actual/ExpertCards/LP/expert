@@ -1,0 +1,310 @@
+Function Replace_symbols(ByVal txt As String) As String
+    St$ = "~!@/\#$%^&*=|`-
+    For i% = 1 To Len(St$)
+        txt = Replace(txt, Mid(St$, i, 1), "")
+    Next
+    Replace_symbols = txt
+End Function
+
+Sub data_TR()
+
+Dim brand, ar_Colmn(), patchTR, nm_FLSM, nm_Mreg, nm_SREP, type_CLN As String
+Dim comp_colo, comp_rev, st_cmp, nmFile, disk, map_search, actTR, NF As String
+Dim num_ar_Brand, num_ar_Colmn, ar_LastRow(), b, iii, i, nc, ee, cdMonth, cdYear, CA1 As Integer
+Dim eee, yyy, CA, Q1, Q2, Q3, Q4, a, z, dogovor, exp_2015, st_pot_exp, clnt_err, st_exp, f As Integer
+Dim Type_bonus as Double
+Dim in_data, Sh As Worksheet
+Dim ar_Data() 'As Object
+Dim discount, koef As Double
+  
+brand = "LP"
+
+
+NF = ActiveWorkbook.Name
+   
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+' Creat Array Total Russia CA
+'---------------------------------------------------------
+ar_Colmn = Array("nb_row", "cd_loreal", "mreg", "reg", "rep", "salons", "cln_type", "contacts_sln_mail", "contact_sln_phone", "contact_sln_name", "SLN_phone", "SLN_mail", "SLN_site",  "ECAD", "edu_ALLTIME", "EDU_2014", "EDU_2015", "DOGOVOR", "CLUB2015", "CLUB2014", "CA_Q1", "TYPE_BNS_Q1", "Points_Q1", "CA_Q2", "TYPE_BNS_Q2", "Points_Q2", "CA_Q3", "TYPE_BNS_Q3", "Points_Q3", "CA_Q4", "TYPE_BNS_Q4", "Points_Q4")
+num_ar_Colmn = UBound(ar_Colmn)
+
+patchTR = "p:\DPP\Business development\Book commercial\" & brand & "\Top Russia Total 2015 " & brand & ".xlsm"
+
+'check Sheets and if not - add
+'---------------------------------------------------------------------------------------------------------
+in_data = "EXPERT"
+For Each Sh In ThisWorkbook.Worksheets
+If Sh.Name = in_data Then
+chek_name = 1
+End If
+Next Sh
+
+If chek_name <> 1 Then
+Set Sh = Worksheets.Add()
+Sh.Name = in_data
+End If
+
+'---------------------------------------------------------------------------------------------------------
+
+Workbooks.Open Filename:=patchTR, Notify:=False
+actTR = ActiveWorkbook.Name
+Sheets(brand).Select
+ActiveSheet.AutoFilterMode = False
+
+num_LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1   ' ïîñëåäíÿÿ ÿ÷åéêà
+ReDim ar_Data(num_LastRow, num_ar_Colmn)
+'-----------------------------------------------------------
+   
+    iii = 0
+
+   
+    For i = 4 To num_LastRow
+yyy = 0
+    ar_Data(iii, 0) = Cells(i, 1) 'nb_row
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Cells(i, 2) 'cd_loreal
+yyy = yyy + 1
+    nm_Mreg = Right(Cells(i, 4), Len(Cells(i, 4)) - 3)
+    ar_Data(iii, yyy) = nm_Mreg ' mreg
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Cells(i, 5) ' reg
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Trim(Cells(i, 7)) ' REP
+yyy = yyy + 1
+    ar_Data(iii, yyy) =  Replace_symbols(Trim(Left(Cells(i, 9), 30)) & ". " &  Trim(Left(Cells(i, 10), 30)) & ". " & Trim(Left(Cells(i, 12), 50) & " " & Left(Cells(i, 13), 30)) & " " & Cells(i, 11)) ' salon'
+yyy = yyy + 1
+    type_CLN = Cells(i, 153)
+    ar_Data(iii, yyy) = type_CLN 'type_CLN
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Cells(i, 14) 'cont_email
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Cells(i, 15) 'cont_phone
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Cells(i, 16) 'cont_name
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Cells(i, 20) 'sln_phone
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Cells(i, 21) 'sln_mail
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Cells(i, 22) 'sln_site
+yyy = yyy + 1
+     
+    If IsNumeric(Cells(i, 29)) Then
+    ar_Data(iii, yyy) = Cells(i, 29) 'id_ECAD
+        Else
+    ar_Data(iii, yyy) = ""
+    End If
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Cells(i, 30) 'EDU_ALLTIME
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Cells(i, 31) 'EDU_2014
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Cells(i, 32) 'EDU_2015
+yyy = yyy + 1
+    dogovor = Cells(i, 40)
+    ar_Data(iii, yyy) = dogovor 'dogovor
+yyy = yyy + 1
+    exp_2015 = Cells(i, 42)
+    ar_Data(iii, yyy) = exp_2015 'exper2015
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Cells(i, 43) 'expert2014
+yyy = yyy + 1
+    
+'Calculate CA and bonus
+'---------------------------------------------------------------------------------------------------------
+Q1 = 0
+Q2 = 0
+Q3 = 0
+Q4 = 0
+a = 0
+z = 0
+For a = 66 To 77 'Q1
+z=z+1
+If IsNumeric(Cells(i, a)) Then
+CA1 = Round(Cells(i, a), 0) / 1000
+Else
+CA1 = 0
+End If
+CA = CA + CA1
+
+if z = 3 then
+select Case CA
+case IS  < 150
+Type_bonus = 0
+case 150 to 209.9
+Type_bonus = 0.03
+case 210 to 299.9
+Type_bonus = 0.04
+case IS >=300
+Type_bonus = 0.05
+end select
+end if
+  
+Select Case a
+Case 68
+Q1 = CA
+CA = 0
+type_BNS1 = Type_bonus
+Type_bonus = 0
+z=0
+Case 71
+Q2 = CA
+CA = 0
+type_BNS2 = Type_bonus
+Type_bonus = 0
+z=0
+Case 74
+Q3 = CA
+CA = 0
+type_BNS3 = Type_bonus
+Type_bonus = 0
+z=0
+Case 77
+Q4 = CA
+CA = 0
+type_BNS4 = Type_bonus
+Type_bonus = 0
+z=0
+End Select
+Next a
+
+'check salon expert
+'--------------------------------------------------------------------------------------------------------- 
+if dogovor = 1 then 
+st_exp =  1
+else
+st_exp = 0
+end if
+'---------------------------------------------------------------------------------------------------------
+
+
+    ar_Data(iii, yyy) = Q1 'CA_Q1
+yyy = yyy + 1
+    ar_Data(iii, yyy) = type_BNS1 '%_Q1
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Round(Q1*type_BNS1*st_exp,0) 'Points_Q1
+yyy = yyy + 1
+
+
+    ar_Data(iii, yyy) = Q2 'CA_Q2
+yyy = yyy + 1
+    ar_Data(iii, yyy) = type_BNS2 '%_Q2
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Round(Q2*type_BNS2*st_exp,0) 'Points_Q2
+yyy = yyy + 1
+
+    ar_Data(iii, yyy) = Q3 'CA_Q3
+yyy = yyy + 1
+    ar_Data(iii, yyy) = type_BNS3 '%_Q3
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Round(Q3*type_BNS3*st_exp,0) 'points_Q3
+yyy = yyy + 1
+
+    ar_Data(iii, yyy) = Q4 'CA_Q4
+yyy = yyy + 1
+    ar_Data(iii, yyy) = type_BNS4 '%_Q4
+yyy = yyy + 1
+    ar_Data(iii, yyy) = Round(Q4*type_BNS4*st_exp,0) 'points_Q4
+
+    
+    
+'check potential salon expert
+'--------------------------------------------------------------------------------------------------------- 
+st_pot_exp = 0
+if dogovor = 1 then st_pot_exp = st_pot_exp + 1 
+if exp_2015 = 1 then st_pot_exp = st_pot_exp + 1 
+if Q1 >=150 then st_pot_exp = st_pot_exp + 1 
+if Q2 >=150 then st_pot_exp = st_pot_exp + 1 
+if Q3 >=150 then st_pot_exp = st_pot_exp + 1 
+if Q4 >=150 then st_pot_exp = st_pot_exp + 1 
+if (Q1 + Q2)/2>=150 then st_pot_exp = st_pot_exp + 1 
+if (Q2 + Q3)/2>=150 then st_pot_exp = st_pot_exp + 1 
+if (Q3 + Q4)/2>=150 then st_pot_exp = st_pot_exp + 1 
+
+if type_CLN = "shop" or type_CLN = "other" then ' restrict shops from array
+clnt_err = 1
+else
+clnt_err = 0
+end if
+
+If st_pot_exp >=1 and clnt_err = 0 then
+iii = iii + 1
+end if
+
+if i = num_LastRow and st_pot_exp = 0 then 'delete last row not expert
+for end_row = 0 to yyy
+ar_Data(iii, end_row) = ""
+next end_row
+end if
+
+'----------------------------------------------------------------------------------------------------------
+Next i
+
+Workbooks(actTR).Close
+
+Workbooks(NF).Activate
+Sheets(in_data).Activate
+
+With ActiveSheet
+.UsedRange.Cells.ClearContents
+For t = 0 To num_ar_Colmn
+Cells(1, t + 1) = ar_Colmn(t)
+Next t
+.Cells(2, 1).Resize(iii + 2, num_ar_Colmn + 1) = ar_Data()
+End With
+
+'formatештп table
+'--------------------------------------------------------------------------------------------------------- 
+
+ActiveWindow.DisplayGridlines = False
+
+Set lRangeCol = Nothing
+Set lRangeH = ActiveSheet.Rows(iii+1)
+
+for f = iii + 1 to 3  step -2
+Set lRangeCol = Application.Union(lRangeH, ActiveSheet.Rows(f))
+Set lRangeH = lRangeCol
+
+Next f
+lRangeCol.Select
+
+With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorDark1
+        .TintAndShade = -4.99893185216834E-02
+        .PatternTintAndShade = 0
+End With
+
+    Columns("A:G").Select
+    Selection.Columns.Ungroup
+
+    Columns("A:E").Select
+    Selection.Columns.Group
+    Columns("J:M").Select
+    Selection.Columns.Group
+    Columns("F:F").Select
+    Selection.ColumnWidth = 61.36
+    Columns("G:G").Select
+    ActiveWindow.FreezePanes = True
+
+
+'--------------------------------------------------------------------------------------------------------- 
+
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+    
+End Sub

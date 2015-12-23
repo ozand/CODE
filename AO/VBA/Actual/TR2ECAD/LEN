@@ -1,0 +1,6 @@
+sUB lEN()
+
+For Each cel In UActiveSheet.UsedRange
+          
+          cel.vALUE = len(cel)
+    Next

@@ -1,0 +1,115 @@
+Option Explicit 
+Public MyArray() As String 
+
+
+Public Function AddItem(item As String) 'добавление элемента в массив 
+    Dim ub As Long 
+    Err.Number = 0 
+    On Error Resume Next 
+    ub = UBound(MyArray()) 
+    If Err.Number = 9 Then 
+        ReDim Preserve MyArray(0 To 0) 
+    Else 
+        ReDim Preserve MyArray(0 To UBound(MyArray()) + 1) 
+    End If 
+    MyArray(UBound(MyArray())) = item 
+    Debug.Print UBound(MyArray()) 
+End Function 
+
+Public Function Clear()      'удаление массива 
+    Erase MyArray 
+End Function 
+
+Public Function GetArrayString(index As Long) As String 'получение элемента из массива 
+    GetArrayString = MyArray(index) 
+End Function 
+
+Public Function ShowArray()     'показать массив 
+    Dim ub As Long, i As Long 
+    Err.Number = 0 
+    On Error Resume Next 
+    ub = UBound(MyArray()) 
+    If Err.Number = 9 Then 
+        Debug.Print "Array is empty. Nothing to show" 
+    Else 
+        For i = 0 To UBound(MyArray()) 
+            Debug.Print MyArray(i) 
+        Next i 
+    End If 
+End Function 
+
+Public Sub DeleteDuplicate()    'удалить дубликаты 
+    Dim temp_arr() As String 
+    Dim k As Long, i As Long 
+    Dim ub As Long 
+    Err.Number = 0 
+    On Error Resume Next 
+    ub = UBound(MyArray()) 
+    If Err.Number = 9 Then Exit Sub 
+    If ub = 0 Then Exit Sub 
+    recur_sort MyArray(), 0, UBound(MyArray) 
+     
+    On Error GoTo end_arr 
+    ReDim temp_arr(LBound(MyArray()) To UBound(MyArray())) 
+    k = LBound(MyArray()) 
+    For i = LBound(MyArray()) To UBound(MyArray()) - 1 
+        temp_arr(k) = MyArray(i): k = k + 1 
+        Do While MyArray(i) = MyArray(i + 1) 
+            i = i + 1 
+        Loop 
+    Next i 
+end_arr: 
+    If MyArray(UBound(MyArray())) <> temp_arr(k - 1) Then 
+        temp_arr(k) = MyArray(UBound(MyArray())) 
+    End If 
+     
+    ReDim Preserve temp_arr(LBound(MyArray()) To k) 
+    For i = LBound(temp_arr()) To UBound(temp_arr()) 
+        MyArray(i) = temp_arr(i) 
+    Next i 
+    ReDim Preserve MyArray(LBound(temp_arr()) To UBound(temp_arr())) 
+
+End Sub 
+
+Private Function partition(a() As String, Low As Long, High As Long) As Long 
+    Dim p As Long, pivot As String, t As String 
+    Dim i As Long, j As Long 
+      
+    p = Low + ((High - Low) \ 2) 
+    pivot = a(p) 
+    a(p) = a(Low) 
+    i = Low + 1 
+    j = High 
+      
+    Do While True 
+        Do While (i < j And (pivot > a(i))):     i = i + 1: Loop 
+        Do While (j >= i And (a(j) > pivot)):    j = j - 1: Loop 
+        If (i >= j) Then Exit Do 
+        t = a(i) 
+        a(i) = a(j) 
+        a(j) = t 
+        j = j - 1 
+        i = i + 1 
+    Loop 
+    a(Low) = a(j) 
+    a(j) = pivot 
+      
+    partition = j 
+      
+End Function 
+
+Private Sub recur_sort(SortArray() As String, Low As Long, High As Long) 
+    Dim m As Long 
+      
+    Do While Low < High 
+        m = partition(SortArray(), Low, High) 
+        If (m - Low <= High - m) Then 
+            recur_sort SortArray(), Low, m - 1 
+            Low = m + 1 
+        Else 
+            recur_sort SortArray(), m + 1, High 
+            High = m - 1 
+        End If 
+    Loop 
+
+End Sub

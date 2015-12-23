@@ -1,0 +1,90 @@
+Sub Converter()
+Dim cnt As Integer, currfile As String
+Dim TrimFile As String, Path, pathF As String, FilesInPath As String _
+, MyFiles() As String, Fnum As Long
+Dim CalcMode As Long, LPosition As Long
+Dim StartTime As Date, EndTime As Date
+Dim LastRow As Integer
+
+NF = ActiveWorkbook.Name
+ThisWorkbook.Activate
+       
+
+Sheets("File_list").Activate
+    
+StartTime = Timer
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+
+For Fnum = 6 To LastRow
+
+pathF = Cells(Fnum, "C")
+    
+Workbooks.Open Filename:=pathF, Notify:=False
+actTR = ActiveWorkbook.Name
+
+sts_TR_raname = 0
+Dim sh As Worksheet
+For Each sh In Worksheets
+If sh.Name = "Сопровождение" Then
+    ActiveSheet.Select
+    ActiveSheet.Name = "Coaching"
+    sts_TR_raname = 1
+    Exit For
+End If
+Next
+
+Dim sh As Worksheet
+For Each sh In Worksheets
+If sh.Name = "Контакты" Then
+    ActiveSheet.Select
+    ActiveSheet.Name = "Contacts"
+    sts_TR_raname = 1
+    Exit For
+End If
+Next
+
+If sts_TR_raname = 1 Then
+    Workbooks(actTR).Save
+    Workbooks(actTR).Close
+    Workbooks(NF).Activate
+    Sheets("File_list").Activate
+Cells(Fnum, 1) = "rename"
+Else
+Workbooks(actTR).Activate
+Workbooks(actTR).Close
+Workbooks(NF).Activate
+Sheets("File_list").Activate
+Cells(Fnum, 1) = "not_sh"
+
+End If
+Next Fnum
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+
+    
+EndTime = Timer
+MsgBox " Task succesfully completed in " & Format(EndTime - StartTime, "0.00") & " seconds"
+End Sub
+
+
+
+
+
+

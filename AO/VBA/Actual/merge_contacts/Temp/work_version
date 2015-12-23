@@ -1,0 +1,89 @@
+Sub GM()
+
+Dim ar_Data() , ar_nmHead()
+    
+For f_x = 2 To 100
+        For f_y = 10 To 100
+        find_val = "LOR mSeries Store"
+        find_cell = Cells(f_y, f_x)
+        If find_cell = find_val Then Exit For
+        Next f_y
+If find_cell = find_val Then Exit For
+Next f_x
+
+strt_clm = f_x
+strt_row = f_y
+
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+LastColumns = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+
+
+iii = 0
+
+ReDim ar_Data(LastRow, LastColumns)
+ReDim ar_nmHead(0, LastColumns)
+for f_x = strt_row - 3 to strt_row
+        yyy = 0
+        for f_y = strt_clm + 2 to LastColumns
+yyy= yyy + 1
+val_head = cells(f_x, f_y)
+
+Select case yyy
+
+Case 1        
+num_colums = 0
+nm_brand = left(val_head, 2)
+ar_Data(iii, num_colums) = nm_brand
+ar_nmHead(num_colums) = "brand"
+
+num_colums = num_colums + 1
+nm_gammes = right(val_head, len(val_head) - 3)
+ar_Data(iii, num_colums) =  nm_gammes
+ar_nmHead(num_colums) = "GAMMES"
+
+case 2
+num_colums = num_colums + 1
+ar_Data(iii, num_colums) =  val_head
+ar_nmHead(num_colums) = "YEAR_TYPE"
+
+case 3
+num_colums = num_colums + 1
+ar_Data(iii, num_colums) =  nm_gammes
+ar_nmHead(num_colums) = "VAL_TYPE"
+
+End select
+        next f_y
+        iii = iii + 1
+next f_x
+
+Sheets("Test").Activate
+
+
+
+For t = 0 To num_colums
+Cells(1, t + 1) = ar_nmHead(t)
+Cells(1, t + 1).Select
+ActiveWorkbook.Names.Add Name:=ar_nmHead(t), RefersTo:="=" & ActiveSheet.Name & "!" & ActiveCell.Address()
+Next t
+
+ActiveSheet.Cells(1, 1).Resize(iii, num_colums + 1) = ar_Data()
+
+
+
+Dim dic_universCD: Set dic_universCD = CreateObject("Scripting.Dictionary")
+
+
+for f_x = strt_row to LastRow 
+iii = iii + 1 
+key_val = cells(f_x, strt_clm)
+
+If Not dic_universCD.Exists(key_val) Then
+dic_DRs.Add iDR, uniq_val_DR
+End If
+
+if left(key_val, 1) = "8" and len(key_val) = 9 Then 
+           
+ar_DATA() 
+
+End Sub
+

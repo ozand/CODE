@@ -1,0 +1,195 @@
+Option Compare Text
+Sub data_CA_per_Brand()
+
+Dim pathc2file, nm_brand, NF, cd_brand_Univers, nm_Mreg, nm_reg, nmMonth, GA_Y, vl_mag, st_cln_base   As String
+Dim ar_code_Brand(6, 1)
+Dim LastRow_CC, LastColumns_CC, act_month, str_PYper_LOR_VAL, str_TYper_LOR_VAL, num_colums, yy, cd_Univers, textPos, f_mr, cdMonth, cdYear, f_m, st_dn_cln, sumCA12M, iq As Integer
+Dim num_month As Integer
+Dim ar_Data(999999, 150)
+Dim ar_tr_value_PY(0 To 11, 10000), ar_tr_value_TY(0 To 11, 10000)
+Dim tr_value_PY, tr_value_TY, val_s
+Dim patchTR, actTR, ar_LastRow(6), in_data, status_head, ar_head_WSOT(150)   As String
+Dim ALLTIME, EDU_PY, EDU_TY, place, AVG_HD As Variant
+Dim b, iii, i, x, y, frqOrder   As Integer
+
+Dim ar_brand(), ar_nmHead(150), ar_type_clients(1 To 4, 1 To 12), ar_PYPer_PART_VAL, ar_TYPer_PART_VAL, ar_PYPer_LOR_VAL(), ar_TYPer_LOR_VAL(), ar_nmMonth(), ar_nmMregEN(), ar_nmMregLT()
+Dim n As Name
+Dim m_val As Single
+
+NF = ActiveWorkbook.Name
+act_month = InputBox("Month")
+act_month = CInt(act_month)
+
+'colums CA PRTNN VAL for LTM
+'---------------------------------------------------------------------------------------------------------
+ar_PYPer_PRTN_VAL = Array(0, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89)
+ar_TYPer_PRTN_VAL = Array(0, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77)
+
+ar_brand = Array("LP", "KR", "RD", "MX", "ES", "DE", "CR")
+num_ar_brand = UBound(ar_brand)
+
+'colums CA LOREAL VAL
+str_PYper_LOR_VAL = 106
+str_TYper_LOR_VAL = 93
+str_PYper_PRTN_VAL = 79
+str_TYper_PRTN_VAL = 66
+
+ar_nm_month = Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+ar_nmMregEN = Array("MOSCOW", "GR", "NORTHWEST", "CENTER", "VOLGA", "SOUTH", "URAL", "SIBERIA", "FAR EAST")
+ar_nmMregLT = Array("Moscou", "GR", "Nord-Ouest", "Centre", "Volga-Centre", "Sud", "Oural", "Siberie", "EO")
+
+
+ar_nmAVG_Order = Array(0, 2.5, 5, 10, 15, 20, 25, 30, 50, 60, 70, 100000)
+'---------------------------------------------------------------------------------------------------------
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+'---------------------------------------------------------------------------------------------------------
+
+iii = 0
+
+For b = 0 To 6
+patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(b) & "\Top Russia Total 2015 " & ar_brand(b) & ".xlsm"
+in_data = "in_TR"
+
+Workbooks.Open Filename:=patchTR, Notify:=False
+actTR = ActiveWorkbook.Name
+Sheets(ar_brand(b)).Select
+ActiveSheet.AutoFilterMode = False
+ar_LastRow(b) = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+      
+ For f_month = 0 To act_month - 1
+      
+'---------------------------------------------------------------------------------------------------------
+'creat ca val loreal monthly
+'---------------------------------------------------------------------------------------------------------
+    
+    ar_cln_type = Array("salons", "e-retailer", "shops")
+        
+        For i = 4 To ar_LastRow(b)
+               
+             
+                    
+        type_cln_rus = Trim(Cells(i, 18))
+        
+        
+        Select Case type_cln_rus
+        Case "магазин", "сеть магазинов"
+        f_cln_type = 2
+        nm_cln_type = "shops"
+        Case "e-commerce"
+        f_cln_type = 1
+        nm_cln_type = "e-retailer"
+        Case Else
+        f_cln_type = 0
+        nm_cln_type = "salons"
+        End Select
+        
+                          
+              
+            tr_value_PY = Cells(i, f_month + str_PYper_LOR_VAL)
+            ar_tr_value_PY(f_month, f_cln_type) = ar_tr_value_PY(f_month, f_cln_type) + tr_value_PY
+            
+            
+            tr_value_TY = Cells(i, f_month + str_TYper_LOR_VAL)
+            ar_tr_value_TY(f_month, f_cln_type) = ar_tr_value_TY(f_month, f_cln_type) + tr_value_TY
+
+            
+                    
+      
+   
+        Next i
+         
+    
+    For f_cln_type = 0 To 2
+            
+    num_colums = 0
+    nm_brand = ar_brand(b)
+    ar_Data(iii, num_colums) = ar_brand(b)
+    If iii = 0 Then ar_nmHead(num_colums) = "brand"
+
+    
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = ar_cln_type(f_cln_type)
+    ar_nmHead(num_colums) = "salon_type_eng"
+
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = f_month + 1
+    If iii = 0 Then ar_nmHead(num_colums) = "act_month"
+    
+  
+                        
+    num_colums = num_colums + 1
+    
+    ca_tr_py = ar_tr_value_PY(f_month, f_cln_type)
+    ar_Data(iii, num_colums) = ca_tr_py / 1000
+    ar_nmHead(num_colums) = "CA_PY"
+    
+    num_colums = num_colums + 1
+    ca_tr_ty = ar_tr_value_TY(f_month, f_cln_type)
+    ar_Data(iii, num_colums) = ca_tr_ty /1000
+    ar_nmHead(num_colums) = "CA_TY"
+
+
+
+
+iii = iii + 1
+        
+    Next f_cln_type
+
+Next f_month
+
+Erase ar_tr_value_PY()
+Erase ar_tr_value_TY()
+    
+ActiveWindow.Close
+Application.DisplayAlerts = False
+
+
+Next b
+
+
+'clear sheet & create head & create name OR fiil data
+'---------------------------------------------------------------------------------------------------------
+
+Workbooks(NF).Activate
+Sheets("TR").Select
+
+With ActiveSheet
+.UsedRange.Cells.ClearContents
+End With
+
+end_POS = iii + 1
+start_POS = 2
+
+num_colums_TR = num_colums
+
+
+For t = 0 To num_colums
+Cells(1, t + 1) = ar_nmHead(t)
+Cells(1, t + 1).Select
+ActiveWorkbook.Names.Add Name:=ar_nmHead(t), RefersTo:="=" & ActiveSheet.Name & "!" & ActiveCell.Address()
+Next t
+
+ActiveSheet.Cells(start_POS, 1).Resize(end_POS - start_POS + 1, num_colums + 1) = ar_Data()
+
+
+ActiveWorkbook.Names.Add Name:="SOURCE" & "_TR", RefersToR1C1:="=OFFSET(TR!R1C1,0,0,COUNTA(TR!R1C1:R65535C1),COUNTA(TR!R1C1:R1C255))"
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+End Sub
+

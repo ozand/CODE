@@ -1,0 +1,178 @@
+
+Public Name As String
+Public CodeName As String  
+
+Public Host As String
+Public Login As String
+Public Password As String
+Public BaseURL As String
+Public BaseFolder As String
+Public Mode As Long   
+
+
+Function Edit() As FTPsettings   
+    On Error Resume Next
+    Me.SaveActiveSettings
+    F_FTP_settings_Edit.Show
+    Set Edit = Me.LoadActiveSettings
+    Edit.Save
+    ClearActiveSettings
+End Function
+
+
+Function IsEmpty() As Boolean
+    If Not Trim(Me.Host) Like "*?.?*" Then IsEmpty = True: Exit Function
+    If Trim(Me.Login) = "" Then IsEmpty = True: Exit Function
+End Function
+
+Function TestConnection(Optional ByRef FolderInfo$) As Boolean
+    On Error Resume Next
+    If Me.IsEmpty Then Exit Function
+    Dim FTP As New FTPserver
+    TestConnection = FTP.OpenConnection(Me)
+    Dim FTPdir As FTPdirectory
+    Set FTPdir = FTP.GetDirectoryListing("*")
+    FolderInfo$ = FTPdir.folders.Count & " ?????????? ?? " & FTPdir.files.Count & " ????????????"
+    FTP.CloseConnection
+End Function
+
+
+
+Sub SaveAs(ByVal Settings_CodeName As String)
+    On Error Resume Next
+    SaveSetting Application.Name, "FTP settings", "Settings: " & Settings_CodeName, cmdEncrypt$(Me.ExportToXML.xml)
+End Sub
+Sub SaveAsDefault(): SaveAs "<DEFAULT>": End Sub
+Sub SaveActiveSettings(): SaveAs "<ActiveFTPsettings>": End Sub
+Sub Save()
+    On Error Resume Next: If Me.CodeName = "" Then Debug.Print "Me.CodeName = """"": Exit Sub
+    SaveSetting Application.Name, "FTP settings", "Settings: " & Me.CodeName, cmdEncrypt$(Me.ExportToXML.xml)
+End Sub
+
+Sub ClearActiveSettings(): DeleteSetting Application.Name, "FTP settings", "Settings: <ActiveFTPsettings>": End Sub
+
+
+Function Load(Optional ByVal Settings_CodeName$ = "<ActiveFTPsettings>") As FTPsettings
+    On Error Resume Next
+    txt = cmdDisplay$(GetSetting(Application.Name, "FTP settings", "Settings: " & Settings_CodeName, ""))
+    Set Load = Me.GetFromText(txt)
+    If Settings_CodeName <> "<ActiveFTPsettings>" Then Load.CodeName = Settings_CodeName
+End Function
+Function LoadDefault() As FTPsettings: Set LoadDefault = Load("<DEFAULT>"): End Function
+Function LoadActiveSettings() As FTPsettings: Set LoadActiveSettings = Load("<ActiveFTPsettings>"): End Function
+
+
+
+Function LoadFromObjectParameter(ByVal txt$, Optional ByVal SettingName$) As FTPsettings    
+    On Error Resume Next
+    Set LoadFromObjectParameter = Me.GetFromText(cmdDisplay$(txt))
+    LoadFromObjectParameter.CodeName = "Object"
+    LoadFromObjectParameter.Name = SettingName$
+End Function
+
+Function GetTextForObjectParameter() As String   
+    On Error Resume Next
+    GetTextForObjectParameter = GetSetting(Application.Name, "FTP settings", "Settings: " & "Object", "")
+    DeleteSetting Application.Name, "FTP settings", "Settings: " & "Object"
+End Function
+
+
+
+Function GetCorrectSettings(ByVal Settings_CodeName As String) As Boolean
+      On Error Resume Next
+    Dim TEST_Settings As FTPsettings: Set TEST_Settings = Me.Load(Settings_CodeName)
+    While TEST_Settings.TestConnection = False
+        msg = "???????????????????? ???????????? (?????? ??????????????????) ?????????????????? ?????????????????????© ?? FTP-??????????????" & vbNewLine & vbNewLine & _
+              "?????????????? ????????, ?????????? ???????????? ?????????????????? ?????????????????????©" & vbNewLine & _
+              "(?????©?????????© ???????? ????????????????, ?????? ?????????? ???????????? ??????????????????, ???????????????????????????? ????, ?? ?????????????????? ?????????????????©)" & vbNewLine & vbNewLine & _
+              "?????? ?????????????? ????????????????, ?????© ???????????? ???? ???????????????? ???????????? ???? FTP ????????????"
+        If MsgBox(msg, vbQuestion + vbOKCancel, "?????????????????????? ???????????? ?? FTP ??????????????") = vbCancel Then Exit Function
+        Set TEST_Settings = TEST_Settings.Edit
+    Wend
+
+    With TEST_Settings
+        Me.Host = .Host
+        Me.Login = .Login
+        Me.Password = .Password
+        Me.BaseFolder = .BaseFolder
+        Me.BaseURL = .BaseURL
+        Me.Mode = .Mode
+        Me.Name = .Name
+    End With
+    Me.Save
+    GetCorrectSettings = True
+End Function
+
+Function GetFromText(ByVal txt As String) As FTPsettings
+    On Error Resume Next
+    Set GetFromText = New FTPsettings
+    Dim xml As DOMDocument: Set xml = CreateObject("Microsoft.XMLDOM")
+    If Not xml.LoadXML(txt) Then
+        If DEBUG_MODE Then Debug.Print "???? ?????????????? ?????????????????? ?????????????????? FTP ???? ???????????? XML"
+        Exit Function
+    End If
+    GetFromText.LoadFromXML xml.DocumentElement
+End Function
+
+
+Function ExportToXML() As IXMLDOMElement
+    Dim xml As DOMDocument, FTPnode As IXMLDOMElement
+    Set xml = CreateObject("Microsoft.XMLDOM")
+
+    With xml
+        .preserveWhiteSpace = True
+        Set FTPnode = .appendChild(.createElement("FTPsettings"))
+        FTPnode.Attributes.setNamedItem(.createAttribute("Name")).Text = Me.Name
+        FTPnode.Attributes.setNamedItem(.createAttribute("CodeName")).Text = Me.CodeName
+
+        FTPnode.appendChild(.createElement("Host")).Text = Trim(Me.Host)
+        FTPnode.appendChild(.createElement("Login")).Text = cmdEncrypt$(Me.Login)
+        FTPnode.appendChild(.createElement("Password")).Text = cmdEncrypt$(Me.Password)
+        'FTPnode.appendChild(.createElement("Port")).Text = Me.Port
+        FTPnode.appendChild(.createElement("Mode")).Text = Me.Mode
+
+        FTPnode.appendChild(.createElement("BaseURL")).Text = Me.BaseURL
+        FTPnode.appendChild(.createElement("BaseFolder")).Text = Me.BaseFolder
+
+    End With
+    Set ExportToXML = FTPnode
+End Function
+
+Sub LoadFromXML(ByVal FTPnode As IXMLDOMElement)
+    On Error Resume Next
+    'MsgBox "FTPnode Is Nothing" & (FTPnode Is Nothing)
+    If FTPnode.BaseName <> "FTPsettings" Then
+        MsgBox "???? ?????????????© ?????????????????? ?????????????????? ?????????????? ?? FTP ??????????????", vbCritical, _
+               "FTPnode.baseName <> ""FTPsettings"""
+        Exit Sub
+    End If
+
+    Me.Name = Trim(FTPnode.Attributes.getNamedItem("Name").Text)
+    Me.CodeName = Trim(FTPnode.Attributes.getNamedItem("CodeName").Text)
+
+    Me.Host = FTPnode.SelectSingleNode("Host").Text
+    Me.Login = cmdDisplay$(Trim(FTPnode.SelectSingleNode("Login").Text))
+    Me.Password = cmdDisplay$(Trim(FTPnode.SelectSingleNode("Password").Text))
+    Me.BaseURL = FTPnode.SelectSingleNode("BaseURL").Text
+    Me.BaseFolder = FTPnode.SelectSingleNode("BaseFolder").Text
+    'Me.Port = Val(FTPnode.selectSingleNode("Port").Text)
+    Me.Mode = Val(FTPnode.SelectSingleNode("Mode").Text)
+End Sub
+
+' =================== ???????????????????? ???????????????? =============================================
+Private Function cmdEncrypt$(txt)
+    On Error Resume Next: pass$ = "FTP account": Randomize Second(Now)
+    d = Fix(98 * Rnd() + 1): cmdEncrypt$ = IIf(Len(Hex(d)) = 1, "0", "") & Hex(d)
+    For i = 1 To Len(txt)
+        r = Asc(Mid(txt, i, 1)) Xor CInt(2 * d * Abs(Sin(3 * i))) + Val(Mid(pass$, 2 + i Mod 10, 1))
+        cmdEncrypt$ = cmdEncrypt$ & IIf(Len(Hex(r)) = 1, "0", "") & Hex(r)
+    Next
+End Function
+
+Private Function cmdDisplay$(txt)
+    On Error Resume Next: pass$ = "FTP account": d = Val("&H" & Mid(txt, 1, 2))
+    For i = 2 To Len(txt) / 2
+        letter = Val("&H" & Mid(txt, 2 * i - 1, 2))
+        cmdDisplay$ = cmdDisplay$ & Chr(letter Xor CInt(2 * d * Abs(Sin(3 * (i - 1)))) + Val(Mid(pass$, 2 + (i - 1) Mod 10, 1)))
+    Next
+End Function

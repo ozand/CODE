@@ -1,0 +1,332 @@
+Function Replace_symbols(ByVal txt As String) As String
+    St$ = "~!@/\#$%^:?&*=|`;"""
+    For f_i% = 1 To Len(St$)
+        txt = Replace(txt, Mid(St$, f_i, 1), "_")
+        txt = Replace(txt, Chr(10), "_")
+    Next
+    Replace_symbols = txt
+    End Function
+    
+'---------------------------------------------------------------------------------------------------------
+Sub data_TR()
+
+Dim brand, ar_Colmn(), patchTR, nm_FLSM, nm_Mreg, nm_SREP, type_CLNT As String
+Dim comp_colo, comp_rev, st_cmp, nmFile, disk, map_search, actTR, NF As String
+Dim num_ar_Brand, num_ar_Colmn, ar_LastRow(), f_b, iii, f_i, nc, ee, cdMonth, cdYear, CA1 As Integer
+Dim eee, num_colums, CA, Q1, Q2, Q3, Q4, a, z, dogovor, club_2015, st_pot_club, clnt_err, st_club, f As Integer
+Dim Type_bonus As Double
+Dim in_data, Sh As Worksheet
+Dim ar_Data(), ar_CA_PART_VAL(), ar_nmHead(150), ar_nmAVG_Order()
+Dim discount, koef As Double
+
+NF = ActiveWorkbook.Name
+act_month = InputBox("Month")
+act_month = CInt(act_month)
+ReDim ar_Data(500000, 200) 
+
+
+
+
+'colums CA PARTN VAL for LTM
+'---------------------------------------------------------------------------------------------------------
+ar_nm_short_month = Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+ar_nmMregEN = Array("MOSCOW", "GR", "NORTHWEST", "CENTER", "VOLGA", "SOUTH", "URAL", "SIBERIA", "FAR EAST")
+ar_nmMregLT = Array("Moscou", "GR", "Nord-Ouest", "Centre", "Volga-Centre", "Sud", "Oural", "Siberie", "EO")
+ar_brand = Array("MX", "ES", "LP", "KR", "RD")
+ar_sts_exl = Array("LP", "MX", "KR", "RD", "ES", "LP+ES", "MX+ES", "KR+ES", "RD+ES", "KR+RD")
+status_head = 0
+'colums CA LOREAL VAL
+str_PYper_LOR_VAL = 106
+str_TYper_LOR_VAL = 93
+str_PYper_PRTN_VAL = 79
+str_TYper_PRTN_VAL = 66
+
+'---------------------------------------------------------------------------------------------------------
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+NF = ActiveWorkbook.Name
+
+'---------------------------------------------------------------------------------------------------------
+'check Sheets and if not - add
+'---------------------------------------------------------------------------------------------------------
+sh_in_data = "DPP"
+status_head = 0
+
+For Each Sh In ThisWorkbook.Worksheets
+If Sh.Name = sh_in_data Then
+chek_name = 1
+ActiveSheet.UsedRange.Cells.ClearContents
+End If
+Next Sh
+
+
+If chek_name <> 1 Then
+Set Sh = Worksheets.Add()
+Sh.Name = sh_in_data
+End If
+
+
+iii = 0
+'---------------------------------------------------------------------------------------------------------
+For f_q = 1 To act_month
+
+    If f_q < 10 Then
+        mm_act_month = "0" & f_q
+    Else
+        mm_act_month = f_q
+    End If
+
+'---------------------------------------------------------------------------------------------------------
+For f_b = 0 To UBound(ar_brand)
+nm_brand = ar_brand(f_b)
+nm_sh_work = nm_brand
+
+Select Case f_q
+Case act_month
+patchTR = "p:\DPP\Business development\Book commercial\" & nm_brand & "\Top Russia Total 2015 " & nm_brand & ".xlsm"
+Case Else
+patchTR = "p:\DPP\Business development\Book commercial\" & nm_brand & "\History 2015\Top Russia Total 2015." & mm_act_month & " " & nm_brand & ".xlsm"
+End Select
+
+'----------------------------------------------------------------------------------------------------
+
+Workbooks.Open Filename:=patchTR, Notify:=False
+actTR = ActiveWorkbook.Name
+
+
+Sheets(nm_brand).Select
+ActiveSheet.AutoFilterMode = False
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1  ' ????????? ??????
+LastColum = ActiveSheet.UsedRange.Column - 1 + ActiveSheet.UsedRange.Columns.Count
+
+
+'-----------------------------------------------------------
+  
+    
+    srt_row = 4
+    For f_i = srt_row To LastRow
+           
+
+    num_colums = 0
+    nm_short_month = ar_nm_short_month(f_q - 1)
+    ar_Data(iii, num_colums) = nm_short_month
+    if iii = 0 then ar_nmHead(num_colums) = "month" 
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = nm_brand
+    if iii = 0 then ar_nmHead(num_colums) = "brand" 
+    
+    num_colums = num_colums + 1
+    nm_Mreg = Right(Cells(f_i, 4), Len(Cells(f_i, 4).Value) - 3)
+    ar_Data(iii, num_colums) = nm_Mreg
+    if iii = 0 then ar_nmHead(num_colums) = "mreg" 
+
+    
+'Mreg LT-> EN + split Moscou GR
+'---------------------------------------------------------------------------------------------------------
+            
+    num_colums = num_colums + 1
+    textPos = 0
+    
+    
+    If nm_Mreg = "Moscou GR" Then
+    nm_reg = Cells(f_i, 5)
+    textPos = InStr(nm_reg, "MSK")
+    textPos = InStr(nm_reg, "Moscou") + textPos
+        If textPos > 0 Then
+        nm_Mreg = "Moscou"
+        Else
+        nm_Mreg = "GR"
+
+        End If
+    End If
+    
+    For f_mr = 0 To UBound(ar_nmMregLT)
+    If ar_nmMregLT(f_mr) = nm_Mreg Then
+    nm_Mreg = ar_nmMregEN(f_mr)
+    End If
+    Next f_mr
+    
+    ar_Data(iii, num_colums) = nm_Mreg
+    if iii = 0 then ar_nmHead(num_colums) = "mreg_EXT"
+    
+'--------------------------------------------------------------
+
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 165)
+    if iii = 0 then ar_nmHead(num_colums) = "FLSM"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 6)
+    if iii = 0 then ar_nmHead(num_colums) = "SEC"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 7)
+    if iii = 0 then ar_nmHead(num_colums) = "SREP"  
+    
+    
+    '---------------------------------------------------------------------------------------------------------
+    
+    If Cells(f_i, 161) <> "" Then cdMonth = Cells(f_i, 161) Else cdMonth = 1
+    If Len(Cells(f_i, 65)) = 4 Then cdYear = Cells(f_i, 65) Else cdYear = 2008
+    
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = cdMonth
+    if iii = 0 then ar_nmHead(num_colums) = "date_month_num"
+    
+    
+    num_colums = num_colums + 1
+
+    For f_m = 0 To 11
+    If cdMonth - 1 = f_m Then
+    nmMonth = ar_nm_short_month(f_m)
+    Exit For
+    End If
+    Next f_m
+    
+    ar_Data(iii, num_colums) = nmMonth
+    if iii = 0 then ar_nmHead(num_colums) = "date_month_name"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = cdYear
+    if iii = 0 then ar_nmHead(num_colums) = "date_year"
+    
+'--------------------------------------
+    
+    num_colums = num_colums + 1
+    st_dn_cln = Cells(f_i, 8)
+    ar_Data(iii, num_colums) = st_dn_cln
+    if iii = 0 then ar_nmHead(num_colums) = "status_DN_num"
+    
+    
+    '---------------------------------------------------------------------------------------------------------
+'creat ca val loreal monthly
+'---------------------------------------------------------------------------------------------------------
+
+    
+    num_colums = num_colums + 1
+    clm_m = str_PYper_LOR_VAL + f_q - 1
+    If Cells(f_i, clm_m) = 0 Then
+    m_val = Empty
+
+    Else
+    m_val = Cells(f_i, clm_m) / 1000
+
+    End If
+    ar_Data(iii, num_colums) = m_val
+    if iii = 0 then ar_nmHead(num_colums) = "CA_PY_M"
+
+    
+    
+
+    
+    num_colums = num_colums + 1
+    clm_m = str_TYper_LOR_VAL + f_q - 1
+    If Cells(f_i, clm_m) = 0 Then
+    m_val = Empty
+
+    Else
+    m_val = Cells(f_i, clm_m) / 1000
+
+    End If
+    ar_Data(iii, num_colums) = m_val
+    if iii = 0 then ar_nmHead(num_colums) = "CA_TY_M" 
+
+    
+ '---------------------------------------------------------------------------------------------------------
+  'creat ca val loreal cumul
+'---------------------------------------------------------------------------------------------------------
+    
+    m_val = 0
+    
+    num_colums = num_colums + 1
+    For f_m = 0 To 11    
+    If f_m < CInt(act_month) Then    
+    clm_m = str_PYper_LOR_VAL + f_m
+    m_val = (Cells(f_i, clm_m) / 1000) + m_val
+    End If
+    Next f_m
+    
+    
+    If m_val = 0 Then  ' del 0 value out
+    ar_Data(iii, num_colums) = Empty
+    Else
+    ar_Data(iii, num_colums) = m_val
+    End If
+    if iii = 0 then ar_nmHead(num_colums) = "CA_PY_YTD"
+    
+    
+    num_colums = num_colums + 1
+    m_val = 0
+    For f_m = 0 To 11  ' limit tange by actuale period
+    If f_m < CInt(act_month) Then
+    clm_m = str_TYper_LOR_VAL + f_m
+    m_val = (Cells(f_i, clm_m) / 1000) + m_val
+    End If
+    Next f_m
+              
+    If m_val = 0 Then  ' del 0 value out
+    ar_Data(iii, num_colums) = Empty
+    Else
+    ar_Data(iii, num_colums) = m_val
+    End If
+    
+    if iii = 0 then ar_nmHead(num_colums) = "CA_TY_YTD"
+        
+             
+    
+    iii = iii + 1
+ 
+    Next f_i
+
+    
+Workbooks(actTR).Activate
+Workbooks(actTR).Close
+
+
+
+Next f_b
+
+Next f_q
+
+   
+Workbooks(NF).Activate
+Sheets(sh_in_data).Activate
+
+ActiveSheet.UsedRange.Cells.ClearContents
+end_POS = iii + 1
+start_POS = 2
+
+For t = 0 To num_colums
+Cells(1, t + 1) = ar_nmHead(t)
+Cells(1, t + 1).Select
+ActiveWorkbook.Names.Add Name:=ar_nmHead(t), RefersTo:="=" & ActiveSheet.Name & "!" & ActiveCell.Address()
+Next t
+ 
+ActiveSheet.Cells(start_POS, 1).Resize(end_POS + 1, num_colums + 1) = ar_Data()
+
+'---------------------------------------------------------------------------------------------------------
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+End Sub
+
+
+
+
+
+
+

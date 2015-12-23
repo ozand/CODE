@@ -1,0 +1,220 @@
+
+Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" _
+                                     (ByVal hwnd As Long, ByVal pszPath As String, _
+                                      ByVal psa As Any) As Long
+                                    
+Sub CreateFolderWithSubfolders(ByVal PatchCreateFolder$)
+ 
+   If Len(Dir(PatchCreateFolder$, vbDirectory)) = 0 Then
+       SHCreateDirectoryEx Application.hwnd, PatchCreateFolder$, ByVal 0&
+   End If
+End Sub
+
+Sub breakdown_of_premius_FLSM()
+Dim NF, Bodies$, nMreg, nmPatch, LastRowFM, LastRow, nEmployer, nmCreatPatch2, nmCreatPatch, nMonth, nYear, LP, KR, RD, MX, SHEF, NFD, eTO, eSub As String
+Dim lRangeDel As Range
+Dim lRangeH As Range
+
+Application.Calculation = xlCalculationManual
+Bodies = InputBox("Body Text mail")
+
+Sheets("Total_FLSMs").Select
+LastRowFM = ActiveSheet.UsedRange.Row - 1 + ActiveSheet.UsedRange.Rows.Count
+For a = 3 To LastRowFM
+NF = ActiveWorkbook.Name
+LP = 0
+KR = 0
+RD = 0
+MX = 0
+
+Sheets("Total_FLSMs").Select
+nMonth = Cells(1, "B")
+nYear = Cells(1, "C")
+LP = Cells(a, 15).Value
+MX = Cells(a, 16).Value
+KR = Cells(a, 17).Value
+RD = Cells(a, 18).Value
+nMreg = Cells(a, 20).Value
+nmBrand = Cells(a, 19).Value
+
+
+TextToFindArray = Cells(a, 2)
+Sheets(Array("LS", "Data", "Contact_FLSMs", "Contact_SREPs", "Total_FLSMs", "Type_Bonus_FLSMs", "Bonus_FLSMs")).Select
+Sheets(Array("LS",  "Data", "Contact_FLSMs", "Contact_SREPs", "Total_FLSMs", "Type_Bonus_FLSMs", "Bonus_FLSMs")).Copy
+
+for f_a = 1 to 5
+
+select case f_a
+    case 1
+    nm_sh = "Data"
+    clm_split = 7
+    str_row = 2
+    
+    case 2
+    nm_sh = "Contact_FLSMs"
+    clm_split = 2
+    str_row = 3
+    
+    case 3
+    nm_sh = "Contact_SREPs"
+    clm_split = 7
+    str_row = 2
+
+    case 4    
+    nm_sh = "Total_FLSMs"
+    clm_split = 2
+    str_row = 3 
+    
+    case 5
+    nm_sh = "Bonus_FLSMs"
+    clm_split = 56
+    str_row = 1
+end Select       
+
+Sheets(nm_sh).Select
+
+LastRow = ActiveSheet.UsedRange.Row - 1 + ActiveSheet.UsedRange.Rows.Count
+Set lRangeDel = Nothing
+Set lRangeH = ActiveSheet.Rows(65000)
+ 
+
+
+    For r = LastRow To str_row Step -1
+
+        If Cells(r, clm_split) <> TextToFindArray Then
+         Set lRangeDel = Application.Union(lRangeH, ActiveSheet.Rows(r))
+         Set lRangeH = lRangeDel
+        End If
+    Next r
+    
+    lRangeDel.Delete
+    
+ '   ActiveSheet.PageSetup.PrintArea = "$A$1:$K$26"
+ '   Cells.Select
+ '   Selection.Copy
+ '   Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+  '      :=False, Transpose:=False
+    
+ 
+Next f_a
+
+
+    Columns("D:D").Select
+    Selection.Copy
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    
+    
+    SHEF = Cells(1, 57)
+    nEmployer = Cells(1, 56)
+    eTO = Cells(1, 58)
+    nmPatch = "Premium " & Cells(1, 56) & "_" & nMonth & "_" & nYear
+    
+            
+ nm_disc = "\\RUCORPRUWKS0665"
+     
+' ???????? ??? FLSM
+
+
+nmCreatPatch =  nm_disc & "\Dropbox\For Regions Commercial Team\FLSM\" & nMreg & "\" & nEmployer & "\" & "Premium" & "\" & nYear & "\" & nMonth & "\" & "FLSM" & "\"
+CreateFolderWithSubfolders nmCreatPatch
+  On Error Resume Next
+        NFD = nmCreatPatchLP & "\" & nmPatch & ".xlsx"
+        eSub = nmPatch
+        ActiveWorkbook.SaveAs Filename:= _
+        nmCreatPatchLP & "\" & nmPatch & ".xlsx", FileFormat _
+        :=xlOpenXMLWorkbook, CreateBackup:=False
+
+If eTO <> "" Then
+        Set OutlookApp = CreateObject("Outlook.Application")
+                Set oMail = OutlookApp.CreateItem(0)
+                With oMail
+                    .To = eTO
+                    '.Cc = Copy
+                    .Importance = 2
+                    .Subject = eSub
+                    .Body = Bodies
+                    .Attachments.Add NFD
+                    .Send
+                    '.Display
+
+                End With
+    End If
+eTO = ""
+
+     '?????? ??? ????? DR
+     
+' nm_disc = "\\RUCORPRUWKS0665"
+
+     
+If nMreg = "Moscou GR" Then
+    nmCreatPatch = nm_disc & "\Dropbox\For Regions Commercial Team\DR\" & nMreg & "\" & "Premium" & "\" & nmBrand & "\" & nYear & "\" & nMonth & "\" & "FLSM"
+    CreateFolderWithSubfolders nmCreatPatch
+    Else
+    nmCreatPatch = nm_disc & "\Dropbox\For Regions Commercial Team\DR\" & nMreg & "\" & "Premium" & "\" & nYear & "\" & nMonth & "\" & "FLSM"
+    CreateFolderWithSubfolders nmCreatPatch
+    End If
+   
+   
+    
+    ActiveSheet.PageSetup.PrintArea = "$A$1:$K$26"
+    Columns("N:AE").Select
+    Selection.Copy
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+        
+        Columns("F:F").Select
+    Selection.Copy
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+
+
+    
+    On Error Resume Next
+    
+    ActiveWorkbook.SaveAs Filename:= _
+        nmCreatPatch & "\" & nmPatch & ".xlsx", FileFormat _
+        :=xlOpenXMLWorkbook, CreateBackup:=False
+       
+          
+     
+
+  
+        
+    ActiveWindow.Close
+    Application.DisplayAlerts = False
+    
+Workbooks(NF).Activate
+Next a
+
+Application.Calculation = xlCalculationAutomatic
+
+End Sub
+
+
+Sub ClearComments()
+
+
+Dim ws As Worksheet
+For Each ws In ThisWorkbook.Worksheets
+ws.UsedRange.ClearComments
+Next ws
+
+ Cells.Replace What:="'*?????? ???????????'", Replacement:= _
+        "'?????? ???????????'", LookAt:=xlPart, SearchOrder:=xlByRows, MatchCase _
+        :=False, SearchFormat:=False, ReplaceFormat:=False
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+

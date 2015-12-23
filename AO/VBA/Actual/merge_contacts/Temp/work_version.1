@@ -1,0 +1,71 @@
+Sub GM()
+
+Dim ar_Data(), ar_nmHead()
+Dim realdata As Range
+Dim val_gam As Integer
+
+Sheets("G_YTD").Activate
+For f_x = 2 To 100
+        For f_y = 10 To 100
+        find_val = "LOR mSeries Store"
+        find_cell = Cells(f_y, f_x)
+        If find_cell = find_val Then Exit For
+        Next f_y
+If find_cell = find_val Then Exit For
+Next f_x
+
+strt_clm = f_x
+strt_row = f_y + 1
+
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+LastColumns = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+Set realdata = ActiveSheet.Cells(strt_row, strt_clm).Resize(LastRow, LastColumns)
+
+iii = 1
+
+ReDim ar_Data(1 To Application.CountA(realdata), 1 To 6)
+
+
+For f_y = strt_row To LastRow
+num_colums = 1
+val_val = Cells(f_y, strt_clm)
+If Left(val_val, 1) = "8" And Len(val_val) = 9 Then
+
+For f_x = strt_clm + 2 To LastColumns
+val_gam = Cells(f_y, f_x)
+If IsNumeric(val_gam) And val_gam <> 0 Then
+        
+        num_colums = 1
+        ar_Data(iii, num_colums) = Cells(f_y, strt_clm)
+        
+        num_colums = num_colums + 1
+        val_head = Cells(strt_row - 3, f_x)
+        nm_brand = Left(val_head, 2)
+        ar_Data(iii, num_colums) = nm_brand
+        
+        num_colums = num_colums + 1
+        nm_gammes = Right(val_head, Len(val_head) - 3)
+        ar_Data(iii, num_colums) = nm_gammes
+        
+        num_colums = num_colums + 1
+        nm_year = Cells(strt_row - 2, f_x)
+        ar_Data(iii, num_colums) = nm_year
+        
+        num_colums = num_colums + 1
+        ar_Data(iii, num_colums) = val_gam
+       
+iii = iii + 1
+End If
+        
+Next f_x
+
+End If
+Next f_y
+
+Sheets("Test2").Activate
+
+ActiveSheet.Cells(1, 1).Resize(iii, 6) = ar_Data()
+
+End Sub
+
+

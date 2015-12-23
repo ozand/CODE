@@ -1,0 +1,404 @@
+Function Replace_symbols(ByVal txt As String) As String
+    St$ = "~!@/\#$%^:?&*=|`;"""
+    For i% = 1 To Len(St$)
+        txt = Replace(txt, Mid(St$, i, 1), "_")
+        txt = Replace(txt, Chr(10), "_")
+    Next
+    Replace_symbols = txt
+End Function
+
+Sub data_CC_in_GC()
+
+
+Dim pathc2file As String
+Dim ar_code_Brand(4, 1)
+Dim LastRow_CC, LastColumns_CC As Integer
+Dim num_month
+Dim cd_Univers As Variant
+Dim patchTR, actTR, ar_LastRow(4), in_data, status_head   As String
+Dim ALLTIME, EDU_PY, EDU_TY, place, AVG_HD As Variant
+Dim b, iii, i, x, y, frqOrder   As Integer
+Dim ar_nmAVG_Order(), ar_Split(), num_row()
+
+'Dim   As Worksheet
+Dim ar_Data(), ar_brand(), ar_nmHead(150), ar_PYPer_PART_VAL, ar_TYPer_PART_VAL, ar_PYPer_LOR_VAL(), ar_TYPer_LOR_VAL(), ar_nm_month(), ar_nmMregEN(), ar_nmMregLT()
+
+NF = ActiveWorkbook.Name
+act_month = InputBox("Month")
+act_month = CInt(act_month)
+
+'colums CA PARTN VAL for LTM
+'---------------------------------------------------------------------------------------------------------
+ar_PYPer_PART_VAL = Array(0, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90)
+ar_TYPer_PART_VAL = Array(0, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77)
+
+
+'colums CA LOREAL VAL
+str_PYper_LOR_VAL = 106
+str_TYper_LOR_VAL = 93
+
+ar_nm_month = Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+ar_nmMregEN = Array("MOSCOW", "GR", "NORTHWEST", "CENTER", "VOLGA", "SOUTH", "URAL", "SIBERIA", "FAR EAST")
+ar_nmMregLT = Array("Moscou", "GR", "Nord-Ouest", "Centre", "Volga-Centre", "Sud", "Oural", "Siberie", "EO")
+
+ar_nmAVG_Order = Array(0, 2.5, 5, 10, 15, 20, 25, 30, 50, 60, 70, 100000)
+'---------------------------------------------------------------------------------------------------------
+
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+status_head = 0
+
+
+ar_brand = Array("LP", "KR", "RD", "MX", "ES")
+
+For b = 0 To UBound(ar_brand) '4 ' ???? ?? TR
+        
+patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(b) & "\Top Russia Total 2015 " & ar_brand(b) & ".xlsm"
+in_data = "in_TR"
+
+Workbooks.Open Filename:=patchTR, Notify:=False
+actTR = ActiveWorkbook.Name
+Sheets(ar_brand(b)).Select
+ActiveSheet.AutoFilterMode = False
+ar_LastRow(b) = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1  ' ????????? ??????
+
+
+ReDim ar_Data(ar_LastRow(b) - 4, 150) ' num_colums)
+
+    iii = 0
+    
+    
+    For i = 4 To ar_LastRow(b)
+    st_all = 0
+    num_colums = 0
+    ar_Data(iii, num_colums) = ar_brand(b)
+    ar_nmHead(num_colums) = "brand"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 1)
+    ar_nmHead(num_colums) = "rowTR"
+    
+    yy = num_colums + 1
+    cd_brand_row = ar_brand(b) & Cells(i, 1)
+    ar_Data(iii, num_colums) = cd_brand_row
+    ar_nmHead(num_colums) = "BRAND_rowTR"
+     
+    num_colums = num_colums + 1
+    cd_Univers = Cells(i, 2)
+    If Not IsNumeric(cd_Univers) Then
+    st_cd_Univers = 1
+    Else: st_cd_Univers = 0
+    End If
+    ar_Data(iii, num_colums) = st_cd_Univers
+    ar_nmHead(num_colums) = "unvCD"
+    
+    num_colums = num_colums + 1
+    nm_Mreg = Right(Cells(i, 4), Len(Cells(i, 4).Value) - 3)
+    ar_Data(iii, num_colums) = nm_Mreg
+    ar_nmHead(num_colums) = "mreg"
+    
+'Mreg LT-> EN + split Moscou GR
+'---------------------------------------------------------------------------------------------------------
+            
+    num_colums = num_colums + 1
+    textPos = 0
+    
+    If nm_Mreg = "Moscou GR" Then
+    nm_reg = Cells(i, 5)
+    textPos = InStr(nm_reg, "MSK")
+    textPos = InStr(nm_reg, "Moscou") + textPos
+        If textPos > 0 Then
+        nm_Mreg = "Moscou"
+        Else
+        nm_Mreg = "GR"
+
+        End If
+    End If
+    
+    For f_mr = 0 To UBound(ar_nmMregLT)
+    If ar_nmMregLT(f_mr) = nm_Mreg Then
+    nm_Mreg = ar_nmMregEN(f_mr)
+    End If
+    Next f_mr
+    
+    ar_Data(iii, num_colums) = nm_Mreg
+    ar_nmHead(num_colums) = "mreg_EXT"
+    
+'---------------------------------------------------------------------------------------------------------
+        
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 5)
+    ar_nmHead(num_colums) = "REG"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 165)
+    ar_nmHead(num_colums) = "FLSM"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 6)
+    ar_nmHead(num_colums) = "SEC"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 7)
+    ar_nmHead(num_colums) = "SREP"
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Replace_symbols(Trim(Left(Cells(i, 9), 30)) & ". " & Trim(Left(Cells(i, 12), 50) & " " & Left(Cells(i, 13), 30)) & " " & Cells(i, 11))
+    ar_nmHead(num_colums) = "nm_salon"
+    
+           
+    num_colums = num_colums + 1
+    st_dn_cln = Cells(i, 8)
+    ar_Data(iii, num_colums) = st_dn_cln
+    ar_nmHead(num_colums) = "status_DN_num"
+        
+    num_colums = num_colums + 1
+    nm_salon = Cells(i, 9)
+    If Len(nm_salon) > 2 Then
+    st_nm_salon = 0
+    Else
+    st_nm_salon = 1
+    st_all = st_all + 1
+    End If
+    ar_Data(iii, num_colums) = st_nm_salon
+    ar_nmHead(num_colums) = "salon"
+    
+    num_colums = num_colums + 1
+    nm_off_name = Cells(i, 10)
+    If Len(nm_off_name) > 2 Then
+    st_nm_off_name = 0
+    Else
+    st_nm_off_name = 1
+    st_all = st_all + 1
+    End If
+    ar_Data(iii, num_colums) = st_nm_off_name
+    ar_nmHead(num_colums) = "off_name"
+    
+    
+    num_colums = num_colums + 1
+    nm_city = Cells(i, 11)
+    If Len(nm_city) > 2 Then
+    st_nm_city = 0
+    Else
+    st_nm_city = 1
+    st_all = st_all + 1
+    End If
+    ar_Data(iii, num_colums) = st_nm_city
+    ar_nmHead(num_colums) = "city"
+        
+    
+    num_colums = num_colums + 1
+    nm_adress = Cells(i, 12)
+    If Len(nm_adress) > 2 Then
+    st_nm_adress = 0
+    Else
+    st_nm_adress = 1
+    st_all = st_all + 1
+    End If
+    ar_Data(iii, num_colums) = st_nm_adress
+    ar_nmHead(num_colums) = "adress"
+
+
+    num_colums = num_colums + 1
+    nm_cntct_mail = Cells(i, 14)
+    If InStr(1, nm_cntct_mail, "@") Then
+    st_nm_cntct_mail = 0
+    Else
+    st_nm_cntct_mail = 1
+    st_all = st_all + 1
+    End If
+    ar_Data(iii, num_colums) = st_nm_cntct_mail
+    ar_nmHead(num_colums) = "cntct_mail"
+    
+    num_colums = num_colums + 1
+    nm_cntct_phone = Cells(i, 15)
+    If Len(nm_cntct_phone) > 2 Then
+    st_nm_cntct_phone = 0
+    Else
+    st_nm_cntct_phone = 1
+    st_all = st_all + 1
+    End If
+    ar_Data(iii, num_colums) = st_nm_cntct_phone
+    ar_nmHead(num_colums) = "cntct_phone"
+
+    num_colums = num_colums + 1
+    nm_type_SLN = Cells(i, 18)
+    If InStr(1, nm_type_SLN, "?????") Then st_salon_type = 1
+   
+    If Len(nm_type_SLN) > 2 Then
+    st_nm_type_SLN = 0
+    Else
+    st_nm_type_SLN = 1
+    st_all = st_all + 1
+    End If
+    ar_Data(iii, num_colums) = st_nm_type_SLN
+    ar_nmHead(num_colums) = "type_SLN"
+    
+    num_colums = num_colums + 1
+    nm_SLN_phone = Cells(i, 20)
+    If Len(nm_SLN_phone) > 2 Then
+    st_nm_SLN_phone = 0
+    Else
+    st_nm_SLN_phone = 1
+    st_all = st_all + 1
+    End If
+    ar_Data(iii, num_colums) = st_nm_SLN_phone
+    ar_nmHead(num_colums) = "SLN_phone"
+    
+    num_colums = num_colums + 1
+    nm_SLN_mail = Cells(i, 21)
+    If InStr(1, nm_SLN_mail, "@") Then
+    st_nm_SLN_mail = 0
+    Else
+    st_nm_SLN_mail = 1
+    st_all = st_all + 1
+    End If
+    ar_Data(iii, num_colums) = st_nm_SLN_mail
+    ar_nmHead(num_colums) = "SLN_mail"
+        
+    
+    num_colums = num_colums + 1
+    nm_SLN_site = Cells(i, 22)
+    If InStr(1, nm_SLN_site, ".") Then
+    st_nm_SLN_site = 0
+    Else
+    st_nm_SLN_site = 1
+    st_all = st_all + 1
+    End If
+    ar_Data(iii, num_colums) = st_nm_SLN_site
+    ar_nmHead(num_colums) = "SLN_site"
+
+
+    num_colums = num_colums + 1
+    nm_min_price = Cells(i, 23)
+    If Len(nm_min_price) > 2 Then
+    st_nm_min_price = 0
+    Else
+    st_nm_min_price = 1
+    st_all = st_all + 1
+    End If
+    If st_salon_type = 1 Then st_nm_min_price = 0
+    ar_Data(iii, num_colums) = st_nm_min_price
+    ar_nmHead(num_colums) = "min_price"
+
+
+    num_colums = num_colums + 1
+    nm_max_price = Cells(i, 25)
+    If Len(nm_max_price) > 2 Then
+    st_nm_max_price = 0
+    Else
+    st_nm_max_price = 1
+    st_all = st_all + 1
+    End If
+    If st_salon_type = 1 Then st_nm_max_price = 0
+    ar_Data(iii, num_colums) = st_nm_max_price
+    ar_nmHead(num_colums) = "max_price"
+
+
+    num_colums = num_colums + 1
+    nm_HD_place = Cells(i, 27)
+    If Not IsEmpty(nm_HD_place) Then
+    st_nm_HD_place = 0
+    Else
+    st_nm_HD_place = 1
+    st_all = st_all + 1
+    End If
+    If st_salon_type = 1 Then st_nm_HD_place = 0
+    ar_Data(iii, num_colums) = st_nm_HD_place
+    ar_nmHead(num_colums) = "HD_place"
+    
+    
+
+    num_colums = num_colums + 1
+    nm_num_empl = Cells(i, 28)
+    If Not IsEmpty(nm_num_empl) Then
+    st_nm_num_empl = 0
+    Else
+    st_nm_num_empl = 1
+    st_all = st_all + 1
+    End If
+    If st_salon_type = 1 Then st_nm_num_empl = 0
+    ar_Data(iii, num_colums) = st_nm_num_empl
+    ar_nmHead(num_colums) = "num_empl"
+    
+    num_colums = num_colums + 1
+    If st_all = 0 Then
+    st_all_nm = "NotERR"
+    Else
+    st_all_nm = "ERR"
+    End If
+    ar_Data(iii, num_colums) = st_all_nm
+    ar_nmHead(num_colums) = "Status_ERR"
+        
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = st_all
+    ar_nmHead(num_colums) = "Point_ERR"
+    
+
+iii = iii + 1
+Next i
+
+    
+ActiveWindow.Close
+Application.DisplayAlerts = False
+  
+    
+Workbooks(NF).Activate
+Sheets(in_data).Activate
+
+'clear sheet & create head & create name OR fiil data
+'---------------------------------------------------------------------------------------------------------
+If status_head = 0 Then
+ActiveSheet.UsedRange.Cells.ClearContents
+end_POS = iii + 1
+start_POS = 2
+
+Dim n As Name
+For Each n In ThisWorkbook.Names
+    On Error Resume Next
+    n.Delete
+    Next n
+
+For t = 0 To num_colums
+Cells(1, t + 1) = ar_nmHead(t)
+Cells(1, t + 1).Select
+ActiveWorkbook.Names.Add Name:=ar_nmHead(t), RefersTo:="=" & ActiveSheet.Name & "!" & ActiveCell.Address()
+Next t
+
+Else
+start_POS = end_POS + 1
+end_POS = start_POS + iii - 1
+End If
+
+ActiveSheet.Cells(start_POS, 1).Resize(end_POS - start_POS + 1, num_colums + 1) = ar_Data()
+status_head = 1
+Next b
+
+ActiveWorkbook.Names.Add Name:="SOURCE", RefersToR1C1:="=OFFSET(in_TR!R1C1,0,0,COUNTA(in_TR!R1C1:R65535C1),COUNTA(in_TR!R1C1:R1C255))"
+'ActiveWorkbook.RefreshAll
+'ActiveWorkbook.Save
+'---------------------------------------------------------------------------------------------------------
+'
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+
+End Sub
+
+

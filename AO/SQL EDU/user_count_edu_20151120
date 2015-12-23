@@ -1,0 +1,25 @@
+select usr2.id, 'LP', usr2.email, usr2.mobile_number, usr2.full_name, usr2.birthdate, usr2.city_name,
+usr2.role, usr2.salon_id,
+(select Concat( sln.city_name_geographic ,' ',sln.address)
+from salons as sln
+where sln.id = usr2.salon_id) as "salon_adress",
+
+(select Count( distinct usr.id ) 
+from  seminar_users as SMU
+left join users as usr on usr.id = SMU.user_id 
+left join seminars as SM on SMU.seminar_id = SM.id
+left join seminar_types as SMT on SM.seminar_type_id = SMT.id
+
+where usr2.id = SMU.user_id and sm.closed_at is not Null) as "Contacts" ,
+
+(select Count( distinct usr.id ) 
+from  seminar_users as SMU
+left join users as usr on usr.id = SMU.user_id 
+left join seminars as SM on SMU.seminar_id = SM.id
+left join seminar_types as SMT on SM.seminar_type_id = SMT.id
+
+where usr2.id = SM.technolog_id or usr2.id = SM.partimer_id ) as "Educater"
+
+
+from users as usr2
+

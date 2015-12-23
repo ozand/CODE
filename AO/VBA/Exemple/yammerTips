@@ -1,0 +1,24 @@
+*** In workbook ***
+Private Sub Workbook_Activate()
+Application.Calculation = xlCalculationManual
+Application.CalculateBeforeSave = False '(not mandatory)
+End Sub
+
+Private Sub Workbook_Deactivate()
+Application.Calculation = xlCalculationAutomatic
+Application.CalculateBeforeSave = True '(again not mandatory)
+End Sub
+
+*** In worksheets where you want a calculation when data is changed ***
+Private Sub Worksheet_Change(ByVal Target As Range)
+ActiveSheet.Calculate
+End Sub
+
+If you are using macro with function that change the excel sheet or select multiple area :
+
+*** In module where you have you're vba function or sub ***
+Sub Example()
+Application.ScreenUpdating = False
+/* vba code*/
+Application.ScreenUpdating = True
+End Sub

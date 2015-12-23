@@ -1,0 +1,57 @@
+select 'ppd' as brand,
+smt.name, smt.kpis_type,
+(case smt.is_free when 't' then 'free' else 'pay' end) as Free_pay_seminar,
+
+ 
+(case when smr.studio_id is not NULL then '1' else 0 end) as id_Studio,
+(select concat(std.name , ' ', std.address ) from studios as std where smr.studio_id = std.id ) as studio,
+usr.full_name as "Educater", usr.role, usr.position,
+to_char(smr.started_at,'DD') as Day, 
+to_char(smr.started_at,'MM')as Month, 
+to_char(smr.started_at,'YYYY') as Year ,
+to_char(smr.started_at,'dd.mm.YYYY') as FullDate,
+(case  when to_char (smr.closed_at, 'YYYY') in ('2015')  then '1' else 0 end) as seminar_closed,
+smr.city_name,  
+
+smr.users_count as "dataUsers", 
+
+(select Count( distinct smu.id ) 
+from  seminar_users as SMU
+where smr.id = SMU.seminar_id) as "UnqContacts" ,
+
+smr.salons_count as "dataSalons",
+
+(select Count( distinct smu.user_salon_id) 
+from  seminar_users as SMU
+where smr.id = SMU.seminar_id) as "UnqSalons" ,
+
+(select Count( distinct sln.id) 
+from  seminar_users as SMU
+left join users as usr5 on  SMU.user_id = usr5.id
+left join salons as sln ON  usr5.salon_id = sln.id
+ 
+where smr.id = SMU.seminar_id) as "UnqSalonsNow" ,
+
+smr.master_count, smr.models_count, smr.models_amount, smr.trip, smr.used_products,
+
+
+(select Count(smu.paid) 
+from  seminar_users as SMU
+where smr.id = SMU.seminar_id) as "count_paid_users" ,
+
+(select sum(smu.paid) 
+from  seminar_users as SMU
+where smr.id = SMU.seminar_id) as "payment" ,
+
+
+ usr.city_name as "educater_city", usr.region_name as "educater_reg", usr.shtatnost as "штатность", usr.chief,  
+(select distinct usr2.chief from users as USR2 where usr2.full_name=usr.chief limit 1 ) as nPlus1
+
+
+
+from seminars AS SMR
+left join users AS USR ON smr.technolog_id = usr.id or smr.partimer_id = usr.id
+left join seminar_types as smt ON smr.seminar_type_id = smt.id
+where to_char(started_at, 'YYYY') in ('2015')
+
+

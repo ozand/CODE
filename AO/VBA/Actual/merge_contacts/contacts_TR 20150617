@@ -1,0 +1,166 @@
+Function Replace_symbols(ByVal txt As String) As String
+    St$ = "~!@/\#$%^:?&*=|`;-"""
+    For i% = 1 To Len(St$)
+        txt = Replace(txt, Mid(St$, i, 1), "_")
+    Next
+    Replace_symbols = txt
+End Function
+
+Sub contacts_TR_in()
+
+Dim ar_nmHead(150), ar_Competitors(), patchTR, map_sln, nm_FLSM, nm_Mreg, nm_SREP As String
+Dim comp_colo, comp_rev, st_cmp, nmFile, disk, map_search As String
+Dim num_ar_Brand, num_Competitors, b, iii, i, nc, ee, cdMonth, cdYear As Integer
+Dim eee As Integer
+Dim NF, actTR, in_data As String
+Dim ar_Data()
+Dim discount, koef As Double
+Dim ar_LastRow(4), ar_brand()
+  
+ar_brand = Array("KR", "RD", "MX", "ES", "LP")
+status_head = 0
+
+NF = ActiveWorkbook.Name
+   
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+' Creat Array Total Russia CA
+'---------------------------------------------------------
+
+
+For b = 0 To 0
+        
+patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(b) & "\Top Russia Total 2015 " & ar_brand(b) & ".xlsm"
+in_data = "in_PPD"
+
+Workbooks.Open Filename:=patchTR, Notify:=False
+actTR = ActiveWorkbook.Name
+Sheets(ar_brand(b)).Select
+ActiveSheet.AutoFilterMode = False
+ar_LastRow(b) = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1  ' ????????? ??????
+
+
+ReDim ar_Data(100000, 10) ' num_colums)s
+   iii = 0
+
+'-----------------------------------------------------------
+   
+
+
+   
+ For i = 4 To ar_LastRow(b)
+ For f_x = 1 To 2
+ 
+Select Case f_x
+Case 1
+Email = Cells(i, 21)
+Case 2
+Email = Cells(i, 14)
+End Select
+
+
+    
+If InStr(1, Email, "@") Then
+1st_at = InStr(1, Email, "@")
+    If InStr(1st_at, Email, "@") Then
+    2st_at = InStr(1, Email, "@")
+    
+
+
+enf if
+
+	
+
+
+find_at = InStr(1, Email, ";")
+
+
+
+Email = Replace(Email, "<", " ")
+Email = Replace(Email, ">", " ")
+Len_email = Len(Email)
+find_at = InStr(1, Email, "@")
+find_null = InStr(1, Email, " ")
+If find_null < find_at Then
+mail = Right(Email, Len_email - find_null)
+End If
+   
+    num_colums = 0
+    ar_Data(iii, num_colums) = ar_brand(b) '
+    ar_nmHead(num_colums) = "brand"
+
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Right(Cells(i, 4), Len(Cells(i, 4)) - 3)
+    ar_nmHead(num_colums) = "Mreg"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Email 'contact salons
+    ar_nmHead(num_colums) = "mail"
+     
+    iii = iii + 1
+  
+End If
+
+Next f_x
+Next i
+
+
+ActiveWindow.Close
+Application.DisplayAlerts = False
+
+Workbooks(NF).Activate
+Sheets(in_data).Activate
+
+'clear sheet & create head & create name OR fiil data
+'---------------------------------------------------------------------------------------------------------
+If status_head = 0 Then
+ActiveSheet.UsedRange.Cells.ClearContents
+end_POS = iii + 1
+start_POS = 2
+
+Dim n As Name
+For Each n In ThisWorkbook.Names
+    On Error Resume Next
+    n.Delete
+    Next n
+
+For t = 0 To num_colums
+Cells(1, t + 1) = ar_nmHead(t)
+Cells(1, t + 1).Select
+ActiveWorkbook.Names.Add Name:=ar_nmHead(t), RefersTo:="=" & ActiveSheet.Name & "!" & ActiveCell.Address()
+Next t
+
+Else
+start_POS = end_POS + 1
+end_POS = start_POS + iii - 1
+End If
+
+ActiveSheet.Cells(start_POS, 1).Resize(end_POS - start_POS + 1, num_colums + 1) = ar_Data()
+status_head = 1
+Next b
+
+ActiveWorkbook.Names.Add Name:="SOURCE", RefersToR1C1:="=OFFSET(in_PPD!R1C1,0,0,COUNTA(in_PPD!R1C1:R65535C1),COUNTA(in_PPD!R1C1:R1C255))"
+'ActiveWorkbook.Names("SOURCE").Comment = ""
+
+'---------------------------------------------------------------------------------------------------------
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+    
+End Sub
+
+
+
+
+

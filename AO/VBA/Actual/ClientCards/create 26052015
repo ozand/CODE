@@ -1,0 +1,221 @@
+
+
+'Declare Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" (ByVal hwnd As Long, ByVal pszPath As String, ByVal psa As Any) As Long
+                                      
+                                    
+Sub CreateFolderWithSubfolders(ByVal PatchCreateFolder$)
+ 
+   If Len(Dir(PatchCreateFolder$, vbDirectory)) = 0 Then
+       SHCreateDirectoryEx Application.hwnd, PatchCreateFolder$, ByVal 0&
+   End If
+End Sub
+
+Function Replace_symbols(ByVal txt As String) As String
+    St$ = "~!@/\#$%^&*=|`-"""
+    For i% = 1 To Len(St$)
+        txt = Replace(txt, Mid(St$, i, 1), "_")
+    Next
+    Replace_symbols = txt
+End Function
+
+
+Private Sub UserForm_Initialize()
+ Dim str$, i&
+ 
+ Select_fish.ComboBox1.AddItem "\\RUCORPRUWKS0665"
+ Select_fish.ComboBox1.AddItem "C:"
+ Select_fish.ComboBox1.AddItem "D:"
+ Select_fish.ComboBox1.AddItem "P:"
+ Select_fish.ComboBox1.AddItem "Z:"
+ Select_fish.ComboBox1.AddItem "U:"
+
+Select_fish.ComboBox4.AddItem "MX"
+Select_fish.ComboBox4.AddItem "ES"
+Select_fish.ComboBox4.AddItem "LP"
+Select_fish.ComboBox4.AddItem "KR"
+Select_fish.ComboBox4.AddItem "RD"
+
+
+Select_fish.ComboBox5.AddItem "MX"
+Select_fish.ComboBox5.AddItem "ES"
+Select_fish.ComboBox5.AddItem "LP"
+Select_fish.ComboBox5.AddItem "KR"
+Select_fish.ComboBox5.AddItem "RD"
+End Sub
+
+
+Private Sub CommandButton1_Click()
+
+Dim xRow, longT, endBrand, nmBrand, l, k, r, m, b, i, sl, xxx, endPos, ratingLine, testCode, nKof, nPrint, startPos, mKode, rReperOrsers, rAVGOrder, rEvol, rISMScolo, nDress, nCha, rISMSret, rSKU, rWTtech, nAverCost, rMAG, rExcl, rTRating, WHO As Integer
+Dim comp_colo, comp_rev, distr_type, nmPatch, startBrand, nmdisc, mKodeP, nmCreatPatchPartners, nmCreatPatch, nMreg, nmMAG, nReg, nSec, nRep, nSalon, nOfName, nStreet, nDom, nTel, nmCity, nCont, nQ, nFLSM, nmAct, nmStatus, cdPartners, cdPartnersCh, LastColmn,LastRow As String
+Dim DynMas()
+Dim ar_brand(),  ar_Competitors,  ar_inRange(), ar_link2TR()
+Dim shtP As Worksheet, shtF, actSH As Worksheet
+  
+ ar_brand = Array("MX", "ES", "LP", "KR", "RD")
+ num_ar_Brand = UBound(ar_brand)
+
+ar_inRange = Array("X81", "D2", "D3", "G2", "D4", "D5", "D6", "N2", "G7", "G8", "V8", "Y2", "V3", "AG3", "V7", "U2", "V4", "V6", "V1", "V5")
+num_ar_inRange = UBound(ar_inRange)
+ReDim Preserve ar_inRange(num_ar_inRange)
+
+
+ Calculate '???????? ???? ???????
+ Sheets("Fiche").Select '????? ????? ?????
+ NF = ActiveWorkbook.Name
+ nmCreatPatch1 = 0
+ nmCreatPatch2 = 0
+ 
+ nmdisc = Select_fish.ComboBox1.Text '??????????? ????? ??? ??????
+ sBrand = Select_fish.ComboBox4.Value '??????????? ????? ?????? ???????????? ?????? ????? (??????? LP;KR;RD;MX)
+ eBrand = Select_fish.ComboBox5.Value '??????????? ????? ?????? ???????????? ????????? ????? (??????? LP;KR;RD;MX)
+ nm_partner = TextBox1.Text
+ Select_fish.Hide
+    
+ For e = 0 To num_ar_Brand
+ If sBrand = ar_brand(e) Then
+ startBrand = e
+ End If
+ If eBrand = ar_brand(e) Then
+ endBrand = e
+ End If
+ Next e
+   
+ 
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+' ???? ?????? ?? ??????
+'---------------------------------------------------------
+
+
+For b = startBrand To endBrand '??????????? ????????? ?????? ?? ?????????
+
+    '---------------------------------------------------------------------------------------------------------
+    in_data = "in_PPD"
+    Sheets(in_data).Select
+    ActiveSheet.AutoFilterMode = False
+    
+    LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1   ' ????????? ??????
+    LastColmn = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+    
+    ReDim DynMas(LastRow - 1, LastColmn - 1) '?????????? ??????
+    
+    '---------------------------------------------------------------------------------------------------------
+    
+    iii = 0 '?????? ???????
+    
+For xRow = 2 To LastRow ' ???????? ?????
+
+Select Case Len(nm_partner)
+
+Case Is > 1
+If Cells(xRow, 8) = nm_partner Then
+For yy = 0 To LastColmn - 1
+DynMas(iii, yy) = Cells(xRow, yy + 1)
+Next yy
+iii = iii + 1 '????? ?????? ???????
+End If
+
+Case Else
+For yy = 0 To LastColmn - 1
+DynMas(iii, yy) = Cells(xRow, yy + 1)
+Next yy
+iii = iii + 1 '????? ?????? ???????
+
+End Select
+
+Next xRow
+    
+longT = iii
+    
+ReDim Preserve DynMas(longT, LastColmn - 1) '?????????? ?????? ?????
+    
+    '---------------------------------------------------------------------------------------------------------
+'?????? ?????
+    
+    
+Sheets("Fiche").Select
+    
+    
+'ReDim Preserve ar_link2TR(iii, 15)
+
+
+For i = 0 To longT
+
+
+
+if ar_brand(b) <> DynMas(i, 0) then
+
+
+
+Application.StatusBar = "LastRow: " & LastRow & " longT : " & longT & " iii: " & iii & "              Calculate" & ar_brand(b) & ": " & i & " to " & iii & " " & DynMas(i, 4) & " " & DynMas(i, 11)
+    
+For qqq = 0 To num_ar_inRange
+           
+        nm_range = ar_inRange(qqq)
+        Range(nm_range) = DynMas(i, qqq)
+        
+Next qqq
+        
+    ActiveSheet.Calculate
+    
+    ActiveSheet.PageSetup.PrintArea = "$C$2:$AE$81"
+    
+    
+    
+    
+    nmPatch = DynMas(i, 24)
+    
+    If nmCreatPatch1 <> nmdisc & nmPatch Then
+    nmCreatPatch1 = nmdisc & nmPatch
+    CreateFolderWithSubfolders nmCreatPatch1
+    End If
+    
+    nmFile = "fc_" & Replace_symbols(DynMas(i, 2))
+    link1 = nmCreatPatch1 & nmFile & ".pdf"
+   
+       
+           ActiveSheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:=link1, Quality _
+            :=xlQualityMinimum, IncludeDocProperties:=True, IgnorePrintAreas:=False, _
+            OpenAfterPublish:=False
+   
+   
+    nmPatch = DynMas(i, 25)
+    
+    If nmCreatPatch2 <> nmdisc & nmPatch Then
+    nmCreatPatch2 = nmdisc & nmPatch
+    CreateFolderWithSubfolders nmCreatPatch2
+    End If
+    
+    nmFile = "fc_" & Replace_symbols(DynMas(i, 2))
+    link2 = nmCreatPatch2 & nmFile & ".pdf"
+     
+    
+    ActiveSheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:=link2, Quality _
+            :=xlQualityMinimum, IncludeDocProperties:=True, IgnorePrintAreas:=False, _
+            OpenAfterPublish:=False
+
+end if
+Next i
+Next b
+
+
+With Application
+            .ScreenUpdating = True
+            .Calculation = xlCalculationAutomatic
+            .EnableEvents = True
+            .DisplayStatusBar = True
+            .DisplayAlerts = True
+End With
+End Sub
+
+
+
+
+

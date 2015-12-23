@@ -1,0 +1,21 @@
+Sub Ìàêðîñ2()
+'
+' Ìàêðîñ2 Ìàêðîñ
+'
+
+'
+    Application.PrintCommunication = False
+
+    With ActiveSheet.PageSetup
+
+        .LeftMargin = Application.InchesToPoints(0.078740157480315)
+        .RightMargin = Application.InchesToPoints(0.078740157480315)
+        .TopMargin = Application.InchesToPoints(0.196850393700787)
+        .BottomMargin = Application.InchesToPoints(0.196850393700787)
+        .HeaderMargin = Application.InchesToPoints(0.078740157480315)
+        .FooterMargin = Application.InchesToPoints(0.078740157480315)
+        .Orientation = xlPortrait
+        
+    End With
+
+End Sub

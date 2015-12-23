@@ -1,0 +1,62 @@
+﻿
+select  SLN.id as "ecad_salon_id",  concat(sln.name, '. ', SLN.address, '. ', sln.city_name) as "salon_name", sln.city_name, right(sln.com_mreg, char_length(sln.com_mreg)-3 ) as com_MREG,
+
+(select Count( distinct usr.id ) 
+from  seminar_users as SMU
+left join users as usr on usr.id = SMU.user_id 
+left join seminars as SM on SMU.seminar_id = SM.id 
+left join seminar_types as SMT on SM.seminar_type_id = SMT.id
+
+where sln.id = usr.salon_id and  sm.closed_at is not Null) as "U_ALLTIME",
+
+ 
+(select Count( distinct usr.id ) 
+from  seminar_users as SMU
+left join users as usr on usr.id = SMU.user_id 
+left join seminars as SM on SMU.seminar_id = SM.id
+left join seminar_types as SMT on SM.seminar_type_id = SMT.id
+
+where sln.id = usr.salon_id and extract(year from sm.started_at) = '2014' and sm.closed_at is not Null) as "U_2014",
+
+(select Count( distinct usr.id ) 
+from  seminar_users as SMU
+left join users as usr on usr.id = SMU.user_id 
+left join seminars as SM on SMU.seminar_id = SM.id
+left join seminar_types as SMT on SM.seminar_type_id = SMT.id
+
+where sln.id = usr.salon_id and extract(year from sm.started_at) = '2015' and sm.closed_at is not Null) as "U_2015",
+
+(select Count(usr.id ) 
+from  seminar_users as SMU
+left join users as usr on usr.id = SMU.user_id 
+left join seminars as SM on SMU.seminar_id = SM.id 
+left join seminar_types as SMT on SM.seminar_type_id = SMT.id
+
+where sln.id = usr.salon_id and  sm.closed_at is not Null) as "C_ALLTIME",
+
+ 
+(select Count( usr.id ) 
+from  seminar_users as SMU
+left join users as usr on usr.id = SMU.user_id 
+left join seminars as SM on SMU.seminar_id = SM.id
+left join seminar_types as SMT on SM.seminar_type_id = SMT.id
+
+where sln.id = usr.salon_id and extract(year from sm.started_at) = '2014' and sm.closed_at is not Null) as "C_2014",
+
+(select Count( usr.id ) 
+from  seminar_users as SMU
+left join users as usr on usr.id = SMU.user_id 
+left join seminars as SM on SMU.seminar_id = SM.id
+left join seminar_types as SMT on SM.seminar_type_id = SMT.id
+
+where sln.id = usr.salon_id and extract(year from sm.started_at) = '2015' and sm.closed_at is not Null) as "C_2015"
+
+
+
+
+from salons as SLN
+
+GROUP BY sln.id 
+
+
+
