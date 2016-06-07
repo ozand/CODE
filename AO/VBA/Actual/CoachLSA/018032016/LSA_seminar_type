@@ -1,0 +1,70 @@
+Sub seminar_type()
+
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+
+Dim dic_seminar_type: Set dic_seminar_type = CreateObject("Scripting.Dictionary")
+dic_seminar_type.RemoveAll
+
+Sheets("eduT").Activate
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+
+clm_nm_smr = 14
+
+
+For f_a = 2 To LastRow
+
+nm_smr = Cells(f_a, clm_nm_smr)
+If Not dic_seminar_type.Exists(nm_smr) Then
+dic_seminar_type.Add nm_smr, dic_seminar_type.Count
+End If
+
+Next f_a
+
+'---------------------------------------------------------------------------------------------------------
+'check Sheets and if not - add
+'---------------------------------------------------------------------------------------------------------
+sh_in_data = "seminar_type"
+
+For Each Sh In ThisWorkbook.Worksheets
+If Sh.Name = sh_in_data Then
+chek_name = 1
+End If
+Next Sh
+
+If chek_name <> 1 Then
+Set Sh = Worksheets.Add()
+Sh.Name = sh_in_data
+End If
+ 
+Sheets(sh_in_data).Activate
+
+With dic_seminar_type
+Cells(1, 1).Resize(.Count) = Application.Transpose(.Keys)
+Cells(1, 2).Resize(.Count) = Application.Transpose(.Items)
+End With
+
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+End Sub
+
+
+
+
+
+
+

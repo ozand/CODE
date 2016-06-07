@@ -1,0 +1,146 @@
+Sub SAPBEXonRefresh(queryID As String, resultArea As Range)
+
+Sheets("QweryUpd").Select
+Set OutlookApp = CreateObject("Outlook.Application")
+                Set oMail = OutlookApp.CreateItem(0)
+                With oMail
+                   ' .SentOnBehalfOfName = "Corpru.StatisticsDPP@loreal.com"
+                    .To = "Corpru.StatisticsDPP@loreal.com"
+                   '.Cc = Copy
+                    .Importance = 2
+                    .Subject = "FishUpd" & queryID
+                    .Body = Bodies
+                    '.Attachments.Add NFD
+                    .Send
+                    .Display
+
+               End With
+
+ActiveWorkbook.Save
+End Sub
+
+ '---------------------------------------------------------------------------------------------------------
+ 
+ Sub SAPBEXonRefresh(queryID As String, resultArea As Range)
+
+ NF = ActiveWorkbook.Name
+ 
+ Sheets("SAPBEXqueries").Visible = True
+
+ Sheets("SAPBEXqueries").Select
+
+clm_qry = 6
+clm_cd_qry = 233
+Columns(clm_qry).Select
+
+ lastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+ 
+ For f_ra = 1 To lastRow
+ c_val = Cells(f_ra, clm_qry)
+ If c_val = queryID Then
+ cd_qry = Cells(f_ra, 3)
+ Exit For
+ End If
+ Next f_ra
+ 
+ 
+ Columns(clm_cd_qry).Select
+ lastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+ 
+ For f_rb = 1 To lastRow
+ c_val = Cells(f_rb, clm_cd_qry)
+    If c_val = cd_qry Then
+        For f_rr = f_rb To lastRow
+        c_val = Cells(f_rr, clm_cd_qry - 1)
+            If c_val = "0000009001" Then
+            nm_qry = Cells(f_rr, clm_cd_qry)
+            Exit For
+            End If
+        Next f_rr
+     End If
+
+ Next f_rb
+ 
+ Sheets("SAPBEXqueries").Visible = xlSheetVeryHidden
+ 
+Set OutlookApp = CreateObject("Outlook.Application")
+                Set oMail = OutlookApp.CreateItem(0)
+                With oMail
+                   ' .SentOnBehalfOfName = "Corpru.StatisticsDPP@loreal.com"
+                    .To = "Corpru.StatisticsDPP@loreal.com"
+                   '.Cc = Copy
+                    .Importance = 2
+                    .Subject = queryID & " in " & NF & " update"
+                    .Body = Bodies
+                    '.Attachments.Add NFD
+                    .Send
+                    .Display
+
+               End With
+ 
+ End Sub
+ 
+'--------------------------------------------------------------------------------------------------------- 
+
+Sub SAPBEXonRefresh()
+
+ Run "sapbex.xla!SAPBEXrefresh", False
+ NF = ActiveWorkbook.Name
+ Sheets("SAPBEXqueries").Visible = True
+ Sheets("SAPBEXqueries").Select
+
+clm_qry = 6
+clm_cd_qry = 233
+Columns(clm_qry).Select
+
+ lastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+ 
+ For f_ra = 1 To lastRow
+ c_val = Cells(f_ra, clm_qry)
+ If c_val = queryID Then
+ cd_qry = Cells(f_ra, 3)
+ Exit For
+ End If
+ Next f_ra
+ 
+ 
+ Columns(clm_cd_qry).Select
+ lastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+ 
+ For f_rb = 1 To lastRow
+ c_val = Cells(f_rb, clm_cd_qry)
+    If c_val = cd_qry Then
+        For f_rr = f_rb To lastRow
+        c_val = Cells(f_rr, clm_cd_qry - 1)
+            If c_val = "0000009001" Then
+            nm_qry = Cells(f_rr, clm_cd_qry)
+            Exit For
+            End If
+        Next f_rr
+     End If
+
+ Next f_rb
+ 
+
+MsgBox (nm_qry)
+Set OutlookApp = CreateObject("Outlook.Application")
+                Set oMail = OutlookApp.CreateItem(0)
+                With oMail
+                   ' .SentOnBehalfOfName = "Corpru.StatisticsDPP@loreal.com"
+                    .To = "Corpru.StatisticsDPP@loreal.com"
+                   '.Cc = Copy
+                    .Importance = 2
+                    .Subject = queryID & " " & nm_qry & " in " & NF & " updated"
+                    .Body = Bodies
+                    '.Attachments.Add NFD
+                    .Send
+                    '.Display
+
+               End With
+               
+  Sheets("SAPBEXqueries").Visible = xlSheetVeryHidden
+ 
+ End Sub
+
+
+

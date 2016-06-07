@@ -1,0 +1,35 @@
+Sub SAPBEXonRefresh()
+Dim ar_bw()
+Bodies = Empty
+ar_bw = Array("BW_SI_ALL", "BW_SI_Partn")
+
+For f_ar_a = 0 To UBound(ar_bw())
+
+Sheets(ar_bw(f_ar_a)).Select
+Cells(3, 1).Select
+Run "SAPBEX.xla!SAPBEXrefresh", False
+
+ NF = ActiveWorkbook.Name
+ 
+Bodies = Bodies & ar_bw(f_ar_a) & " Refreshed time: " & Now() & Chr(10)
+ 
+
+Set OutlookApp = CreateObject("Outlook.Application")
+                Set oMail = OutlookApp.CreateItem(0)
+                With oMail
+                   ' .SentOnBehalfOfName = "Corpru.StatisticsDPP@loreal.com"
+                    .To = "Corpru.StatisticsDPP@loreal.com"
+                   '.Cc = Copy
+                    .Importance = 2
+                    .Subject = NF & " updated"
+                    .Body = Bodies
+                    '.Attachments.Add NFD
+                    .Send
+                    '.Display
+
+               End With
+               
+Next f_ar_a
+ 
+ End Sub
+

@@ -41,7 +41,7 @@ End If
 
 '---------------------------------------------------------------------------------------------------------
 ar_nm_month_eng = Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-ar_nm_month_eng_rus = Array("январь", "февраль", "март", "арпель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь")
+ar_nm_month_eng_rus = Array("пїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ")
 ar_nmMregEN = Array("MOSCOW", "GR", "NORTHWEST", "CENTER", "VOLGA", "SOUTH", "URAL", "SIBERIA", "FAR EAST")
 ar_nmMregLT = Array("Moscou", "GR", "Nord-Ouest", "Centre", "Volga-Centre", "Sud", "Oural", "Siberie", "EO")
 ar_brand = Array("LP", "KR", "RD", "MX", "ES")
@@ -87,11 +87,9 @@ For f_q = 1 To act_month
         patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(b) & "\History 2015\Top Russia Total 2015." & mm_act_month  & " " & ar_brand(b) & ".xlsm"
         End Select
         
-        
         Workbooks.Open Filename:=patchTR, Notify:=False
         actTR = ActiveWorkbook.Name
-        
-        
+                
         Sheets(nm_sh_coach).Select
         ActiveSheet.AutoFilterMode = False
         LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1  
@@ -137,8 +135,8 @@ For f_q = 1 To act_month
             '--------------------------------------------------------------------------------------------------------- 
                           
             
-            if left(nm_SREP, 5) = "вакан" then nm_SREP = "vacancy_" & nm_sector :end if    
-            if left(nm_FLSM, 5) = "вакан" then nm_SREP = "vacancy_" & nm_reg :end if    
+            if left(nm_SREP, 5) = "пїЅпїЅпїЅпїЅпїЅ" then nm_SREP = "vacancy_" & nm_sector :end if    
+            if left(nm_FLSM, 5) = "пїЅпїЅпїЅпїЅпїЅ" then nm_SREP = "vacancy_" & nm_reg :end if    
             if nm_SREP = nm_FLSM Then FLSMasSREP = True
             
             

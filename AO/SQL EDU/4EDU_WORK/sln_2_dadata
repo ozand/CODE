@@ -1,0 +1,26 @@
+select sln.id, sln.name, sln.address, sln.city_name,  sln.city_name_geographic,  sln.phone,  sln.email, sln.site, 
+
+Concat(sln.address,' ',
+(case 
+when char_length(sln.city_name_geographic)  <3 then trim(both 'MX'  from  sln.city_name)
+when char_length(sln.city_name_geographic)  >= 3 then  sln.city_name_geographic END)),
+
+
+(select usr.full_name from users as usr where usr.id = sln.salon_manager_id) as Manager,
+
+
+
+(select usr.mobile_number from users as usr where usr.id = sln.salon_manager_id) as mng_phone,
+
+
+(select usr.email from users as usr where usr.id = sln.salon_manager_id) as mng_mail,
+
+
+(select count(usr.id) from users as usr where sln.id = usr.salon_id) as Empl
+
+from salons as sln
+
+
+
+Order by sln.id
+

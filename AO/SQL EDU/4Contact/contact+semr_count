@@ -1,0 +1,30 @@
+select 
+usr.full_name, (select count(usr2.id) from users as usr2 where usr.full_name = usr2.full_name) as count_usr,
+usr.id, 
+usr.role, (select count(concat(usr2.id ,usr2.role)) from users as usr2 where usr.full_name = usr2.full_name and usr.role = usr2.role ) as count_usr_role,
+usr.lname, 
+usr.fname,
+usr.mname,
+usr.email, (case when char_length(usr.email) > 3 then (select count(usr2.email) from users as usr2 where usr.email = usr2.email) else Null end) as count_usr_email,
+usr.mobile_number, (case when char_length(usr.mobile_number) > 3 then (select count(usr2.mobile_number) from users as usr2 where usr.mobile_number = usr2.mobile_number) else Null end) as count_usr_phone,
+usr.city_name, 
+usr.commercial_megaregion, 
+usr.region_name, 
+usr.position, 
+usr.shtatnost, 
+usr.is_blocked, 
+usr.created_at, 
+usr.chief, 
+(count(smr_edu.id) ) as "smr_edu", 
+(select count(smu.user_id) from seminar_users as smu  where usr.id= smu.user_id) as "smr_mstr", 
+(case  when  usr.login_count  is Null then 0 else 1 end) as "act_accnt",
+( to_char(max(smr_edu.started_at),  'YYYY/MM/DD') ) as "last_smr_edu", 
+to_char(usr.last_request_at, 'YYYYMMDD') as "last_access",
+(select trim(concat(Trim(sln.name), '. ', trim(SLN.address), '. ', Trim(sln.city_name_geographic))) from salons as sln where usr.salon_id = sln.id )as "salon_name" 
+
+from users as usr
+left join seminars as smr_edu  ON smr_edu.technolog_id = usr.id or smr_edu.partimer_id = usr.id
+GROUP BY usr.id, usr.full_name
+
+limit 100
+

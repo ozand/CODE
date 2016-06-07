@@ -1,0 +1,193 @@
+
+
+
+Sub GetStock()
+
+Dim column&, row&, startRow&, month&, nmbBrand&, nmBrand$, pathFile$, monthT$, colum&, monthCur&
+
+Dim inpdata As Range, realdata As Range, ns As Worksheet
+Dim i&, j&, k&, c&, r&, hc&, hr&
+Dim out(), dataArr, hcArr, hrArr
+Dim lRangeDel As Range
+Dim lRangeH As Range
+
+
+monthEnd = Val(InputBox("Месяц закрытия"))
+monthCur = Format(Date, "MM")
+
+
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+ActiveSheet.UsedRange.Clear
+
+Cells(1, 1) = "month"
+Cells(1, 2) = "brend"
+Cells(1, 3) = "cd"
+Cells(1, 4) = "S_stock"
+Cells(1, 5) = "E_stock"
+Cells(1, 6) = "month"
+Cells(1, 7) = "name"
+Cells(1, 8) = "Brand+cdPartners"
+Cells(1, 9) = "stat"
+Cells(1, 10) = "stock_next_Liason"
+Cells(1, 11) = "stock_Lison"
+Cells(1, 12) = "stock_ФЭД"
+Cells(1, 13) = "STOCK_FINAL"
+Cells(1, 14) = "delt"
+
+startRow = 1
+Sheets("in").Select
+
+
+For month = 1 To monthCur
+
+
+For nmbBrand = 1 To 5
+Select Case nmbBrand
+Case 1
+    nmBrand = "LP"
+Case 2
+    nmBrand = "MX"
+Case 3
+    nmBrand = "KR"
+Case 4
+    nmBrand = "RD"
+Case 5
+    nmBrand = "ES"
+End Select
+
+If month < 10 Then
+monthT = "0" & month
+Else
+monthT = month
+End If
+
+For row = 3 To 50
+
+startRow = startRow + 1
+
+
+For colum = 1 To 7
+
+If monthCur = month Then
+lname = " сводный.xlsm]"
+Else
+lname = "_закрытие.xlsx]"
+End If
+
+
+Select Case colum
+
+Case 1
+    columT = month
+Case 2
+    columT = nmBrand
+Case 3
+    columT = "'P:\DPP\GENERAL\LIAISON DPP\" & nmBrand & "\[" & nmBrand & "_liaison_2015_" & monthT & lname & "Livraison'!" & "A" & "$" & row
+Case 4
+    columT = "'P:\DPP\GENERAL\LIAISON DPP\" & nmBrand & "\[" & nmBrand & "_liaison_2015_" & monthT & lname & "Livraison'!" & "D" & "$" & row
+Case 5
+    columT = "'P:\DPP\GENERAL\LIAISON DPP\" & nmBrand & "\[" & nmBrand & "_liaison_2015_" & monthT & lname & "Livraison'!" & "S" & "$" & row
+Case 6
+    columT = ""
+Case 7
+    columT = "'P:\DPP\GENERAL\LIAISON DPP\" & nmBrand & "\[" & nmBrand & "_liaison_2015_" & monthT & lname & "Livraison'!" & "AX" & "$" & row
+
+
+End Select
+ 
+ columTF = "=ЕСЛИ(" & columT & " = 0;" & Chr(34) & Chr(34) & ";" & columT & ")"
+
+
+If colum < 3 Or colum = 6 Then
+Cells(startRow, colum).Value = columT
+Else
+Cells(startRow, colum).FormulaLocal = columTF
+End If
+
+Next colum
+Next row
+Next nmbBrand
+Next month
+
+Calculate
+
+For Each myCell In ActiveSheet.UsedRange.SpecialCells(xlCellTypeFormulas)
+myCell.Value = myCell.Value
+Next myCell
+
+
+Set lRangeDel = Nothing
+Set lRangeH = ActiveSheet.Rows(65000)
+
+    
+    For r = startRow To 2 Step -1
+
+        If Len(Cells(r, 3).Value) <> 9 Then
+         Set lRangeDel = Application.Union(lRangeH, ActiveSheet.Rows(r))
+         Set lRangeH = lRangeDel
+        End If
+    Next r
+    
+    lRangeDel.Delete
+    
+  
+    
+
+'Sheets("liason").Select
+'ActiveSheet.PivotTables("СводнаяТаблица1").PivotCache.Refresh
+    
+    
+    'hr = 1
+    'hc = 2
+
+   'Set inpdata = Sheets("in").Range(cell(1, 1), cell(startRow, 5))
+    
+   ' If inpdata.Rows.Count <= hr Or inpdata.Columns.Count <= hc Then Exit Sub
+   ' Set realdata = inpdata.Offset(hr, hc).Resize(inpdata.Rows.Count - hr, inpdata.Columns.Count - hc)
+   ' dataArr = realdata.Value
+   ' If hr Then hrArr = inpdata.Offset(0, hc).Resize(hr, inpdata.Columns.Count - hc).Value
+   ' If hc Then hcArr = inpdata.Offset(hr, 0).Resize(inpdata.Rows.Count - hr, hc).Value
+    
+   ' ReDim out(1 To Application.CountA(realdata), 1 To hr + hc + 1)
+   ' Set ns = Sheets("out")
+    
+   ' For i = 1 To UBound(dataArr, 1)
+       ' For j = 1 To UBound(dataArr, 2)
+         '   If Not IsEmpty(dataArr(i, j)) Then
+        '        k = k + 1
+       '         For c = 1 To hc: out(k, c) = hcArr(i, c): Next c
+      '          For r = 1 To hr: out(k, c + r - 1) = hrArr(r, j): Next r
+     '           out(k, c + r - 1) = dataArr(i, j)
+    '        End If
+    'Next j, i
+    'ns.Cells(2, 1).Resize(UBound(out, 1), UBound(out, 2)) = out
+   ' Sheets("out").Select
+    'Range("B11").Select
+    'ActiveSheet.PivotTables("СводнаяТаблица1").PivotCache.Refresh
+
+'Cells(1, 1) = "month"
+'Cells(1, 2) = "brend"
+'Cells(1, 3) = "cd"
+'Cells(1, 4) = "stock_type"
+
+
+Application.DisplayAlerts = True
+Application.Calculation = xlCalculationAutomatic
+ Application.ScreenUpdating = True
+  
+  
+  
+  
+End Sub
+
+
+
+

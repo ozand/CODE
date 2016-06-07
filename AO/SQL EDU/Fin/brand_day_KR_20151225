@@ -1,0 +1,40 @@
+select extract(month from smr.started_at) as nmMonth, smr.description,
+smr.technolog_full_name, smr.users_count, Concat(sln.name, '. ' , sln.address,'. ',
+sln.city_name_geographic), sln.com_mreg, sln.com_reg, sln.com_sect,
+
+(select sln2.partner_private_code
+from seminar_users as smu
+left join users as usr2 ON smu.user_id = usr2.id
+left join salons as sln2 ON usr2.salon_id = sln2.id
+
+where smr.id = smu.seminar_id 
+limit 1 ),
+
+
+(select sln2.partner
+from seminar_users as smu
+left join users as usr2 ON smu.user_id = usr2.id
+left join salons as sln2 ON usr2.salon_id = sln2.id
+
+where smr.id = smu.seminar_id 
+limit 1 ),
+
+(select Concat(sln2.name, '. ' , sln2.address,'. ',
+sln2.city_name_geographic)
+from seminar_users as smu
+left join users as usr2 ON smu.user_id = usr2.id
+left join salons as sln2 ON usr2.salon_id = sln2.id
+
+where smr.id = smu.seminar_id 
+limit 1 ),
+
+ sln.partner, usr.email, usr.position, usr.chief 
+from seminars as smr
+left join seminar_types as smt ON  smr.seminar_type_id = smt.id
+left join salons as sln ON smr.salon_id = sln.id
+left join users as usr ON smr.technolog_id = usr.id
+
+where smt.kpis_type like 'Brand Day' and extract(year from smr.created_at) in ('2016')
+and to_char(smr.started_at, 'MM') in ('01')
+and smr.closed_at is not Null
+

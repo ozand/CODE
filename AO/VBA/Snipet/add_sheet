@@ -1,0 +1,16 @@
+'---------------------------------------------------------------------------------------------------------
+'check Sheets and if not - add
+'---------------------------------------------------------------------------------------------------------
+sh_in_data = "Cnt_SREP"
+status_head = 0
+
+For Each Sh In ThisWorkbook.Worksheets
+If Sh.Name = sh_in_data Then
+chek_name = 1
+End If
+Next Sh
+
+If chek_name <> 1 Then
+Set Sh = Worksheets.Add()
+Sh.Name = sh_in_data
+End If

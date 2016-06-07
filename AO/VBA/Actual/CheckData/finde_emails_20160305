@@ -1,0 +1,66 @@
+Sub agregate_email()
+
+
+
+
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+
+ar_brand = Array("LP", "KR", "RD", "MX", "ES", "DE", "CR")
+num_ar_brand = UBound(ar_brand)
+
+Dim dic_emeil: Set dic_emeil = CreateObject("Scripting.Dictionary")
+
+iii = 0
+for f_year  = 2011 to 2016
+
+For b = 0 To UBound(ar_brand)
+
+patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(b) & "\Top Russia Total " & f_year & " " & ar_brand(b) & ".xlsm"
+in_data = "in_TR"
+
+If Dir(patchTR) = "" Then
+exit for
+else 
+Workbooks.Open Filename:=patchTR, Notify:=False
+end if
+
+actTR = ActiveWorkbook.Name
+Sheets(ar_brand(b)).Select
+ActiveSheet.AutoFilterMode = False
+
+
+For Each cell In ActiveSheet.UsedRange
+
+  check_cell = Cell.Value  
+  if InStr(check_cell, "@") and dic_emeil.Exists(check_cell) Then
+  dic_emeil.Add check_cell, ar_brand(b)
+  end if
+
+Next cell
+
+Workbooks(actTR).Close
+
+Next b
+next f_year
+
+Workbooks(NF).Activate
+
+
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+end sub

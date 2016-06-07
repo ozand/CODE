@@ -1,0 +1,20 @@
+Sub f_Err()
+
+
+
+    
+    For Each x In ActiveSheet.UsedRange.SpecialCells(xlCellTypeFormulas)
+    txt_f = x.FormulaLocal
+    x.Select
+    
+    If Not IsEmpty(x.Value) And InStr(1, txt_f, "ЕСЛИОШИБКА", vbTextCompare) = 0 Then
+    txt_f = Right(txt_f, Len(txt_f) - 1)
+    new_txt_f = "=ЕСЛИОШИБКА(" & txt_f & ";0)"
+    
+    ActiveCell.FormulaLocal = new_txt_f
+    
+    End If
+    
+    Next x
+
+End Sub

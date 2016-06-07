@@ -1,0 +1,125 @@
+Sub get_Pillars()
+    Dim inpdata As Range, realdata As Range, ns As Worksheet
+    Dim i&, j&, k&, c&, r&, hc&, hr&
+    Dim out(), dataArr, hcArr, hrArr
+    
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+'---------------------------------------------------------------------------------------------------------
+NF = ActiveWorkbook.Name
+
+in_data = "Pillars"
+
+For Each Sh In ThisWorkbook.Worksheets
+If Sh.Name = in_data Then
+chek_name = 1
+End If
+Next Sh
+
+If chek_name <> 1 Then
+Set Sh = Worksheets.Add()
+Sh.Name = in_data
+End If
+
+'---------------------------------------------------------------------------------------------------------
+patchClntCard = "p:\DPP\Business development\Book commercial\DPP\#Расчётные\1. MONTHLY TASKS\фишка клиента v_2016.xlsm"
+out_data ="Pillars"
+
+Workbooks.Open Filename:=patchClntCard, Notify:=False
+openBook = ActiveWorkbook.Name
+Sheets(out_data).Select
+
+sts = 0
+start_cell = "LOR mSeries Store"
+ hr = 4
+ hc = 2
+
+ar_head = Array("unvCD", "nm_salon", "Year", "Quartal", "brand", "gamme",  "val")
+
+
+
+For Each Cell In ActiveSheet.UsedRange
+If InStr(1, Cell, start_cell) Then
+sts = 1 + sts
+    If sts > 1 Then
+    strt_row = Cell.Row
+    strt_column = Cell.Column
+    Exit For
+    End If
+End If
+
+Next Cell
+
+Cells(strt_row, strt_column).Activate
+ActiveCell.CurrentRegion.Select
+
+
+
+Set inpdata = Selection
+    If inpdata.Rows.Count <= hr Or inpdata.Columns.Count <= hc Then Exit Sub
+    Set realdata = inpdata.Offset(hr, hc).Resize(inpdata.Rows.Count - hr, inpdata.Columns.Count - hc)
+    dataArr = realdata.Value
+    If hr Then hrArr = inpdata.Offset(0, hc).Resize(hr, inpdata.Columns.Count - hc).Value
+    If hc Then hcArr = inpdata.Offset(hr, 0).Resize(inpdata.Rows.Count - hr, hc).Value
+    
+    ReDim out(1 To Application.CountA(realdata), 1 To hr + hc + 1)
+        
+    For i = 1 To UBound(dataArr, 1)
+        For j = 1 To UBound(dataArr, 2)
+            If dataArr(i, j) <> Empty And hcArr(i, 1) <> "Overall Result" Then
+                k = k + 1
+                c = 1
+                out(k, c) = hcArr(i, 1)
+                c = 1 + c
+                out(k, c) = hcArr(i, 2)
+                c = 1 + c
+                out(k, c) = hrArr(1, j)
+                c = 1 + c
+                out(k, c) = hrArr(2, j)
+                c = 1 + c
+                out(k, c) = Left(hrArr(3, j), 2)
+                c = 1 + c
+                If Len(hrArr(3, j)) = 2 Then
+                out(k, c) = hrArr(3, j)
+                Else
+                out(k, c) = Right(hrArr(3, j), Len(hrArr(3, j)) - 3)
+                End If
+                c = 1 + c
+                v_table = dataArr(i, j)
+                out(k, c) = v_table
+                
+            End If
+    Next j, i
+    
+If ActiveWorkbook.Name  = openBook then
+ActiveWindow.Close
+Application.DisplayAlerts = False
+End If
+    
+    
+    Workbooks(NF).Activate
+    Sheets(in_data).Activate
+    ActiveSheet.UsedRange.Cells.ClearContents
+    Cells(2, 1).Resize(UBound(out, 1), UBound(out, 2)) = out
+  
+For f_c = 0 To UBound(ar_head)
+    Cells(1, f_c + 1) = ar_head(f_c)
+    Next f_c
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+End Sub
+

@@ -1,0 +1,373 @@
+
+Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" (ByVal hwnd As Long, ByVal pszPath As String, ByVal psa As Any) As Long
+                                      
+                                    
+                                      
+Sub CreateFolderWithSubfolders(ByVal PatchCreateFolder$)
+ 
+   If Len(Dir(PatchCreateFolder$, vbDirectory)) = 0 Then
+       SHCreateDirectoryEx Application.hwnd, PatchCreateFolder$, ByVal 0&
+   End If
+End Sub
+
+Function Replace_symbols(ByVal txt As String) As String
+    St$ = "~!@/\#$%^&*=|`-"""
+    For i% = 1 To Len(St$)
+        txt = Replace(txt, Mid(St$, i, 1), "_")
+        txt = Replace(txt, Chr(10), "_")
+    Next
+    Replace_symbols = txt
+End Function
+
+
+Sub CrRegCard()
+
+Dim nmCreatPatch, nmPatch, nmMReg, nmFLSM, nmSREP, nm_Sh, LastRow, LastRowC, TTF As String
+Dim colum, f_brand, num_Hierarchy As Integer
+Dim lRangeC, lRangeH As Range
+Dim ws As Worksheet
+Dim ar_nm_Brand(), ar_Split(), ar_num_row(3), ar_colum_hierarchy(), ar_colums_null(), new_DynMas(), DynMas()
+
+
+'---------------------------------------------------------------------------------------------------------
+With Application
+.Calculation = xlCalculationManual
+.DisplayAlerts = False
+.ScreenUpdating = False
+End With
+
+NF = ActiveWorkbook.Name
+'-------------------------------------------------------------------------------------------------
+ar_nm_Brand = Array("LP", "MX", "KR", "RD", "ES")
+num_brand = UBound(ar_nm_Brand)
+
+ar_colum_hierarchy = Array(4, 6, 8)
+num_Hierarchy = UBound(ar_colum_hierarchy)  'count hier. split
+
+ar_colums_null = Array(17, 20, 28, 33, 38, 43, 48, 51, 55, 59, 63, 67)
+num_clm_null = UBound(ar_colums_null)
+
+For f_brand = 0 To num_brand
+nm_Sh = "in_TR_" & ar_nm_Brand(f_brand)
+Sheets(nm_Sh).Select
+  
+ActiveSheet.AutoFilterMode = False
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+LastColmn = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+ReDim DynMas(LastRow - 1, LastColmn - 1)
+
+'---------------------------------------------------------------------------------------------------------
+'create array
+'---------------------------------------------------------------------------------------------------------
+ iii = 0
+    
+    For xRow = 2 To LastRow
+    For yy = 0 To LastColmn - 1
+    DynMas(iii, yy) = Cells(xRow, yy + 1)
+    Next yy
+    iii = iii + 1
+    Next xRow
+longT = iii
+ReDim Preserve DynMas(longT, LastColmn - 1)
+
+'---------------------------------------------------------------------------------------------------------
+'uniq split type + link dic
+'---------------------------------------------------------------------------------------------------------
+
+Dim dic_link2fc: Set dic_link2fc = CreateObject("Scripting.Dictionary")
+Dim dic_DRs: Set dic_DRs = CreateObject("Scripting.Dictionary")
+Dim dic_FLSMs: Set dic_FLSMs = CreateObject("Scripting.Dictionary")
+Dim dic_SREPs: Set dic_SREPs = CreateObject("Scripting.Dictionary")
+     
+dic_link2fc.RemoveAll
+dic_DRs.RemoveAll
+dic_FLSMs.RemoveAll
+dic_SREPs.RemoveAll
+ 
+iDR = 0
+iFLSM = 0
+iSREP = 0
+clmDR = 3
+clmFLSM = 5
+clmSREP = 7
+ 
+For i = 0 To longT
+
+uniq_val_DR = DynMas(i, clmDR)
+uniq_val_FLSM = DynMas(i, clmFLSM)
+uniq_val_SREP = DynMas(i, clmSREP)
+link2fc = DynMas(i, 24)
+key_link2fc = DynMas(i, 1)
+
+If Not dic_DRs.Exists(uniq_val_DR) Then
+
+dic_DRs.Add uniq_val_DR, uniq_val_DR
+End If
+    
+If Not dic_FLSMs.Exists(uniq_val_FLSM) Then
+
+dic_FLSMs.Add uniq_val_FLSM, uniq_val_FLSM
+End If
+
+If Not dic_SREPs.Exists(uniq_val_SREP) Then
+dic_SREPs.Add uniq_val_SREP, uniq_val_SREP
+End If
+
+
+
+dic_link2fc.Add key_link2fc, link2fc
+
+Next i
+
+'---------------------------------------------------------------------------------------------------------
+'created and split
+'---------------------------------------------------------------------------------------------------------
+For f_h = 0 To 2
+colum = ar_colum_hierarchy(f_h)
+'sort CA on the sheet
+'---------------------------------------------------------------------------------------------------------
+
+Select Case f_h
+Case 0
+colum = clmDR
+count_SPLIT = dic_DRs.Count
+ReDim arr_name_empl(count_SPLIT)
+arr_name_empl = dic_DRs.Items
+Case 1
+colum = clmFLSM
+count_SPLIT = dic_FLSMs.Count
+ReDim arr_name_empl(count_SPLIT)
+arr_name_empl = dic_FLSMs.Items
+Case 2
+colum = clmSREP
+count_SPLIT = dic_SREPs.Count
+ReDim arr_name_empl(count_SPLIT)
+arr_name_empl = dic_SREPs.Items
+End Select
+
+'MsgBox (count_SPLIT)
+
+With Sheets("temp")
+.Select
+.UsedRange.Clear
+.UsedRange.Cells.ClearContents
+.UsedRange.NumberFormat = "General"
+
+    For a = 1 To LastColmn
+      .Cells(1, a) = a
+    Next a
+.Cells(2, 1).Resize(longT + 1, LastColmn) = DynMas()
+.UsedRange.NumberFormat = "General"
+End With
+
+  Cells(1, 1).Select
+  Selection.AutoFilter
+With ActiveWorkbook.Worksheets("temp").AutoFilter.Sort
+    .SortFields.Clear
+    .SortFields.Add Key:=Cells(1, colum + 1), SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+    .SortFields.Add Key:=Cells(1, 14), SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+End With
+
+'---------------------------------------------------------------------------------------------------------
+'create array
+'---------------------------------------------------------------------------------------------------------
+ActiveSheet.AutoFilterMode = False
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+LastColmn = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+ReDim DynMas(LastRow - 1, LastColmn - 1)
+ iii = 0
+    
+    For xRow = 2 To LastRow
+    For yy = 0 To 15
+    DynMas(iii, yy) = Cells(xRow, yy + 1)
+    Next yy
+    iii = iii + 1
+    Next xRow
+longT = iii
+ReDim Preserve DynMas(longT, LastColmn - 1)
+    
+ 
+ '---------------------------------------------------------------------------------------------------------
+ 
+
+  ReDim new_DynMas(50000, 150)
+  
+ For f_b = 0 To count_SPLIT - 1 'öèêë ïî ñîòðóäíèêó
+ Application.StatusBar = ar_nm_Brand(f_brand) & " :" & f_b + 1 & " from " & UBound(arr_name_empl) + 1
+ nm_val_split = arr_name_empl(f_b)
+ 
+'MsgBox (nm_val_split)
+'MsgBox (find_val)
+ooo = 0
+ For arr_i = 0 To longT
+        find_val = DynMas(arr_i, colum)
+        'MsgBox (find_val)
+
+        If nm_val_split = find_val Then
+            For f_clm_arr = 0 To 15
+            new_DynMas(ooo, f_clm_arr) = DynMas(arr_i, f_clm_arr)
+            Next f_clm_arr
+            ooo = ooo + 1
+        End If
+        Next arr_i
+        ReDim new_DynMas(ooo - 1, 15)
+ 
+
+ 
+ 
+  nm_card = "Card_" & ar_nm_Brand(f_brand)
+  
+  Sheets(nm_card).Select
+  LastRowC = ActiveSheet.UsedRange.Row - 1 + ActiveSheet.UsedRange.Rows.Count
+    If LastRowC <= 12 Then
+    LastRowC = 12
+    End If
+  ActiveSheet.Range("12:" & LastRowC).Select 'óäàëÿåì ñòàðûå äàííûå
+  Selection.Delete Shift:=xlUp
+  
+  ActiveSheet.Cells(11, 1).Resize(ooo + 1 + 11, 15) = new_DynMas()
+
+  LastRowC = ActiveSheet.UsedRange.Row - 1 + ActiveSheet.UsedRange.Rows.Count
+  nmMReg = Cells(11, 4)
+  nmFLSM = Cells(11, 6)
+  nmSREP = Cells(11, 8)
+  ActiveSheet.PageSetup.PrintArea = "I1:BR" & LastRowC 'ðàñøèðÿåì ïå÷àòíûé äèàïàçîí
+  Rows("11:11").Select 'êîïèðóåì ôîðìàòèðîâàíèå
+  Selection.Copy
+  Rows("11:" & LastRowC).Select
+  Selection.PasteSpecial Paste:=xlPasteFormats, Operation:=xlNone, _
+        SkipBlanks:=False, Transpose:=False
+  For k = 12 To LastRowC Step 2 'ðàçëèíîâêà ÷åðåç îäíó
+   ActiveSheet.Rows(k).Select
+   With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorDark1
+        .TintAndShade = -0.149998474074526
+        .PatternTintAndShade = 0
+   End With
+  Next k
+  Range("R11:BR11").Select 'êîïèðóåì ôîðìóëû
+  Application.CutCopyMode = False
+  Selection.Copy
+  Range("R11:BR" & LastRowC).Select
+  Selection.PasteSpecial Paste:=xlPasteFormulas, Operation:=xlNone, _
+        SkipBlanks:=False, Transpose:=False
+  Application.CutCopyMode = False
+  
+  For f_d = 0 To num_clm_null
+  ActiveSheet.Range(Cells(11, ar_colums_null(f_d)), Cells(LastRowC, ar_colums_null(f_d))).Select
+  Selection.Clear
+  Next f_d
+    
+  For f_e = 11 To LastRowC
+  nm_salons = Cells(f_e, 10)
+  num_trRow = Cells(f_e, 2)
+  link2fs = dic_link2fc.Item(num_trRow)
+  
+  With Cells(f_e, 10)
+    .Select
+    .ClearHyperlinks
+    .Hyperlinks.Add Anchor:=Selection, Address:=link2fs, TextToDisplay:=nm_salons
+    .Font.ColorIndex = xlAutomatic
+    .Font.TintAndShade = 0
+    .Font.Bold = True
+  
+    End With
+     
+  Next f_e
+    
+  
+  ActiveSheet.Calculate
+ 
+ '---------------------------------------------------------------------------------------------------------
+ 'save file
+ '---------------------------------------------------------------------------------------------------------
+ ActiveSheet.Select
+ ActiveSheet.Copy
+
+aLinks = ActiveWorkbook.LinkSources(xlExcelLinks)
+If Not IsEmpty(aLinks) Then
+For i = 1 To UBound(aLinks)
+ActiveWorkbook.BreakLink _
+Name:=aLinks(i), _
+Type:=xlLinkTypeExcelLinks
+Next i
+End If
+ 
+For Each MyCell In ActiveSheet.UsedRange.SpecialCells(xlCellTypeFormulas)
+MyCell.Value = MyCell.Value
+Next MyCell
+ 
+    
+  Select Case f_h
+  
+  Case 2
+  'SREP
+  nmPatch = "rc_SREP_" & ar_nm_Brand(f_brand) & "_" & nmMReg & "_" & Trim(nmSREP)
+  nmCreatPatch = "Z:\Dropbox\For Regions Commercial Team\SREP\" & nmMReg & "\" & nmSREP & "\"
+  CreateFolderWithSubfolders nmCreatPatch
+  ActiveSheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:= _
+  nmCreatPatch & nmPatch & ".pdf", Quality:=xlQualityStandard, _
+  IncludeDocProperties:=True, IgnorePrintAreas:=False, OpenAfterPublish:=False
+    
+  'FLSM
+  nmPatch = "rc_SREP_" & ar_nm_Brand(f_brand) & "_" & nmMReg & "_" & Trim(nmSREP)
+  nmCreatPatch = "Z:\Dropbox\CARDS\" & nmMReg & "\" & nmFLSM & "\Region_Cards\"
+  CreateFolderWithSubfolders nmCreatPatch
+  ActiveSheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:= _
+  nmCreatPatch & nmPatch & ".pdf", Quality:=xlQualityStandard, _
+  IncludeDocProperties:=True, IgnorePrintAreas:=False, OpenAfterPublish:=False
+
+
+ Case 1
+ ActiveWindow.FreezePanes = False
+ Cells(11, 17).Select
+ ActiveWindow.FreezePanes = True
+  
+ nmPatch = "rc_FLSM_" & ar_nm_Brand(f_brand) & "_" & nmMReg & "_" & Trim(nmFLSM)
+ nmCreatPatch = "Z:\Dropbox\CARDS\" & nmMReg & "\" & nmFLSM & "\Region_Cards\"
+ CreateFolderWithSubfolders nmCreatPatch
+ ActiveWorkbook.SaveAs Filename:=nmCreatPatch & nmPatch, _
+ FileFormat:=xlOpenXMLWorkbook, CreateBackup:=False
+ 
+ 
+ Case 0
+ ActiveWindow.FreezePanes = False
+ Cells(11, 17).Select
+ ActiveWindow.FreezePanes = True
+ 
+ nmPatch = "rc_DR_" & ar_nm_Brand(f_brand) & "_" & nmMReg
+ nmCreatPatch = "Z:\Dropbox\CARDS\" & nmMReg & "\" & "Region_Cards\"
+ CreateFolderWithSubfolders nmCreatPatch
+ ActiveWorkbook.SaveAs Filename:=nmCreatPatch & nmPatch, _
+ FileFormat:=xlOpenXMLWorkbook, CreateBackup:=False
+   
+ End Select
+ 
+ActiveWindow.Close
+Workbooks(NF).Activate
+ 
+  Next f_b
+  Next f_h
+ 
+Next f_brand
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+.StatusBar = ""
+End With
+
+End Sub
+
+
+

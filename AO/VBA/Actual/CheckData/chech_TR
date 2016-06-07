@@ -65,7 +65,7 @@ patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(b) & "\Top R
 in_data = "in_TR"
 
 Workbooks.Open Filename:=patchTR, Notify:=False
-actTR = ActiveWorkbook.Name
+actTR = ActiveWorkbook.Namevba
 Sheets(ar_brand(b)).Select
 ActiveSheet.AutoFilterMode = False
 ar_LastRow(b) = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1  ' ????????? ??????

@@ -1,0 +1,26 @@
+select *, id,  name, address, law_name, com_mreg, street, city_name_geographic, region_name_geographic, 
+--(select count(usr.id) from users as usr where sln.id = usr.salon_id) as Emplб
+
+
+	(case when sln.com_mreg is Null   Then
+	(select sln2.com_mreg 
+	from salons as sln2
+	where sln.city_name_geographic = sln2.city_name_geographic
+	GROUP BY sln2.com_mreg
+	order by count( sln2.com_mreg ) desc
+	limit 1 ) 
+	else sln.com_mreg end) as mreg,
+	
+	(case when sln.com_mreg is Null   Then
+	(select sln3.com_mreg 
+	from salons as sln3
+	where sln.region_name_geographic = sln3.region_name_geographic
+	GROUP BY sln3.com_mreg
+	order by count( sln3.region_name_geographic ) desc
+	limit 1 ) 
+	else sln.com_mreg end) as mreg2
+
+
+
+from salons as sln
+order by id

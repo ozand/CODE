@@ -1,0 +1,11 @@
+
+Dim fso as object, Path  as string
+ 
+Set fso = CreateObject("Scripting.FileSystemObject")
+Path = "C:\Users\мвидио\Desktop\VBA\txt\123.txt"
+ 
+    If fso.FileExists(Path) Then
+        MsgBox "Файл присутствует"
+    Else
+        MsgBox "Файла нет"
+    End If

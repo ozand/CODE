@@ -1,0 +1,185 @@
+Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" (ByVal hwnd As Long, ByVal pszPath As String, ByVal psa As Any) As Long
+                                      
+Sub CreateFolderWithSubfolders(ByVal PatchCreateFolder$)
+ 
+   If Len(Dir(PatchCreateFolder$, vbDirectory)) = 0 Then
+       SHCreateDirectoryEx Application.hwnd, PatchCreateFolder$, ByVal 0&
+   End If
+End Sub
+
+
+Sub create_2Fuzz()
+Dim nm_sh_TR, nm_sh_TPS As String
+Dim ar_cd_Partners(), ar_Data_TPS(), ar_Data_TR(), ar_new_Data_TPS(), ar_new_Data_TR() As String
+Dim LastRow_TR, LastRow_TPS, LastColum_TR, LastColum_TPS  As Variant
+Dim value As Variant
+
+nm_sh_TR = "TR"
+nm_sh_TPS = "TPS"
+nm_sh_Sys = "Sys"
+
+NF = ActiveWorkbook.Name
+
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+Sheets(nm_sh_Sys).Select
+
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+
+ReDim ar_cd_Partners(1 To LastRow, 1 To 2)
+
+For i = 1 To LastRow
+    val1 = Cells(i, 1)
+    val2 = Cells(i, 2)
+    ar_cd_Partners(i, 1) = val1
+    ar_cd_Partners(i, 2) = val2
+Next i
+
+count_Partn = UBound(ar_cd_Partners)
+'---------------------------------------------------------------------------------------------------------
+Sheets(nm_sh_TR).Select
+LastRow_TR = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+LastColum_TR = ActiveSheet.UsedRange.Column - 1 + ActiveSheet.UsedRange.Columns.Count
+
+ReDim ar_Data_TR(1 To LastRow_TR, 1 To LastColum_TR)
+
+For f_r = 1 To LastRow_TR
+    For f_c = 1 To LastColum_TR
+         
+        ar_Data_TR(f_r, f_c) = Cells(f_r, f_c)
+    Next f_c
+Next f_r
+
+'---------------------------------------------------------------------------------------------------------
+Sheets(nm_sh_TPS).Select
+LastRow_TPS = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+LastColum_TPS = ActiveSheet.UsedRange.Column - 1 + ActiveSheet.UsedRange.Columns.Count
+
+ReDim ar_Data_TPS(1 To LastRow_TPS, 1 To LastColum_TPS)
+
+For f_r = 1 To LastRow_TPS
+    For f_c = 1 To LastColum_TPS
+        
+        ar_Data_TPS(f_r, f_c) = Cells(f_r, f_c)
+    Next f_c
+Next f_r
+
+'---------------------------------------------------------------------------------------------------------
+iPath = ActiveWorkbook.Path
+
+
+For f_p = 1 To count_Partn
+
+cd_partners = ar_cd_Partners(f_p, 1)
+nm_partners = ar_cd_Partners(f_p, 2)
+nmFile = "Fuzz_" & nm_partners
+
+Workbooks.Add
+nm_new_WB = ActiveWorkbook.Name
+
+Workbooks(nm_new_WB).Activate
+chek_name = Empty
+
+For i = 1 To 3
+
+    Select Case i
+    Case 1
+    sh_in_data = nm_sh_TR
+    clm_prtn_TR = 7
+    Case 2
+    sh_in_data = nm_sh_TPS
+    clm_prtn_TPS = 11
+    Case 3
+    sh_in_data = "Fuzz"
+    End Select
+    
+    
+    For Each Sh In ActiveWorkbook.Worksheets
+    act_WB_sh = Sh.Name
+    If Sh.Name = sh_in_data Then
+    chek_name = 1
+    End If
+    Next Sh
+    
+    If chek_name <> 1 Then
+    Set Sh = Worksheets.Add()
+    Sh.Name = sh_in_data
+    End If
+    
+Next i
+
+'--------------------------------------------------------------------------------------------------------- \
+
+ReDim ar_new_Data_TR(1 To LastRow_TR, 1 To LastColum_TR)
+
+
+
+iii = 0
+Workbooks(NF).Activate
+Sheets(nm_sh_TR).Select
+    For f_r = 1 To LastRow_TR
+        cd_prtn_in_ar = ar_Data_TR(f_r, clm_prtn_TR)
+        If cd_partners = cd_prtn_in_ar Or f_r = 1 Then
+            iii = iii + 1
+                For f_c = 1 To LastColum_TR
+                ar_new_Data_TR(iii, f_c) = Cells(f_r, f_c)
+                Next f_c
+        End If
+     Next f_r
+Workbooks(nm_new_WB).Activate
+Sheets(nm_sh_TR).Select
+ActiveSheet.Cells(1, 1).Resize(iii, LastColum_TR) = ar_new_Data_TR
+ActiveSheet.ListObjects.Add(xlSrcRange, ActiveSheet.UsedRange, , xlYes).Name = nm_sh_TR 
+'---------------------------------------------------------------------------------------------------------
+
+ReDim ar_new_Data_TPS(1 To LastRow_TPS, 1 To LastColum_TPS)
+
+iii = 0
+Workbooks(NF).Activate
+Sheets(nm_sh_TPS).Select
+    For f_r = 1 To LastRow_TPS
+        cd_prtn_in_ar = ar_Data_TPS(f_r, clm_prtn_TPS)
+        If cd_partners = cd_prtn_in_ar Or f_r = 1 Then
+            iii = iii + 1
+                For f_c = 1 To LastColum_TPS
+                ar_new_Data_TPS(iii, f_c) = Cells(f_r, f_c)
+                Next f_c
+        End If
+     Next f_r
+Workbooks(nm_new_WB).Activate
+Sheets(nm_sh_TPS).Select
+ActiveSheet.Cells(1, 1).Resize(iii, LastColum_TPS) = ar_new_Data_TPS
+ActiveSheet.ListObjects.Add(xlSrcRange, ActiveSheet.UsedRange, , xlYes).Name = nm_sh_TPS 
+
+'---------------------------------------------------------------------------------------------------------
+
+
+
+nmPath = iPath & "\Partners\"
+
+CreateFolderWithSubfolders nmPath
+        ActiveWorkbook.SaveAs Filename:=nmPath & nmFile, _
+        FileFormat:=xlOpenXMLWorkbook, CreateBackup:=False
+        Workbooks(nmFile).Close
+Next f_p
+Workbooks(NF).Activate
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+End Sub
+ 
+
+

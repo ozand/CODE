@@ -1,0 +1,5 @@
+If Dir(patchTR) = "" Then
+exit for
+else 
+Workbooks.Open Filename:=patchTR, Notify:=False
+end if

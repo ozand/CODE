@@ -1,0 +1,3 @@
+Function lastColumn(ws as Worksheet)
+	lastRow = ws.UsedRange.Column + ws.UsedRange.Column.Count - 1
+End Function

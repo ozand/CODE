@@ -1,0 +1,35 @@
+Sub row_hide()
+
+Dim lRangeDel As Range
+Dim lRangeH As Range
+
+ar_brand = Array("LP", "KR", "RD", "MX", "ES", "DE", "CR")
+num_ar_brand = UBound(ar_brand)
+
+ActiveSheet.Outline.ShowLevels RowLevels:=1, ColumnLevels:=1
+
+clm_row_hide = 61
+
+For f_b = 0 To num_ar_brand
+lastrow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+
+nm_sheet_data = ar_brand(f_b)
+Sheets(nm_sheet_data).Select
+
+Set lRangeDel = Nothing
+Set lRangeH = ActiveSheet.Rows(65000)
+
+    For r = lastrow To 3 Step -1
+    
+    If Cells(r, clm_row_hide) = 0 Then
+    Set lRangeDel = Application.Union(lRangeH, ActiveSheet.Rows(r))
+    Set lRangeH = lRangeDel
+    End If
+    Next r
+    lRangeDel.Select
+    
+    Selection.EntireRow.Hidden = True
+    
+Next f_b
+    
+End Sub

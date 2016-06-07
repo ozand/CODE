@@ -1,0 +1,134 @@
+
+Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" _
+                                     (ByVal hwnd As Long, ByVal pszPath As String, _
+                                      ByVal psa As Any) As Long
+                                    
+Sub CreateFolderWithSubfolders(ByVal PatchCreateFolder$)
+ 
+   If Len(Dir(PatchCreateFolder$, vbDirectory)) = 0 Then
+       SHCreateDirectoryEx Application.hwnd, PatchCreateFolder$, ByVal 0&
+   End If
+End Sub
+
+Sub breakdown_of_premius_FLSM()
+Dim NF, Bodies$, nMreg, nmPatch, LastRowFM, LastRow, nEmployer, nmCreatPatch2, nmCreatPatch, nMonth, nYear, LP, KR, RD, MX, SHEF, NFD, eTO, eSub As String
+Dim lRangeDel As Range
+Dim lRangeH As Range
+
+Application.Calculation = xlCalculationManual
+Bodies = "Высылаем Вам отчет, по результатам сопровождений Вас вашим руководителем(ями). Данный отчет,сформирован на основе предоставленных ежемесячно данных, вашими руководителями. В случае вопросов по содержанию отчета, оценок, комментариев, дат сопровождений и т.п. просьба обращаться напрямую к вашему руководителю или руководителю мегарегиона"
+
+Sheets("SREP_Send").Select
+LastRowFM = ActiveSheet.UsedRange.Row - 1 + ActiveSheet.UsedRange.Rows.Count
+For a = 2 To LastRowFM
+NF = ActiveWorkbook.Name
+
+Sheets("SREP_Send").Select
+    
+email_Srep = Cells(a, 13)
+nmSrep = Cells(a, 11)
+
+TextToFindArray = nmSrep
+Sheets("Coaching").Select
+Sheets("Coaching").Copy
+
+exist_links = ActiveWorkbook.LinkSources(xlExcelLinks)
+
+    If Not IsEmpty(exist_links) Then
+        For i = LBound(exist_links) To UBound(exist_links)
+            ActiveWorkbook.BreakLink Name:=exist_links(i), Type:=xlLinkTypeExcelLinks
+        Next
+    End If
+
+
+
+    nm_sh = "Coaching"
+    clm_split = 2
+    str_row = 5
+
+
+Sheets(nm_sh).Select
+
+LastRow = ActiveSheet.UsedRange.Row - 1 + ActiveSheet.UsedRange.Rows.Count
+Set lRangeDel = Nothing
+Set lRangeH = ActiveSheet.Rows(65000)
+
+
+    For r = LastRow To str_row Step -1
+
+        If Cells(r, clm_split) <> TextToFindArray Then
+           ' Rows(r).Delete
+         Set lRangeDel = Application.Union(lRangeH, ActiveSheet.Rows(r))
+         Set lRangeH = lRangeDel
+        End If
+    Next r
+
+    lRangeDel.Delete
+
+
+
+
+    nmPatch = "coaching_list " & nmSrep
+
+nm_disc = "C:\"
+
+'разбивка и отправка для FLSM
+
+nmCreatPatch = nm_disc & "coaching"
+CreateFolderWithSubfolders nmCreatPatch
+  On Error Resume Next
+        NFD = nmCreatPatch & "\" & nmPatch & ".xlsx"
+        eSub = nmPatch
+        ActiveWorkbook.SaveAs Filename:= _
+        nmCreatPatch & "\" & nmPatch & ".xlsx", FileFormat _
+        :=xlOpenXMLWorkbook, CreateBackup:=False
+
+    If email_Srep <> "" Then
+        Set OutlookApp = CreateObject("Outlook.Application")
+                Set oMail = OutlookApp.CreateItem(0)
+                With oMail
+                    .SentOnBehalfOfName = "Corpru.StatisticsDPP@loreal.com"
+                    .To = email_Srep
+                   '.Cc = Copy
+                    .Importance = 2
+                    .Subject = "Отчет по сопровождению за 2015 год. " & eSub
+                    .Body = Bodies
+                    .Attachments.Add NFD
+                    .Send
+                    .Display
+
+               End With
+    End If
+
+email_Srep = ""
+
+
+
+    ActiveWindow.Close
+    Application.DisplayAlerts = False
+
+Workbooks(NF).Activate
+Next a
+
+Application.Calculation = xlCalculationAutomatic
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

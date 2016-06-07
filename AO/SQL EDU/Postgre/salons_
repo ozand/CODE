@@ -1,0 +1,11 @@
+SELECT distinct yc.zcpartner, yc.rstxtmd, yc.customer, yc.zsfstore , concat(yc.owner, ' ' , yc.city,' ', yc.street)
+
+Case
+
+  FROM z_dpp_y_customers as yc
+
+  left join z_dpp_y_turnover_year as ty ON yc.customer  = ty.customer
+  left join 
+
+  GROUP BY yc.zcpartner,yc.rstxtmd, yc.customer,yc.zsfstore, yc.owner, yc.city, yc.street
+   

@@ -1,0 +1,48 @@
+Sub Ìàêðîñ5()
+'
+' Ìàêðîñ5 Ìàêðîñ
+'
+
+'
+    Range("B6").Select
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").RowAxisLayout xlTabularRow
+    With ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8")
+        .ColumnGrand = False
+        .RowGrand = False
+    End With
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").PivotFields("name").Subtotals = _
+        Array(False, False, False, False, False, False, False, False, False, False, False, False)
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").PivotFields("Òàáåëü").Subtotals = _
+        Array(False, False, False, False, False, False, False, False, False, False, False, False)
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").PivotFields("Âèòðèíà").Subtotals = _
+        Array(False, False, False, False, False, False, False, False, False, False, False, False)
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").PivotFields("Íà÷èñëåííî"). _
+        Subtotals = Array(False, False, False, False, False, False, False, False, False, False, _
+        False, False)
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").PivotFields("LP").Subtotals = Array _
+        (False, False, False, False, False, False, False, False, False, False, False, False)
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").PivotFields("MX").Subtotals = Array _
+        (False, False, False, False, False, False, False, False, False, False, False, False)
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").PivotFields("KR").Subtotals = Array _
+        (False, False, False, False, False, False, False, False, False, False, False, False)
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").PivotFields("RD").Subtotals = Array _
+        (False, False, False, False, False, False, False, False, False, False, False, False)
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").PivotFields("ES").Subtotals = Array _
+        (False, False, False, False, False, False, False, False, False, False, False, False)
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").PivotFields("mix").Subtotals = _
+        Array(False, False, False, False, False, False, False, False, False, False, False, False)
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").PivotFields("mreg").Subtotals = _
+        Array(False, False, False, False, False, False, False, False, False, False, False, False)
+    Range("H8").Select
+    ActiveWindow.DisplayGridlines = False
+    Range("A6").Select
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").TableStyle2 = "PivotStyleMedium8"
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").ShowTableStyleRowStripes = True
+    Range("A4").Select
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").PivotFields("mix").LayoutForm = _
+        xlOutline
+    Range("A4").Select
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").PivotFields("mix").Subtotals = _
+        Array(True, False, False, False, False, False, False, False, False, False, False, False)
+    ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà8").ColumnGrand = True
+End Sub

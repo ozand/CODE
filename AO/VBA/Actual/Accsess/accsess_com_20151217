@@ -183,6 +183,7 @@ LastColum = ActiveSheet.UsedRange.Column - 1 + ActiveSheet.UsedRange.Columns.Cou
     
     num_colums = num_colums + 1
     ar_Data(iii, num_colums) = Replace_symbols(Trim(Cells(f_i, 8)))
+    
     ar_nmHead(num_colums) = "cont_email"
         
     num_colums = num_colums + 1

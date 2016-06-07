@@ -1,0 +1,29 @@
+
+
+select  
+
+count(distinct usr.id) as count_unq_USR,
+count(distinct usr.email) as count_email,
+count(distinct usr.mobile_number) as count_mphone,
+count(distinct sln.id) as count_unq_SLN,
+count(distinct sln.email) as count_SLN_email,
+count(distinct sln.phone) as count_SLN_phone,
+count(distinct usr_RS.email) as count_SLN_email,
+count(distinct usr_RS.mobile_number) as count_SLN_phone,
+count(distinct concat(sln.email, usr_RS.email)) as count_T_SLN_email,
+count(distinct concat(usr_RS.mobile_number, sln.phone)) as count_T_SLN_phone
+
+
+from seminars as SMR
+
+left join seminar_users as SMU ON smr.id = smu.seminar_id
+left join users as usr ON smu.user_id = usr.id
+left join salons as sln ON usr.salon_id = sln.id
+left join users as usr_RS ON sln.salon_manager_id = usr_RS.id 
+
+
+where to_char(smr.started_at, 'YYYY') in ('2015') 
+
+
+
+

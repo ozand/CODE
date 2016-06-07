@@ -1,0 +1,21 @@
+select std.id, std.name, std.address,  std.city_name, std.capacity, std.is_closed, smr.started_at, extract(day from smr.started_at) as cd_day, 
+extract(month from smr.started_at) as cd_month, extract(year from smr.started_at) as cd_year, count(smr.id),
+(select count(smu.user_id) as Contacts
+from seminar_users as smu
+where smr.id = smu.seminar_id ), 
+
+(select sum(smu.paid)
+from seminar_users as smu
+where smr.id = smu.seminar_id ) as Payment,
+smt.name as smr_name, smt.kpis_type
+
+
+from studios as std
+
+left join seminars as SMR on std.id = smr.studio_id 
+left join seminar_types as smt ON smr.seminar_type_id = smt.id
+
+Where smr.closed_at is not Null
+
+group by smr.started_at, std.id, smr.id, smt.name, smt.kpis_type
+

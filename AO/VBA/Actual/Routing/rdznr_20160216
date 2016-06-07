@@ -1,0 +1,30 @@
+Sub Redesigner()
+    Dim inpdata As Range, realdata As Range, ns As Worksheet
+    Dim i&, j&, k&, c&, r&, hc&, hr&
+    Dim out(), dataArr, hcArr, hrArr
+    
+    hr = Val(InputBox("Colums number"))
+    hc = Val(InputBox("Rows number"))
+    num_data = 
+
+    Set inpdata = Selection
+    If inpdata.Rows.Count <= hr Or inpdata.Columns.Count <= hc Then Exit Sub
+    Set realdata = inpdata.Offset(hr, hc).Resize(inpdata.Rows.Count - hr, inpdata.Columns.Count - hc)
+    dataArr = realdata.Value
+    If hr Then hrArr = inpdata.Offset(0, hc).Resize(hr, inpdata.Columns.Count - hc).Value
+    If hc Then hcArr = inpdata.Offset(hr, 0).Resize(inpdata.Rows.Count - hr, hc).Value
+    
+    ReDim out(1 To Application.CountA(realdata), 1 To hr + hc + 1)
+    Set ns = Worksheets.Add
+    
+    For i = 1 To UBound(dataArr, 1)
+        For j = 1 To UBound(dataArr, 2)
+            If Not IsEmpty(dataArr(i, j)) Then
+                k = k + 1
+                For c = 1 To hc: out(k, c) = hcArr(i, c): Next c
+                For r = 1 To hr: out(k, c + r - 1) = hrArr(r, j): Next r
+                out(k, c + r - 1) = dataArr(i, j)
+            End If
+    Next j, i
+    ns.cells(2, 1).Resize(UBound(out, 1), UBound(out, 2)) = out
+End Sub

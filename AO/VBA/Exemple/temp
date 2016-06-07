@@ -1,0 +1,112 @@
+Sub Ìàêðîñ1()
+'
+' Ìàêðîñ1 Ìàêðîñ
+'
+
+'
+    Workbooks.OpenText Filename:="P:\SAPBW\Z_DPP_Y_CUSTOMERS.csv", _
+        Origin:=28595, StartRow:=1, DataType:=xlDelimited, TextQualifier:= _
+        xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, Semicolon:=True, _
+        Comma:=False, Space:=False, Other:=False, TrailingMinusNumbers:=True
+        
+ 
+        
+        
+End Sub
+Sub Ìàêðîñ2()
+
+Dim FilePatch As String
+FilePatch = "P:\SAPBW\Z_DPP_Y_CUSTOMERS.csv"
+Open FilePatch For Input As #1
+
+row_number = 0
+Do Until EOF(1)
+Line Input #1, lineFromFile
+LineItems = Split(lineFromFile, ";")
+
+ActiveCell.Offset(row_number, 0).Value = LineItems(5)
+ActiveCell.Offset(row_number, 1).Value = LineItems(4)
+ActiveCell.Offset(row_number, 2).Value = LineItems(0)
+ActiveCell.Offset(row_number, 3).Value = LineItems(1)
+ActiveCell.Offset(row_number, 4).Value = LineItems(6)
+ActiveCell.Offset(row_number, 5).Value = LineItems(9)
+ActiveCell.Offset(row_number, 6).Value = LineItems(10)
+row_number = row_number + 1
+
+Loop
+Close #1
+
+    
+End Sub
+
+
+Sub rt()
+
+Dim ar_data()
+Dim FilePatch As String
+FilePatch = "P:\SAPBW\Z_DPP_Y_CUSTOMERS.csv"
+Open FilePatch For Input As #1
+lastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+ReDim ar_data(0 To lastRow, 0 To 10)
+row_number = 0
+Do Until EOF(1)
+Line Input #1, lineFromFile
+LineItems = Split(lineFromFile, ";")
+
+ar_data(row_number, 0) = LineItems(5)
+ar_data(row_number, 1) = LineItems(4)
+ar_data(row_number, 2) = LineItems(0)
+ar_data(row_number, 3) = LineItems(1)
+ar_data(row_number, 4) = LineItems(6)
+ar_data(row_number, 5) = LineItems(9)
+ar_data(row_number, 6) = LineItems(10)
+row_number = row_number + 1
+
+Loop
+
+
+Close #1
+    
+End Sub
+Sub Ìàêðîñ3()
+'
+' Ìàêðîñ3 Ìàêðîñ
+'
+
+'
+    Workbooks.OpenText Filename:="P:\SAPBW\Z_DPP_Y_CUSTOMERS — êîïèÿ.txt", _
+        Origin:=28595, StartRow:=1, DataType:=xlDelimited, TextQualifier:= _
+        xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, Semicolon:=True, _
+        Comma:=False, Space:=False, Other:=False, FieldInfo:=Array(Array(1, 1), _
+        Array(2, 1), Array(3, 1), Array(4, 1), Array(5, 1), Array(6, 1), Array(7, 1), Array(8, 1), _
+        Array(9, 1), Array(10, 1), Array(11, 1)), TrailingMinusNumbers:=True
+End Sub
+
+Sub www()
+
+
+Dim url As String
+url = "URL;https://dadata.ru/api/v2/clean/(address|phone|passport|name|email|birthdate|vehicle)"
+With Worksheets("Sheet1").QueryTables.Add(Connection:=url, Destination:=Worksheets("Sheet1").Range("A1"))
+  .Name = "Geocoder Query"
+  .RowNumbers = False
+  .FillAdjacentFormulas = False
+  .PreserveFormatting = True
+  .RefreshOnFileOpen = False
+  .BackgroundQuery = False
+  .RefreshStyle = xlOverwriteCells
+  .SavePassword = False
+  .SaveData = True
+  .AdjustColumnWidth = True
+  .RefreshPeriod = 0
+  .WebSelectionType = xlEntirePage
+  .WebFormatting = xlWebFormattingNone
+  .WebPreFormattedTextToColumns = True
+  .WebConsecutiveDelimitersAsOne = True
+  .WebSingleBlockTextImport = False
+  .WebDisableDateRecognition = False
+  .WebDisableRedirections = False
+  .Refresh BackgroundQuery:=False
+End With
+
+End Sub

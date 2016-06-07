@@ -1,0 +1,90 @@
+
+Sub YtoUnvCD()
+Dim ar_Data_Y()  
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+
+lnk_datafolder = "p:\SAPBW\"
+nm_file = "Z_DPP_Y_CUSTOMERS.csv"
+NF = ActiveWorkbook.Name
+
+Dim dic_cdY: Set dic_cdY = CreateObject("Scripting.Dictionary")
+
+clm_85 = 5
+clm_y = 6 
+clm_cd_prtn = 1
+clm_nm_prtn = 2
+clm_own = 7
+clm_city = 10
+clm_adress =11
+
+
+iii = 0
+ 
+Workbooks.OpenText Filename:=lnk_datafolder & nm_file, _
+        Origin:=65001, StartRow:=1, DataType:=xlDelimited, TextQualifier:= _
+        xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, Semicolon:=True, _
+        Comma:=False, Space:=False, Other:=False, TrailingMinusNumbers:=True
+        
+        
+num_LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+num_LastColum = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+  
+redim ar_Data_Y(num_LastRow, 7)  
+     
+For f_r = 2 To num_LastRow
+
+cd_Y = cells(f_r, clm_y)
+
+If not dic_cdY.Exists(cd_Y) Then
+dic_cdY.add cd_Y, iii
+
+num_colums = 0
+ar_Data_Y(iii, num_colums) = Cells(f_r, clm_y)
+
+num_colums = num_colums + 1
+ar_Data_Y(iii, num_colums) = Cells(f_r, clm_85)
+
+num_colums = num_colums + 1
+ar_Data_Y(iii, num_colums) = Cells(f_r, clm_cd_prtn)
+
+num_colums = num_colums + 1
+ar_Data_Y(iii, num_colums) = Cells(f_r, clm_nm_prtn)
+
+num_colums = num_colums + 1
+ar_Data_Y(iii, num_colums) = Cells(f_r, clm_own)
+
+num_colums = num_colums + 1
+ar_Data_Y(iii, num_colums) = Cells(f_r, clm_city)
+
+num_colums = num_colums + 1
+ar_Data_Y(iii, num_colums) = Cells(f_r, clm_adress)
+
+iii = iii + 1
+end if
+
+
+Next f_r
+
+ActiveWindow.Close
+     
+Workbooks(NF).Activate
+ActiveSheet.UsedRange.Cells.ClearContents
+
+ ActiveSheet.Cells(1, 1).Resize(iii + 1, num_colums+1) = ar_Data_Y()
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+End Sub

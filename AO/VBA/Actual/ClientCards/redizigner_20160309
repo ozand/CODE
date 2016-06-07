@@ -1,0 +1,96 @@
+Sub redesig()
+    Dim inpdata As Range, realdata As Range, ns As Worksheet
+    Dim i&, j&, k&, c&, r&, hc&, hr&
+    Dim out(), dataArr, hcArr, hrArr
+
+sts = 0
+start_cell = "LOR mSeries Store"
+ hr = 3
+ hc = 2
+
+ar_head = Array("unvCD", "nm_salon", "brand", "gamme", "period", "val")
+
+'---------------------------------------------------------------------------------------------------------
+NF = ActiveSheet.Name
+
+
+new_rediz_Sheet = NF & "_" & "redz"
+
+For Each Sh In ThisWorkbook.Worksheets
+If Sh.Name = new_rediz_Sheet Then
+chek_name = 1
+End If
+Next Sh
+
+If chek_name <> 1 Then
+Set Sh = Worksheets.Add()
+Sh.Name = new_rediz_Sheet
+End If
+
+'---------------------------------------------------------------------------------------------------------
+
+Sheets(NF).Activate
+
+For Each Cell In ActiveSheet.UsedRange
+If InStr(1, Cell, start_cell) Then
+sts = 1 + sts
+    If sts > 1 Then
+    strt_row = Cell.Row
+    strt_column = Cell.Column
+    Exit For
+    End If
+End If
+
+Next Cell
+
+
+Cells(strt_row, strt_column).Activate
+ActiveCell.CurrentRegion.Select
+
+
+
+Set inpdata = Selection
+    If inpdata.Rows.Count <= hr Or inpdata.Columns.Count <= hc Then Exit Sub
+    Set realdata = inpdata.Offset(hr, hc).Resize(inpdata.Rows.Count - hr, inpdata.Columns.Count - hc)
+    dataArr = realdata.Value
+    If hr Then hrArr = inpdata.Offset(0, hc).Resize(hr, inpdata.Columns.Count - hc).Value
+    If hc Then hcArr = inpdata.Offset(hr, 0).Resize(inpdata.Rows.Count - hr, hc).Value
+    
+    ReDim out(1 To Application.CountA(realdata), 1 To hr + hc + 1)
+        
+    For i = 1 To UBound(dataArr, 1)
+        For j = 1 To UBound(dataArr, 2)
+            If dataArr(i, j) <> Empty And hcArr(i, 1) <> "Overall Result" Then
+                k = k + 1
+                c = 1
+                out(k, c) = hcArr(i, 1)
+                c = 1 + c
+                out(k, c) = hcArr(i, 2)
+                c = 1 + c
+                out(k, c) = Left(hrArr(1, j), 2)
+                c = 1 + c
+                out(k, c) = Right(hrArr(1, j), Len(hrArr(1, j)) - 1)
+                
+                c = 1 + c
+                out(k, c) = hrArr(2, j)
+                
+                c = 1 + c
+                v_table = dataArr(i, j)
+                out(k, c) = v_table
+                
+            End If
+    Next j, i
+    
+    Sheets(new_rediz_Sheet).Activate
+    Cells(2, 1).Resize(UBound(out, 1), UBound(out, 2)) = out
+  
+For f_c = 0 To UBound(ar_head)
+    Cells(1, f_c + 1) = ar_head(f_c)
+    Next f_c
+
+
+
+End Sub
+
+
+

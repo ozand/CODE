@@ -6,7 +6,7 @@ to_char(smr.started_at,'MM')as Month,
 to_char(smr.started_at,'YYYY') as Year ,
 to_char(smr.started_at,'dd.mm.YYYY') as FullDate,
 to_char(smr.updated_at,'dd.mm.YYYY') as UpdateDate,
-(case  when to_char (smr.closed_at, 'YYYY') in ('2015')  then '1' else 0 end) as seminar_closed,
+(case  when to_char (smr.closed_at, 'YYYY') in ('2016')  then '1' else 0 end) as seminar_closed,
 smr.seminar_type_id,smr.name, smr.city_name, smr.studio_name, smr.technolog_full_name, smr.users_count, smr.salons_count, usr.full_name, usr.id, 
 usr.role,
 usr.position, usr.city_name, 
@@ -22,5 +22,5 @@ usr.region_name
 from seminars AS SMR
 left join users AS USR ON smr.technolog_id = usr.id or smr.partimer_id = usr.id
 
-where to_char(started_at, 'YYYY') in ('2015') and usr.role not like 'master' and to_char(started_at, 'MM') in ('04', '05', '06') 
+where to_char(started_at, 'YYYY') in ('2016') and usr.role not like 'master' and to_char(started_at, 'MM') in ('01', '02', '03') 
 

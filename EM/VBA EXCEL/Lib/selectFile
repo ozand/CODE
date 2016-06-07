@@ -1,0 +1,11 @@
+Function selectFile()
+    nameOfFile = ""
+    With Application.FileDialog(msoFileDialogFilePicker)
+        .AllowMultiSelect = False
+        .InitialFileName = "*.*"
+        .Title = "Select file"
+        .Show
+        If .SelectedItems.Count = 1 Then nameOfFile = .SelectedItems(1)
+    End With
+    selectFile = nameOfFile
+End Function

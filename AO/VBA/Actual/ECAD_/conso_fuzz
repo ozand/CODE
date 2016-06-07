@@ -1,0 +1,102 @@
+
+Sub conso_2Fuzz()
+Dim nm_sh_TR, nm_sh_TPS As String
+Dim ar_cd_Partners(), ar_Data_TPS(), ar_Data_TR(), ar_new_Data_TPS(), ar_new_Data_TR() As String
+Dim LastRow_TR, LastRow_TPS, LastColum_TR, LastColum_TPS  As Variant
+Dim value As Variant
+
+nm_sh_TR = "TR"
+nm_sh_TPS = "TPS"
+nm_sh_Sys = "Sys"
+
+NF = ActiveWorkbook.Name
+
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+Sheets(nm_sh_Sys).Select
+
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+
+ReDim ar_cd_Partners(1 To LastRow, 1 To 2)
+
+For i = 1 To LastRow
+    val1 = Cells(i, 1)
+    val2 = Cells(i, 2)
+    ar_cd_Partners(i, 1) = val1
+    ar_cd_Partners(i, 2) = val2
+Next i
+
+count_Partn = UBound(ar_cd_Partners)
+
+iPath = ActiveWorkbook.Path
+
+
+'---------------------------------------------------------------------------------------------------------
+Sheets(nm_sh_TR).Select
+LastRow_TR = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+LastColum_TR = ActiveSheet.UsedRange.Column - 1 + ActiveSheet.UsedRange.Columns.Count
+
+
+
+Sheets(nm_sh_TPS).Select
+LastRow_TPS = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+LastColum_TPS = ActiveSheet.UsedRange.Column - 1 + ActiveSheet.UsedRange.Columns.Count
+
+ReDim ar_Data_TPS(1 To LastRow_TPS, 1 To LastColum_TPS + LastColum_TR + 1)
+
+'---------------------------------------------------------------------------------------------------------
+
+iii = 0
+For f_p = 1 To count_Partn
+
+cd_partners = ar_cd_Partners(f_p, 1)
+nm_partners = ar_cd_Partners(f_p, 2)
+nmFile = "Fuzz_" & nm_partners
+
+nmPath = iPath & "\Partners\" & nmFile & ".xlsx"
+
+Workbooks.Open Filename:=nmPath, Notify:=False
+
+Workbooks(nmFile).Activate
+
+
+Sheets("Fuzz").Select
+LastRow_Fuzz = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+LastColum_Fuzz = ActiveSheet.UsedRange.Column - 1 + ActiveSheet.UsedRange.Columns.Count
+    For f_r = 1 To LastRow_Fuzz
+                iii = iii + 1
+                if iii = 1 then strt_row = 1 :else strt_row = 2 :end if
+                
+                For f_c = strt_row To LastColum_Fuzz
+                ar_Data_Fuzz(iii, f_c) = Cells(f_r, f_c)
+                Next f_c
+        End If
+     Next f_r
+
+Workbooks(nmFile).Close
+
+Next f_p
+Workbooks(NF).Activate
+
+Sheets("Fuzz").Select
+ActiveSheet.Cells(1, 1).Resize(iii, LastColum_Fuzz) = ar_Data_Fuzz
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+End Sub
+ 
+
+

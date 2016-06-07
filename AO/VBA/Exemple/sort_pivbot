@@ -1,0 +1,30 @@
+
+Private Sub Worksheet_SelectionChange(ByVal Target As Excel.Range)
+
+Dim pt As PivotTable
+Dim pf As PivotField
+ 
+Set pt = ActiveSheet.PivotTables(1)
+
+
+numColumn = ActiveCell.Column
+actCell = ActiveCell.Value
+numRow = ActiveCell.Row
+
+Select Case numColumn
+Case Is >=8
+On Error Resume Next
+With pt
+pf.AutoSort  xlDescending,  pf.Name
+End with
+
+End Select
+
+End Sub
+
+
+
+
+
+
+

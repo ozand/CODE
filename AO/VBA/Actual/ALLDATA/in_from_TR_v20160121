@@ -846,9 +846,6 @@ End Select
     If f_m < CInt(act_month) Then
     clm_m = str_PYper_LOR_VAL + f_m
     m_val = (Cells(i, clm_m) / 1000) + m_valP
-
-
-
     Else
     Exit For
     End If
@@ -896,16 +893,20 @@ End Select
     ca_ytd_TY = m_val
     
     num_colums = num_colums + 1
-    if ca_ytd_PY is not Null and ca_ytd_TY is Null Then
+    If ca_ytd_PY <> 0 And ca_ytd_TY = 0 Then
         type_cln_react = "lost"
-        else 
+        ca_ytd_PY_lost = ca_ytd_PY*-1
+        Else
         type_cln_react = "act"
-    end if
+        ca_ytd_PY_lost = Empty
+    End If
     ar_Data(iii, num_colums) = type_cln_react
+    ar_nmHead(num_colums) = "type_LOST"
     
-     
-    
-        
+         
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = ca_ytd_PY_lost
+    ar_nmHead(num_colums) = "CA_LOST_PY"
     
     
 '---------------------------------------------------------------------------------------------------------
@@ -1113,6 +1114,7 @@ With Application
 End With
 
 End Sub
+
 
 
 

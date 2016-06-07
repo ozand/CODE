@@ -1,16 +1,88 @@
 select id, 	city_id, 	name, 	address, 	phone, 	manager, 	law_name, 	inn, 	salon_code, 	salon_type, 	description, 	created_at, 	updated_at, 	city_name, 	free_certificate_count, 	active_certificate_count, 	partner_code, 	is_closed, 	grade, 	contact_person, 	brand, 	open_date, 	representative_id, 	representative_full_name, 	street, 	house, 	ext_address, 	discount, 	open_month, 	open_year, 	chain_name, 	city_name_geographic, 	which_club, 	barber_chairs, 	color_cost, 	com_mreg, 	com_reg, 	com_sect, 	client_type, 	crer, 	hide, 	technolog_full_name, 	region_id, 	users_count, 	region_name, 	technolog_id, 	megaregion_name, 	user_counter, 	mag, 	megaregion_id, 	site, 	email, 	partner, 	partner_private_code, 	manager_phone, 	manager_mail, 	salon_conquer, 	fias_id, 	salon_manager_id, 	show_on_locator, 	
-(select count(DISTINCT smu.user_id) 
-from seminar_users as smu 
-left join users as usr ON smu.user_id = usr.id
-where sln.id = usr.salon_id) as EDU_SLN_USR, 
+select Count( distinct usr.id ) 
+from  seminar_users as SMU
+left join users as usr on usr.id = SMU.user_id 
+left join seminars as SM on SMU.seminar_id = SM.id 
+left join seminar_types as SMT on SM.seminar_type_id = SMT.id
 
-(select count(DISTINCT usr2.id) from users as usr2 
-where sln.id = usr2.salon_id) as SLN_USR,
+where sln.id = usr.salon_id and  sm.closed_at is not Null) as "U_ALLTIME",
 
-(select count(smr.id) 
-from seminars as smr
-where smr.salon_id = sln.id 
-) as cnt_sln
+ 
+(select Count( distinct usr.id ) 
+from  seminar_users as SMU
+left join users as usr on usr.id = SMU.user_id 
+left join seminars as SM on SMU.seminar_id = SM.id
+left join seminar_types as SMT on SM.seminar_type_id = SMT.id
+
+where sln.id = usr.salon_id and extract(year from sm.started_at) = '2015' and sm.closed_at is not Null) as "U_2015",
+
+(select Count( distinct usr.id ) 
+from  seminar_users as SMU
+left join users as usr on usr.id = SMU.user_id 
+left join seminars as SM on SMU.seminar_id = SM.id
+left join seminar_types as SMT on SM.seminar_type_id = SMT.id
+
+where sln.id = usr.salon_id and extract(year from sm.started_at) = '2016' and sm.closed_at is not Null) as "U_2016",
+
+(select Count(usr.id ) 
+from  seminar_users as SMU
+left join users as usr on usr.id = SMU.user_id 
+left join seminars as SM on SMU.seminar_id = SM.id 
+left join seminar_types as SMT on SM.seminar_type_id = SMT.id
+
+where sln.id = usr.salon_id and  sm.closed_at is not Null) as "C_ALLTIME",
+
+ 
+(select Count( usr.id ) 
+from  seminar_users as SMU
+left join users as usr on usr.id = SMU.user_id 
+left join seminars as SM on SMU.seminar_id = SM.id
+left join seminar_types as SMT on SM.seminar_type_id = SMT.id
+
+where sln.id = usr.salon_id and extract(year from sm.started_at) = '2015' and sm.closed_at is not Null) as "C_2015",
+
+(select Count( usr.id ) 
+from  seminar_users as SMU
+left join users as usr on usr.id = SMU.user_id 
+left join seminars as SM on SMU.seminar_id = SM.id
+left join seminar_types as SMT on SM.seminar_type_id = SMT.id
+
+where sln.id = usr.salon_id and extract(year from sm.started_at) = '2016' and sm.closed_at is not Null) as "C_2016",
+
+(select Count( usr.id ) 
+from users as usr
+
+where sln.id = usr.salon_id ) as "Count_SLN_USRs",
+
+(select Count( usr.id ) 
+from users as usr
+where sln.id = usr.salon_id and usr.last_request_at is not Null ) as "Count_actECAD_USRs",
+
+(select Count(distinct usr.email ) 
+from users as usr
+where sln.id = usr.salon_id  ) as "Count_usr_email",
+
+(select Count(distinct usr.mobile_number ) 
+from users as usr
+where sln.id = usr.salon_id  ) as "Count_usr_phone",
+
+
+to_char(sln.created_at, 'DD.MM.YYYY')  as "add2ECAD",
+
+(select usr.full_name from users as usr 
+where sln.salon_manager_id = usr.id) as "Manager_SLN",
+
+(select to_char(usr.last_request_at, 'DD.MM.YYYY')  from users as usr 
+where sln.salon_manager_id = usr.id  and usr.last_request_at is not Null) as "Manager_SLN_last_accsess", 
+
+(Select concat( smr.technolog_full_name, smr.partimer_full_name)
+from seminar_users as smu
+left join seminars as smr ON smr.id = smu.seminar_id
+Left join users as usr ON smu.user_id = usr.id
+left join salons as sln2 ON sln2.id = usr.salon_id
+where sln.id = sln2.id
+order by smr.started_at Desc
+limit 1) as "last_educater_cont"
 
 
 

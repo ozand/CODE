@@ -1,0 +1,86 @@
+Sub edu2TR()
+Dim FilePatch As String
+Dim ar_DataEDU
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+
+ar_brand = Array("KR", "LP", "RD", "MX", "ES")
+num_ar_brand = UBound(ar_brand)
+f_year = 2016
+
+
+
+For f_brand = 0 To num_ar_brand
+in_data = "Educated"
+
+FilePatch = "p:\DPP\Business development\Statistics Service\EDU\Base\salons_educated_" & ar_brand(f_brand) & ".csv"
+
+Workbooks.OpenText Filename:=FilePatch, _
+        Origin:=65001, StartRow:=1, DataType:=xlDelimited, TextQualifier:= _
+        xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, Semicolon:=True, _
+        Comma:=False, Space:=False, Other:=False, TrailingMinusNumbers:=True
+
+
+actEDUBook = ActiveWorkbook.Name
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+LastColumn = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+ReDim ar_DataEDU(1 To LastRow, 1 To LastColumn)
+
+For f_rw = 1 To LastRow
+For f_clm = 1 To LastColumn
+
+ar_DataEDU(f_rw, f_clm) = cells(f_rw, f_clm)
+Next f_clm
+Next f_rw
+
+Workbooks(actEDUBook).Close
+
+patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(f_brand) & "\Top Russia Total " & f_year & " " & ar_brand(f_brand) & ".xlsm"
+
+
+If Dir(patchTR) = "" Then
+Exit For
+Else
+Workbooks.Open Filename:=patchTR, Notify:=False
+End If
+
+actTR = ActiveWorkbook.Name
+Sheets(in_data).Select
+
+
+
+ActiveSheet.UsedRange.cells.ClearContents
+ActiveSheet.cells(1, 1).Resize(LastRow, LastColumn) = ar_DataEDU
+
+MsgBox(  "calcalate " & patchTR)
+Calculate
+MsgBox(  "calcalated end & save " & patchTR)
+Workbooks(actTR).Save
+Workbooks(actTR).Close
+
+
+Next f_brand
+'---------------------------------------------------------------------------------------------------------
+Unload frmMsg
+Set frmMsg = Nothing
+
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+    
+End Sub
+
+
+

@@ -21,10 +21,6 @@ ar_nm_month = Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep
 ar_nmMregEN = Array("MOSCOW", "GR", "NORTHWEST", "CENTER", "VOLGA", "SOUTH", "URAL", "SIBERIA", "FAR EAST")
 ar_nmMregLT = Array("Moscou", "GR", "Nord-Ouest", "Centre", "Volga-Centre", "Sud", "Oural", "Siberie", "EO")
 
-STR_ROW = InputBox("ROW")
-STR_ROW = CInt(STR_ROW)
-END_ROW = STR_ROW + 1000
-
 With Application
 .ScreenUpdating = False
 .EnableEvents = False
@@ -36,12 +32,12 @@ End With
 status_head = 0
 
 
-nm_brand = "LP"
+nm_brand = "RD"
 
 
 
         
-patchTR = "p:\DPP\Business development\Book commercial\" & nm_brand & "\Top Russia Total 2015 " & nm_brand & ".xlsm"
+patchTR = "p:\DPP\Business development\Book commercial\" & nm_brand & "\Top Russia Total 2016 " & nm_brand & ".xlsm"
 in_data = "in_TR"
 
 For Each Sh In ThisWorkbook.Worksheets
@@ -249,11 +245,15 @@ ReDim ar_Data(ar_LastRow - 4, 150)  ' num_colums
         num_colums = num_colums + 1
     ar_Data(iii, num_colums) = Left(Trim(Cells(i, 14)), 30)
     ar_nmHead(num_colums) = "manager_mail"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 1)
+    ar_nmHead(num_colums) = "row"
         
 
-    IF iii+1 >= STR_ROW AND iii+1 <= END_ROW THEN
+
 iii = iii + 1
-    end if
+
     
 Next i
 

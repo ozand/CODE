@@ -1,0 +1,102 @@
+Sub Get_PRGRM()
+
+Dim ar_DATA(1 To 100000, 1 To 6)
+
+'---------------------------------------------------------------------------------------------------------
+ar_brand = Array("LP", "KR", "RD", "MX", "ES", "DE", "CR")
+
+'---------------------------------------------------------------------------------------------------------
+num_ar_brand = UBound(ar_brand)
+
+clm_prtnr = 1
+clm_brand = 2
+clm_year = 3
+clm_type_val = 4
+clm_month_strt = 11
+step_month = 4
+
+
+iii = 1
+
+For f_b = 0 To num_ar_brand
+lastrow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+
+nm_sheet_data = "Partners_" & (ar_brand(f_b))
+
+Sheets(nm_sheet_data).Select
+
+For num_row = 1 To lastrow
+
+cd_partners = Cells(num_row, clm_prtnr)
+cd_brand = Cells(num_row, clm_brand)
+nm_year = Cells(num_row, clm_year)
+nm_type = Cells(num_row, clm_type_val)
+
+'---------------------------------------------------------------------------------------------------------
+sts = 0
+If cd_partners <> "" Then sts = sts + 1
+If nm_year = "TY" Then sts = sts + 1
+If nm_type = "SI" Or nm_type = "SO" Then sts = sts + 1
+
+
+
+If sts = 3 Then
+    
+    num_mnth = 0
+    For f_v = clm_month_strt To clm_month_strt + 11 * step_month Step step_month
+    
+    vl_cell = Cells(num_row, f_v)
+        
+        If vl_cell <>  0 then 
+    
+        num_colums = 0
+            
+        num_colums = num_colums + 1
+        num_mnth = num_mnth + 1
+        ar_DATA(iii, num_colums) = num_mnth
+
+        num_colums = num_colums + 1
+        ar_DATA(iii, num_colums) = cd_partners
+        
+        num_colums = num_colums + 1
+        ar_DATA(iii, num_colums) = cd_brand
+        
+        num_colums = num_colums + 1
+        ar_DATA(iii, num_colums) = nm_type
+            
+        num_colums = num_colums + 1
+        ar_DATA(iii, num_colums) = cd_partners & cd_brand & nm_type
+        
+        num_colums = num_colums + 1
+        
+        ar_DATA(iii, num_colums) = vl_cell
+        
+        iii = iii + 1
+        End If
+    Next f_v
+    
+
+
+End If
+'---------------------------------------------------------------------------------------------------------
+
+Next num_row
+Next f_b
+
+
+
+Sheets("PRGRM").Activate
+ActiveSheet.UsedRange.Cells.ClearContents
+ActiveSheet.Cells(2, 1).Resize(iii+1, num_colums) = ar_DATA()
+
+cells(1,1) = "num_mnth"
+cells(1,2) = "cd_partners"
+cells(1,3) = "cd_brand"
+cells(1,4) = "nm_type"
+cells(1,5) = "concate"
+cells(1,6) = "val"
+
+
+End Sub
+
+

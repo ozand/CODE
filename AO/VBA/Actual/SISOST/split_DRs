@@ -1,0 +1,153 @@
+
+Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" (ByVal hwnd As Long, ByVal pszPath As String, ByVal psa As Any) As Long
+                                    
+Sub CreateFolderWithSubfolders(ByVal PatchCreateFolder$)
+ 
+   If Len(Dir(PatchCreateFolder$, vbDirectory)) = 0 Then
+       SHCreateDirectoryEx Application.hwnd, PatchCreateFolder$, ByVal 0&
+   End If
+End Sub
+'---------------------------------------------------------------------------------------------------------
+Function Replace_symbols(ByVal txt As String) As String
+    St$ = "~!@/\#$%^:?&*=|`;"""
+    For i% = 1 To Len(St$)
+        txt = Replace(txt, Mid(St$, i, 1), "_")
+        txt = Replace(txt, Chr(10), "_")
+    Next
+    Replace_symbols = txt
+End Function
+
+'--------------------------------------------------------------------------------------------------------- 
+Sub toDr()
+
+    Dim sts_del As Boolean
+    
+    ar_brand = Array("LP", "MX", "KR", "RD", "ES", "DE", "CR")
+    ar_mreg = Array("MOSCOW", "NORTHWEST", "CENTER", "SOUTH", "URAL", "SIBERIA", "FAR EAST")
+    mRegsF = Array("Moscou GR", "Nord-Ouest", "Centre", "Sud", "Oural", "Siberie", "EO")
+    
+    
+    
+    
+    num_brand = UBound(ar_brand)
+    num_mreg = UBound(ar_mreg)
+    act_month = Val(InputBox("Month number"))
+    NF = ActiveWorkbook.Name
+    numYear = 2016
+    
+    With Application
+    .ScreenUpdating = False
+    .EnableEvents = False
+    .Calculation = xlCalculationManual
+    '.DisplayPageBreaks = False
+    .DisplayAlerts = False
+    End With
+    
+    
+    
+    If act_month < 10 Then
+    act_month = "0" & act_month
+Else
+    act_month = act_month
+End If
+    
+    
+    
+    
+    i = 0
+    
+    
+    For f_m = 0 To num_mreg
+    
+        nm_mreg = ar_mreg(f_m)
+    
+        With Sheets(ar_brand)
+        .Select
+        .Copy
+        End With
+        
+        For f_b = 0 To num_brand
+            nm_brand = ar_brand(f_b)
+            Sheets(nm_brand).Activate
+            LastRow = ActiveSheet.UsedRange.Row - 1 + ActiveSheet.UsedRange.Rows.Count
+            
+            Set lRangeDel = Nothing
+            Set lRangeH = ActiveSheet.Rows(65000)
+            
+            sts_del = False
+            For r = LastRow To 2 Step -1
+            find_val = Cells(r, 5)
+            
+            
+            Select Case find_val
+            Case Is = nm_mreg
+                sts_del = False
+            Case Is = "Total"
+                sts_del = False
+            Case Is = "Partners"
+                sts_del = False              
+            Case Else
+                sts_del = True
+            End Select
+               
+                If sts_del = True Then
+                    Set lRangeDel = Application.Union(lRangeH, ActiveSheet.Rows(r))
+                    Set lRangeH = lRangeDel
+                End If
+                                
+            Next r
+    
+            lRangeDel.Delete
+               
+            Cells(1, 1).Select
+            
+        Next f_b
+        
+For Each c In ActiveSheet.UsedRange.SpecialCells(xlCellTypeFormulas)
+        c.Formula = Replace(c.Formula, "#REF!", "", 1, -1, vbTextCompare)
+    Next       
+
+
+ActiveSheet.Calculate
+
+For Each n In ActiveWorkbook.Names:
+On Error Resume Next
+If n <> "Область_печати" Then n.Delete:
+Next n
+    
+Dim iLinks As Variant
+iLinks = ActiveWorkbook.LinkSources(Type:=xlLinkTypeExcelLinks)
+If IsArray(iLinks) Then
+For f_l = LBound(iLinks) To UBound(iLinks)
+ActiveWorkbook.BreakLink Name:=iLinks(f_l), Type:=xlLinkTypeExcelLinks
+Next f_l
+End If
+
+    Sheets(ar_brand(0)).Select
+    
+     
+    nmCreatPatch = "\\RUCORPRUWKS0665\For Regions Commercial Team\DR\" & mRegsF(i) & "\Analysis\IN_OUT_STOCK\" & numYear & "\" & act_month & "\"
+    nmfile = "SISOSTOCK_" & numYear & "_" & act_month & "_" & nm_mreg & ".xlsx"
+        
+    CreateFolderWithSubfolders nmCreatPatch        
+
+        NFD = nmCreatPatch & nmfile
+        ActiveWorkbook.SaveAs NFD
+        ActiveWorkbook.Close
+        i = i + 1
+        
+    Workbooks(NF).Activate
+    Next f_m
+
+
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With    
+        
+End Sub
+

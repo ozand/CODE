@@ -1,0 +1,13 @@
+select extract(year from smr.created_at) as nm_year, extract(month from smr.created_at) as mnth, smr.name,  smr.studio_name, smr.city_name, concat(smr.technolog_full_name , smr.partimer_full_name), 
+usr.full_name, usr.role, usr.city_name, smu.paid, *
+
+
+
+from seminars as smr
+left join seminar_types AS smt ON smr.seminar_type_id = smt.id
+left join seminar_users AS smu on smr.id = smu.seminar_id
+left join studios as std ON smr.studio_id = std.id
+left join users as usr ON smu.user_id = usr.id
+left join salons as sln ON usr.salon_id =sln.id
+
+where extract(year from smr.created_at) in ('2015', '2016') and extract(year from smr.closed_at) is not Null and smt.is_free = 'f'

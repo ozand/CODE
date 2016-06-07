@@ -1,0 +1,91 @@
+Sub seminars()
+
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+
+Dim dic_seminars: Set dic_seminars = CreateObject("Scripting.Dictionary")
+dic_seminars.RemoveAll
+
+Sheets("eduT").Activate
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+
+clm_nm_smr = 14
+clm_dt_smr = 12
+clm_nm_coach = 11
+
+For f_a = 2 To LastRow
+
+nm_smr = Cells(f_a, clm_nm_smr)
+dt_smr = Cells(f_a, clm_dt_smr)
+nm_coach = Cells(f_a, clm_nm_coach)
+unq_key = nm_smr & "|" & dt_smr & "|" & nm_coach
+If Not dic_seminars.Exists(unq_key) Then
+dic_seminars.Add unq_key, dic_seminars.Count + 1
+End If
+
+Next f_a
+
+'---------------------------------------------------------------------------------------------------------
+'check Sheets and if not - add
+'---------------------------------------------------------------------------------------------------------
+sh_in_data = "seminars"
+
+For Each Sh In ThisWorkbook.Worksheets
+If Sh.Name = sh_in_data Then
+chek_name = 1
+End If
+Next Sh
+
+If chek_name <> 1 Then
+Set Sh = Worksheets.Add()
+Sh.Name = sh_in_data
+End If
+ 
+Sheets(sh_in_data).Activate
+
+With dic_seminars
+Cells(1, 1).Resize(.Count) = Application.Transpose(.Items)
+Cells(1, 2).Resize(.Count) = Application.Transpose(.Keys)
+
+cnt_split = 0
+For f_c = 1 To Len(.Keys()(1))
+If Mid(.Keys()(1), f_c, 1) = "|" Then
+cnt_split = cnt_split + 1
+End If
+Next f_c
+
+For f_a = 0 To .Count - 1
+LineItems = Split(.Keys()(f_a), "|")
+For f_b = 1 To cnt_split + 1
+Cells(f_a + 1, f_b + 1) = LineItems(f_b - 1)
+Next f_b
+Next f_a
+
+End With
+
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+End Sub
+
+
+
+
+
+
+
+
+

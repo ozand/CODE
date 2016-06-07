@@ -1,0 +1,97 @@
+
+Sub agregate_email()
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+Dim dic_emeil: Set dic_emeil = CreateObject("Scripting.Dictionary")
+
+
+strt = 0
+NF = ActiveWorkbook.Name
+act_sheet = "data"
+Sheets(act_sheet).Select
+
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+zxc = 1
+dic_emeil.RemoveAll
+For row_b = 2 To 5
+
+
+
+Sheets(act_sheet).Select
+patchTR = Cells(row_b, 3)
+
+    If Dir(patchTR) <> "" Then
+    Workbooks.Open Filename:=patchTR, Notify:=False
+    actWB = ActiveWorkbook.Name
+        
+        used_sh = Empty
+        For Each sh In ActiveWorkbook.Worksheets
+               
+        sh.Activate
+        ActiveSheet.AutoFilterMode = False
+        nm_this_sh = sh.Name
+        
+        used_sh = used_sh & "|" & nm_this_sh
+        
+                For Each cell In ActiveSheet.UsedRange
+                    If Not IsError(cell) Then
+                        c_cells = cell.Value
+                        If InStr(1, c_cells, "@") Then
+                        zxc = zxc + 1
+                            If Not dic_emeil.Exists(c_cells) Then
+                            dic_emeil.Add c_cells, patchTR & "|" & nm_this_sh & "|" & row_b
+                            End If
+                        End If
+                     
+                    End If
+                
+                Next cell
+                
+                
+        Next sh
+        
+        Workbooks(actWB).Close
+    End If
+
+    Workbooks(NF).Activate
+    Sheets(act_sheet).Select
+    
+    count_emails = dic_emeil.Count
+    
+    Cells(row_b, 6) = count_emails
+    Cells(row_b, 7) = used_sh
+    Sheets("emails").Select
+
+    If dic_emeil.Count > 1 Then
+        
+    strt = count_emails + strt
+    With dic_emeil
+    Cells(strt + 1, 1).Resize(.Count) = Application.Transpose(.Keys)
+    Cells(strt + 1, 2).Resize(.Count) = Application.Transpose(.Items)
+  
+
+    
+    
+    
+    End If
+
+Next row_b
+
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+End Sub
+

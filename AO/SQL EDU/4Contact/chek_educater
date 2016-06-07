@@ -1,0 +1,29 @@
+select 
+usr.full_name, 
+usr.id, 
+usr.role,
+usr.position, 
+usr.shtatnost, 
+usr.chief, 
+usr.is_blocked, 
+usr.email, 
+usr.mobile_number, 
+usr.city_name, 
+usr.commercial_megaregion, 
+usr.region_name, 
+usr.created_at, 
+(count(smr_edu.id) ) as "smr_edu", 
+(select count(smu.user_id) from seminar_users as smu  where usr.id= smu.user_id) as "smr_mstr", 
+(case  when  usr.login_count  is Null then 0 else 1 end) as "act_accnt",
+( to_char(max(smr_edu.started_at),  'YYYY/MM/DD') ) as "last_smr_edu", 
+to_char(usr.last_request_at, 'YYYYMMDD') as "last_access",
+(select trim(concat(Trim(sln.name), '. ', trim(SLN.address), '. ', Trim(sln.city_name_geographic))) from salons as sln where usr.salon_id = sln.id )as "salon_name" 
+
+from users as usr
+left join seminars as smr_edu  ON smr_edu.technolog_id = usr.id or smr_edu.partimer_id = usr.id
+
+where smr_edu.started_at is not Null
+GROUP BY usr.id, usr.full_name
+
+
+

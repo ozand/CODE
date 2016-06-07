@@ -16,5 +16,69 @@ pvtTable.PivotCache.Refresh
 
 Next pvtTable
 
+End Sub
 
+
+
+Private Sub frmtlPivotNumeric()
+Dim ws As Worksheet
+Dim pvtTable As PivotTable
+Dim pvtField As PivotField
+
+
+Application.ScreenUpdating = False
+For Each pvtTable In ActiveSheet.PivotTables
+For Each pvtField In pvtTable.DataFields
+
+with pvtField
+
+.Function = xlSum
+.NumberFormat = "# ##0"
+
+end with 
+Next pvtField
+
+
+Next pvtTable
+
+
+
+
+End Sub
+
+
+
+
+Sub null_red()
+
+Dim ws As Worksheet
+Dim pvtTable As PivotTable
+Dim pvtField As PivotField
+
+
+Application.ScreenUpdating = False
+For Each pvtTable In ActiveSheet.PivotTables
+For Each pvtField In pvtTable.DataFields
+
+With pvtField.DataRange
+
+  .FormatConditions.Add Type:=xlCellValue, Operator:=xlEqual, Formula1:="=0"
+  .FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+    
+    With Selection.FormatConditions(1).Font
+        .Color = -16776961
+        .TintAndShade = 0
+    End With
+    Selection.FormatConditions(1).StopIfTrue = False
+    Selection.FormatConditions(1).ScopeType = xlDataFieldScope
+
+End with
+
+
+Next pvtField
+Next pvtTable
+
+   
+    
+    
 End Sub

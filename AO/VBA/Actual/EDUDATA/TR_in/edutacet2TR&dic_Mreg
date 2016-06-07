@@ -11,8 +11,8 @@ End Function
 
 Sub edu2TR()
 Dim FilePatch As String
-Dim ar_DataEDU(), ar_Data_TR(), ar_type_clients(1 To 4, 1 To 12), ar_JoinData()
-
+Dim ar_Data_EDU(), ar_Data_TR(), ar_type_clients(1 To 4, 1 To 12), ar_JoinData()
+Dim xxx As Integer
 
 With Application
 .ScreenUpdating = False
@@ -23,12 +23,32 @@ With Application
 End With
 
 actEDU = ActiveWorkbook.Name
-
-ar_brand = Array("KR")  ', "LP", "RD", "MX", "ES")
+start_cells = 1
+ar_brand = Array("MX", "LP", "KR", "RD", "ES")
 num_ar_brand = UBound(ar_brand)
 f_year = 2016
 
 in_data_EDU = "Educated"
+yyy = 1
+
+EDUDATA = ActiveWorkbook.Name
+in_edudata = "in_data"
+
+'---------------------------------------------------------------------------------------------------------
+'check Sheets and if not - add
+'---------------------------------------------------------------------------------------------------------
+in_edudata = "in_data"
+
+For Each Sh In ThisWorkbook.Worksheets
+If Sh.Name = in_edudata Then
+chek_name = 1
+End If
+Next Sh
+
+If chek_name <> 1 Then
+Set Sh = Worksheets.Add()
+Sh.Name = in_edudata
+End If
 
 
 For f_brand = 0 To num_ar_brand
@@ -129,15 +149,15 @@ ReDim ar_Data_TR(1 To tr_count_row, 1 To 100)
  
  Dim dic_idECAD: Set dic_idECAD = CreateObject("Scripting.Dictionary")
  Dim dic_City: Set dic_City = CreateObject("Scripting.Dictionary")
- 
+ Dim dic_Sec: Set dic_Sec = CreateObject("Scripting.Dictionary")
  '---------------------------------------------------------------------------------------------------------
  start_row = 4
  
  For f_i = start_row To tr_LastRow
  
    num_column = 1
-   ar_Data_TR(iii, num_column) = Cells(f_i, 1)
-   If iii = 1 Then If iii = 1 Then ar_Data_TR(1, num_column) = "rowTR"
+   ar_Data_TR(iii, num_column) = ar_brand(f_brand)
+   If iii = 1 Then If iii = 1 Then ar_Data_TR(1, num_column) = "brand"
 
     num_column = num_column + 1
     clm_nm_mreg = num_column
@@ -174,6 +194,9 @@ ReDim ar_Data_TR(1 To tr_count_row, 1 To 100)
     ar_Data_TR(iii, num_column) = nm_Mreg
     If iii = 1 Then ar_Data_TR(1, num_column) = "mreg_EXT"
     
+    
+    
+    
 '---------------------------------------------------------------------------------------------------------
         
     
@@ -186,7 +209,8 @@ ReDim ar_Data_TR(1 To tr_count_row, 1 To 100)
     If iii = 1 Then ar_Data_TR(1, num_column) = "FLSM"
     
     num_column = num_column + 1
-    ar_Data_TR(iii, num_column) = Cells(f_i, 6)
+    nm_Sector = Cells(f_i, 6)
+    ar_Data_TR(iii, num_column) = nm_Sector
     If iii = 1 Then ar_Data_TR(1, num_column) = "SEC"
     
     num_column = num_column + 1
@@ -245,10 +269,12 @@ ReDim ar_Data_TR(1 To tr_count_row, 1 To 100)
     
     
     num_column = num_column + 1
-    nm_month = Cells(f_i, 64)
-    ar_Data_TR(iii, num_column) = nm_month
-    If iii = 1 Then ar_Data_TR(1, num_column) = "nm_month"
     
+    ar_Data_TR(iii, num_column) = Cells(f_i, 19)
+    If iii = 1 Then ar_Data_TR(1, num_column) = "chain_name"
+    
+    
+    nm_month = Cells(f_i, 64)
            
     num_column = num_column + 1
     
@@ -260,12 +286,12 @@ ReDim ar_Data_TR(1 To tr_count_row, 1 To 100)
     End If
     Next f_m
     ar_Data_TR(iii, num_column) = num_month
-    If iii = 1 Then ar_Data_TR(1, num_column) = "month_num"
+    If iii = 1 Then ar_Data_TR(1, num_column) = "CNQ_month_num"
 
     num_column = num_column + 1
     If Len(Cells(f_i, 65)) = 4 Then cdYear = Cells(f_i, 65) Else cdYear = 2008
     ar_Data_TR(iii, num_column) = cdYear
-    If iii = 1 Then ar_Data_TR(1, num_column) = "date_year"
+    If iii = 1 Then ar_Data_TR(1, num_column) = "CNQ_year"
     
     Select Case num_month
     Case 1 To 3
@@ -325,7 +351,7 @@ ReDim ar_Data_TR(1 To tr_count_row, 1 To 100)
         place = ""
         End If
     ar_Data_TR(iii, num_column) = place
-    If iii = 1 Then ar_Data_TR(1, num_column) = "type_place_HD"
+    If iii = 1 Then ar_Data_TR(1, num_column) = "_place_HD"
     
     num_column = num_column + 1
     AVG_HD = Cells(f_i, 28)
@@ -335,7 +361,7 @@ ReDim ar_Data_TR(1 To tr_count_row, 1 To 100)
         place = ""
         End If
     ar_Data_TR(iii, num_column) = AVG_HD
-    If iii = 1 Then ar_Data_TR(1, num_column) = "type_AVG_HD"
+    If iii = 1 Then ar_Data_TR(1, num_column) = "AVG_HD"
 
     num_column = num_column + 1
     ar_Data_TR(iii, num_column) = Cells(f_i, 167)
@@ -351,20 +377,25 @@ ReDim ar_Data_TR(1 To tr_count_row, 1 To 100)
     If iii = 1 Then ar_Data_TR(1, num_column) = "status_link"
     
     num_column = num_column + 1
-    status_educated = num_column
+    num_clm_status_educated = num_column
     ar_Data_TR(iii, num_column) = Empty
     If iii = 1 Then ar_Data_TR(1, num_column) = "status_educated"
     
     
 
    '---------------------------------------------------------------------------------------------------------
-    If Not dic_idECAD.exists(id_ECAD) Then
+    If Not dic_idECAD.Exists(id_ECAD) Then
     dic_idECAD.Add id_ECAD, id_ECAD
     End If
     
-    If Not dic_City.exists(nm_city) And Not IsEmpty(nm_city) Then
+    If Not dic_City.Exists(nm_city) And Not IsEmpty(nm_city) Then
     dic_City.Add nm_city, nm_Mreg
     End If
+    
+    If Not dic_Sec.Exists(nm_Sector) And Not IsEmpty(nm_Sector) Then
+    dic_Sec.Add nm_Sector, nm_Mreg
+    End If
+    
     '---------------------------------------------------------------------------------------------------------
 
 iii = iii + 1
@@ -386,7 +417,7 @@ actEDUBook = ActiveWorkbook.Name
 edu_LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
 edu_LastColumn = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
 
-ReDim ar_DataEDU(1 To edu_LastRow, 1 To edu_LastColumn)
+ReDim ar_Data_EDU(1 To edu_LastRow, 1 To edu_LastColumn)
 
 Dim dic_eduID: Set dic_eduID = CreateObject("Scripting.Dictionary")
 dic_eduID.RemoveAll
@@ -395,16 +426,17 @@ For f_rw = 1 To edu_LastRow
     For f_clm = 1 To edu_LastColumn
         If f_clm = 1 Then
             edu_id = Cells(f_rw, 1)
-                If Not dic_eduID.exists(edu_id) Then
+                If Not dic_eduID.Exists(edu_id) Then
                 dic_eduID.Add edu_id, f_rw
                 End If
         End If
+    
     If Cells(f_rw, f_clm) = 0 Then
     vl_c = Empty
     Else
     vl_c = Cells(f_rw, f_clm)
     End If
-    ar_DataEDU(f_rw, f_clm) = vl_c
+    ar_Data_EDU(f_rw, f_clm) = vl_c
     Next f_clm
 Next f_rw
 
@@ -412,7 +444,7 @@ Workbooks(actEDUBook).Close
 
 '--------------------------------------------
 
-ReDim ar_JoinData(1 To UBound(ar_Data_TR) + UBound(ar_DataEDU), 1 To num_column + edu_LastColumn)
+ReDim ar_JoinData(1 To UBound(ar_Data_TR) + UBound(ar_Data_EDU), 1 To num_column + edu_LastColumn)
 
 iii = 1
 
@@ -422,58 +454,139 @@ For f_tr_rw = 1 To UBound(ar_Data_TR)
     Next f_tr_clm
         tr_key = Empty
         tr_key = ar_Data_TR(f_tr_rw, clm_id_ecad)
-            If dic_eduID.exists(tr_key) Then
+            If dic_eduID.Exists(tr_key) Then
                 ar_JoinData(iii, status_link) = "LINK"
                 rw_edu_dataset = dic_eduID.Item(tr_key)
                 xxx = 1
                 strt_jd_edu_clmn = num_column + 1
                     For f_edu_clm = strt_jd_edu_clmn To strt_jd_edu_clmn + edu_LastColumn - 1
-                        ar_JoinData(iii, f_edu_clm) = ar_DataEDU(rw_edu_dataset, xxx)
+                        ar_JoinData(iii, f_edu_clm) = ar_Data_EDU(rw_edu_dataset, xxx)
+                        
+                        '---------------------------------------------------------------------------------------------------------
+                                                
+                        If ar_Data_EDU(rw_edu_dataset, 7) <> 0 Then
+                        status_educated = "edu_TY"
+                        Else
+                            If ar_Data_EDU(rw_edu_dataset, 6) <> 0 Then
+                            status_educated = "edu_PY"
+                            Else
+                                If ar_Data_EDU(rw_edu_dataset, 5) <> 0 Then
+                                status_educated = "edu_ALLTIME"
+                                Else
+                               
+                                status_educated = Empty
+                                End If
+                                End If
+                                End If
+                        '---------------------------------------------------------------------------------------------------------
+                        
                         xxx = xxx + 1
                     Next f_edu_clm
                     Else
                     ar_JoinData(iii, status_link) = "UNLINK"
+                    status_educated = Empty
+                    
+                     
             End If
+            ar_JoinData(iii, num_clm_status_educated) = status_educated
 iii = iii + 1
 Next f_tr_rw
+'---------------------------------------------------------------------------------------------------------
 
 
 
-For f_edu_rw = 2 To UBound(ar_DataEDU)
+For f_edu_rw = 1 To UBound(ar_Data_EDU)
     ecad_key = Empty
-    ecad_key = ar_DataEDU(f_edu_rw, 1)
-    If Not dic_idECAD.exists(ecad_key) Then
+    ecad_key = ar_Data_EDU(f_edu_rw, 1)
+    If Not dic_idECAD.Exists(ecad_key) Then
+    
+            
+                If dic_Sec.Exists(ar_Data_EDU(f_edu_rw, 3)) Then
+                ar_JoinData(iii, clm_nm_mreg_ext) = dic_Sec.Item(ar_Data_EDU(f_edu_rw, 3))
+                Else
+                    If dic_City.Exists(ar_Data_EDU(f_edu_rw, 22)) Then
+                    ar_JoinData(iii, clm_nm_mreg_ext) = dic_City.Item(ar_Data_EDU(f_edu_rw, 22))
+                
+                    End If
+                End If
+                   
         ar_JoinData(iii, status_link) = "UNLINK"
+        ar_JoinData(iii, 1) = ar_brand(f_brand)
+        ar_JoinData(iii, clm_nm_salon) = ar_Data_EDU(f_edu_rw, 2)
+        
+   '---------------------------------------------------------------------------------------------------------
+                        If ar_Data_EDU(f_edu_rw, 7) <> 0 Then
+                        status_educated = "edu_TY"
+                        Else
+                            If ar_Data_EDU(f_edu_rw, 6) <> 0 Then
+                            status_educated = "edu_PY"
+                            Else
+                                If ar_Data_EDU(f_edu_rw, 5) <> 0 Then
+                                status_educated = "edu_ALLTIME"
+                                Else
+                                status_educated = Empty
+                                End If
+                                End If
+                                End If
+   '---------------------------------------------------------------------------------------------------------
+        
+        ar_JoinData(iii, num_clm_status_educated) = status_educated
+        
         rw_edu_dataset = dic_eduID.Item(ecad_key)
         xxx = 1
         strt_jd_edu_clmn = num_column + 1
             For f_edu_clm = strt_jd_edu_clmn To strt_jd_edu_clmn + edu_LastColumn - 1
+                
                 If f_edu_rw = 1 Then
-                ar_JoinData(1, f_edu_clm) = ar_DataEDU(1, xxx)
+                ar_JoinData(1, f_edu_clm) = ar_Data_EDU(rw_edu_dataset, xxx)
                 Else
-                ar_JoinData(iii, f_edu_clm) = ar_DataEDU(rw_edu_dataset, xxx)
+                ar_JoinData(iii, f_edu_clm) = ar_Data_EDU(rw_edu_dataset, xxx)
                 End If
                 xxx = xxx + 1
+                
             Next f_edu_clm
             If f_edu_rw <> 1 Then iii = iii + 1
             End If
 Next f_edu_rw
 
-
+Workbooks(actTR).Activate
 Sheets(in_data_EDU).Select
+
 
 ActiveSheet.UsedRange.Cells.ClearContents
 ActiveSheet.Cells(1, 1).Resize(iii - start_row, num_column + edu_LastColumn) = ar_JoinData
+Cells(1, 1).Select
+Selection.AutoFilter
 
 
 Calculate
 
+Sheets(ar_brand(f_brand)).Select
+Workbooks(actTR).Save
+Workbooks(actTR).Close
+
+full_row = iii + full_row
 
 
+Workbooks(EDUDATA).Activate
+Sheets(in_edudata).Select
 
-'Workbooks(actTR).Save
-'Workbooks(actTR).Close
+Select Case f_brand
+Case 0
+ActiveSheet.UsedRange.Cells.ClearContents
+strt_jd_rw = 1
+Case Else
+strt_jd_rw = 2
+End Select
 
+
+For f_rw_jd = strt_jd_rw To iii - 1
+
+    For f_clm_jd = 1 To (num_column + edu_LastColumn)
+    Cells(yyy, f_clm_jd) = ar_JoinData(f_rw_jd, f_clm_jd)
+    Next f_clm_jd
+yyy = yyy + 1
+Next f_rw_jd
 
 Next f_brand
 '---------------------------------------------------------------------------------------------------------
@@ -487,7 +600,3 @@ With Application
 End With
     
 End Sub
-
-
-
-

@@ -1,0 +1,10 @@
+"{\"operations\":[{\"method\":\"PUT\",
+\"path\":\"/lists/7e5073d0bc/members/6fd2d7539b832d77093579bb40a7944c/\",
+\"body\":\"
+{
+    \\"email_address\\":\\"akvam.spa@gmail.com\\",
+    \\"status_if_new\\":\\"subscribed\\",
+    \\"status\\":\\"subscribed\\",
+    \\"merge_fields\\":{\\"MMERGE3\\":1}
+    }
+    \"}]}

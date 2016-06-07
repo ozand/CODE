@@ -1,0 +1,286 @@
+
+Private Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" _
+                                     (ByVal hwnd As Long, ByVal pszPath As String, _
+                                      ByVal psa As Any) As Long
+Sub CreateFolderWithSubfolders(ByVal ПутьСоздаваемойПапки$)
+ 
+   If Len(Dir(ПутьСоздаваемойПапки$, vbDirectory)) = 0 Then    ' если папка отсутствует
+       SHCreateDirectoryEx Application.hwnd, ПутьСоздаваемойПапки$, ByVal 0&    ' создаём путь
+   End If
+End Sub
+Private Sub UserForm_Initialize()
+ Dim str$, i&
+ For i = 1 To 12
+  str = CStr(i)
+  VacationForm.ComboBox1.AddItem str
+ Next i
+ 
+ VacationForm.ComboBox2.AddItem "ALL"
+ VacationForm.ComboBox2.AddItem "DPP"
+ VacationForm.ComboBox2.AddItem "DPGP"
+ VacationForm.ComboBox2.AddItem "DPL"
+ VacationForm.ComboBox2.AddItem "DCA"
+ VacationForm.ComboBox2.AddItem "General Services"
+ VacationForm.ComboBox2.AddItem "Factory"
+ 
+ VacationForm.ComboBox3.AddItem "Save"
+ VacationForm.ComboBox3.AddItem "Send"
+ VacationForm.ComboBox3.AddItem "Save & Send"
+ 
+ 
+ For i = 0 To 30 step 7
+  str = CStr(i)
+  VacationForm.ComboBox4.AddItem str
+ Next i
+ 
+ 
+ 
+End Sub
+
+Private Sub CommandButton1_Click()
+Dim NF, NFD, nmPatch, LastRowFM, nmBrand, nmDepartment, nmCreatPatch, nmUser, nmTodo, nmD As String
+Dim lRangeDel As Range
+Dim lRangeH As Range
+Dim fALL, fSave, fSend As Boolean
+Dim a, nod, f, status_14D, status_MoreD, stChange, status_addD, status_28D, status_WE, idUser, right_for_Y2014, balance_2013_right_2014, planed2014, not_planed2014, eoc, nmMonth, cntMachBrand     As Long
+Dim n As Variant
+
+    If VacationForm.ComboBox1.Text = "" Or VacationForm.ComboBox2.Text = "" Or VacationForm.ComboBox3.Text = "" Then
+     MsgBox "Недостаточно данных! Заполните все поля", vbCritical, ""
+     Exit Sub
+    End If
+
+Application.ScreenUpdating = False
+Application.EnableEvents = False
+Application.Calculation = xlCalculationManual
+ActiveSheet.DisplayPageBreaks = False
+Application.DisplayAlerts = False
+
+fALL = False
+fSave = False
+fSend = False
+nmMonth = Val(VacationForm.ComboBox1.Text)
+nmD = VacationForm.ComboBox2.Text
+nmTodo = VacationForm.ComboBox3.Text
+nmTodo2 =Val(VacationForm.ComboBox4.Text)
+
+Select Case nmTodo
+ Case "Save"
+  fSave = True
+ Case "Send"
+  fSend = True
+ Case "Save & Send"
+  fSave = True
+  fSend = True
+End Select
+
+If nmD = "ALL" Then
+ fALL = True
+ eoc = 6
+Else
+ nmBrand = nmD
+ eoc = 1
+End If
+
+
+Select Case nmTodo2
+ Case is >= 28
+  type_w = 2
+ Case is <> 0
+  type_w = 1
+ Case 0
+ type_w = 0  
+End Select
+
+
+
+CreateFolderWithSubfolders "c:\Vacation"
+
+For nod = 1 To eoc
+
+If fALL Then
+ Select Case nod
+  Case 1
+   nmBrand = "DPP"
+  Case 2
+   nmBrand = "DPGP"
+  Case 3
+   nmBrand = "DPL"
+  Case 4
+   nmBrand = "DCA"
+  Case 5
+   nmBrand = "General Services"
+  Case 6
+   nmBrand = "Factory"
+ End Select
+End If
+
+
+Sheets("ALL LOREAL").Select
+
+
+LastRowFM = ActiveSheet.UsedRange.Row - 1 + ActiveSheet.UsedRange.Rows.Count
+cntMachBrand = Application.WorksheetFunction.CountIf(Range(Cells(1, 3), Cells(LastRowFM, 3)), nmBrand)
+nmbOfMachBrand = 0
+
+Sheets("table").Unprotect Password:="123"
+
+For a = 1 To LastRowFM
+
+Sheets("ALL LOREAL").Select
+nmDepartment = Cells(a, 3).Value
+not_planedPY = Cells(a, 9).Value
+
+
+If nmDepartment = nmBrand Then f = 1 Else: GoTo labelEND
+    
+    Select Case type_w
+    Case 2
+    if nmTodo2 > not_planedPY  Then   GoTo labelEND
+    Case 1 
+    if not_planedPY = 0  Then  GoTo labelEND
+    End Select
+
+
+nmbOfMachBrand = nmbOfMachBrand + 1
+Application.StatusBar = "              Calculate " & nmBrand & ": " & nmbOfMachBrand & " of " & cntMachBrand & " (string: " & a & ")"
+NF = ActiveWorkbook.Name
+
+
+
+idUser = Cells(a, 1).Value
+nmUser = Cells(a, 2).Value
+
+right_for_Y = Cells(a, 5).Value
+balance_PY_right_Y = Cells(a, 6).Value
+planedY = Cells(a, 7).Value
+
+
+
+
+Sheets("table").Select
+Range("AB19") = idUser
+
+
+
+ActiveSheet.Calculate
+
+Sheets("Рассылка").Select
+ActiveSheet.Calculate
+'для отправки письма
+Addresses = Cells(1, 2)
+
+Subjects = Cells(2, 2)
+Bodies = Cells(2, 3)
+
+
+
+Sheets("table").Select
+
+status_14D = Range("AH6")
+status_28D = Range("AH8")
+status_MoreD = Range("AH10")
+status_WE = Range("AH12")
+status_addD = Range("AH17")
+Sheets("table").Copy
+
+'For Each n In ActiveWorkbook.Names:
+'On Error Resume Next
+'n.Delete:
+'Next
+
+
+Dim iLinks As Variant, i&
+iLinks = ActiveWorkbook.LinkSources(xlExcelLinks)
+If Not IsEmpty(iLinks) Then
+For i = 1 To UBound(iLinks)
+ActiveWorkbook.BreakLink Name:=iLinks(i), Type:=xlExcelLinks
+Next i
+End If
+ 
+
+ nmCreatPatch = "C:\Vacation" & "\" & nmBrand
+
+
+
+nmPatch = status_14D & status_28D & status_MoreD & status_WE & status_addD & "_Vacation " & nmUser
+
+
+
+
+      '  ActiveWorkbook.SaveAs Filename:= _
+       ' nmCreatPatchLP & "\" & "Vacation" & nmUser & "_" & nmDepartment & "_Balans-" & balance_2013_right_2014 & "_Planet-" & planed2014 & "_notPlaned-" & not_planed2014 & ".xlsx", FileFormat _
+        ':=xlOpenXMLWorkbook, CreateBackup:=False
+        
+Sheets("table").Select
+Range(Cells(21, 2), Cells(20 + nmMonth, 33)).Select
+Selection.Locked = True
+Selection.FormulaHidden = False
+
+Range(Cells(21, 2), Cells(22 - nmMonth, 33)).Select
+Selection.Copy
+Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+    :=False, Transpose:=False
+Cells(1, 1).Select
+With Worksheets("table")
+     ' .Cells.Locked = True
+      .Cells.FormulaHidden = True
+      .Protect Password:="123", DrawingObjects:=True, Contents:=True, Scenarios:=True
+End With
+
+
+ActiveWorkbook.SaveAs Filename:= _
+        "C:\Vacation" & "\" & nmPatch & ".xlsx", FileFormat _
+        :=xlOpenXMLWorkbook, CreateBackup:=False
+
+If fSave = True Then
+CreateFolderWithSubfolders nmCreatPatch
+ActiveWorkbook.SaveAs Filename:= _
+        nmCreatPatch & "\" & nmPatch & ".xlsx", FileFormat _
+        :=xlOpenXMLWorkbook, CreateBackup:=False
+End If
+
+ NFD = "C:\Vacation" & "\" & nmPatch & ".xlsx"
+
+
+
+ActiveWindow.Close
+    'отправка
+If fSend Then
+If Addresses <> "" Then
+        Set OutlookApp = CreateObject("Outlook.Application")
+                Set oMail = OutlookApp.CreateItem(0)
+                With oMail
+                    .To = Addresses
+                    '.Cc = Copy
+                    .Importance = 2
+                    .Subject = Subjects
+                    .Body = Bodies
+                    .Attachments.Add NFD
+                    .Send
+                   ' .Display
+                    
+                End With
+End If
+End If
+'Kill NFD
+  
+
+Workbooks(NF).Activate
+
+labelEND:
+Next a
+Next nod
+ Application.StatusBar = ""
+ Application.ScreenUpdating = True
+            Application.Calculation = xlCalculationAutomatic
+            Application.EnableEvents = True
+            Application.DisplayStatusBar = True
+            Application.DisplayAlerts = True
+ Unload VacationForm
+End Sub
+
+Private Sub CommandButton2_Click()
+ Unload VacationForm
+End Sub
+

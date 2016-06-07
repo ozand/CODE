@@ -1,0 +1,10 @@
+Dim MailObj as Outlook.MailItem
+MailObj = Outlook.Application.CreateItem(olMailItem)
+With MailObj
+  .To = "Who@Where.Com"
+  .CC = "Whoelse@Whereelse.Com"
+  .Subject = "The Subject (HTML Format)"
+  .BodyFormat = olFormatHTML
+  .HTMLBody = "HTML Content"
+  .Display 'Can be .Send but prompts for user intervention before sending without 3rd party software like ClickYes
+End With

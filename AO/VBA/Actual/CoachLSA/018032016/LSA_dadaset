@@ -1,0 +1,153 @@
+Function GetHash(ByVal txt$) As String
+    Dim oUTF8, oMD5, abyt, i&, k&, hi&, lo&, chHi$, chLo$
+    Set oUTF8 = CreateObject("System.Text.UTF8Encoding")
+    Set oMD5 = CreateObject("System.Security.Cryptography.MD5CryptoServiceProvider")
+    abyt = oMD5.ComputeHash_2(oUTF8.GetBytes_4(txt$))
+    For i = 1 To LenB(abyt)
+        k = AscB(MidB(abyt, i, 1))
+        lo = k Mod 16: hi = (k - lo) / 16
+        If hi > 9 Then chHi = Chr(Asc("a") + hi - 10) Else chHi = Chr(Asc("0") + hi)
+        If lo > 9 Then chLo = Chr(Asc("a") + lo - 10) Else chLo = Chr(Asc("0") + lo)
+        GetHash = GetHash & chHi & chLo
+    Next
+    Set oUTF8 = Nothing: Set oMD5 = Nothing
+End Function
+
+Sub seminars()
+
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+'---------------------------------------------------------------------------------------------------------
+Dim dic_seminars_type: Set dic_seminars_type = CreateObject("Scripting.Dictionary")
+dic_seminars_type.RemoveAll
+
+Dim dic_seminars: Set dic_seminars = CreateObject("Scripting.Dictionary")
+dic_seminars.RemoveAll
+
+Dim dic_seminar_users: Set dic_seminar_users = CreateObject("Scripting.Dictionary")
+dic_seminar_users.RemoveAll
+
+Sheets("eduT").Activate
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+
+'---------------------------------------------------------------------------------------------------------
+clm_nm_users = 1
+clm_nm_coach = 11
+clm_dt_smr = 12
+clm_nm_smr = 14
+clm_nm_reg = 4
+
+For f_a = 2 To LastRow
+
+nm_smr = Cells(f_a, clm_nm_smr)
+dt_smr = Cells(f_a, clm_dt_smr)
+nm_coach = Cells(f_a, clm_nm_coach)
+nm_users = Cells(f_a, clm_nm_users)
+nm_reg = Cells(f_a, clm_nm_reg)
+
+unq_key_seminars_type = nm_smr & "|" & GetHash(nm_smr)
+
+data_seminars = nm_smr & "|" & dt_smr & "|" & nm_coach
+unq_key_seminars = GetHash(nm_smr) & "|" & data_seminars & "|" & GetHash(data_seminars)
+
+data_seminar_users = nm_smr & "|" & dt_smr & "|" & nm_reg & "|" & nm_coach & "|" & nm_users
+unq_key_seminar_users = GetHash(data_seminars) & "|" & data_seminar_users
+
+If Not dic_seminars_type.Exists(unq_key_seminars_type) Then
+dic_seminars_type.Add unq_key_seminars_type, dic_seminars_type.Count + 1
+End If
+
+If Not dic_seminars.Exists(unq_key_seminars) Then
+dic_seminars.Add unq_key_seminars, dic_seminars.Count + 1
+End If
+
+If Not dic_seminar_users.Exists(unq_key_seminar_users) Then
+dic_seminar_users.Add unq_key_seminar_users, dic_seminar_users.Count + 1
+End If
+
+Next f_a
+
+
+'---------------------------------------------------------------------------------------------------------
+
+For f_x = 1 To 3
+
+Select Case f_x
+Case 1
+sh_in_data = "seminars_type"
+Set dic_act = dic_seminars_type
+Case 2
+sh_in_data = "seminars"
+Set dic_act = dic_seminars
+Case 3
+sh_in_data = "seminar_users"
+Set dic_act = dic_seminar_users
+End Select
+
+For Each Sh In ThisWorkbook.Worksheets
+If Sh.Name = sh_in_data Then
+chek_name = 1
+End If
+Next Sh
+
+If chek_name <> 1 Then
+Set Sh = Worksheets.Add()
+Sh.Name = sh_in_data
+End If
+ 
+Sheets(sh_in_data).Activate
+
+With dic_act
+Cells(1, 1).Resize(.Count) = Application.Transpose(.Items)
+Cells(1, 2).Resize(.Count) = Application.Transpose(.Keys)
+
+cnt_split = 0
+For f_c = 1 To Len(.Keys()(1))
+If Mid(.Keys()(1), f_c, 1) = "|" Then
+cnt_split = cnt_split + 1
+End If
+Next f_c
+
+For f_a = 0 To .Count - 1
+LineItems = Split(.Keys()(f_a), "|")
+For f_b = 1 To cnt_split + 1
+Cells(f_a + 1, f_b + 1) = LineItems(f_b - 1)
+Next f_b
+Next f_a
+
+
+End With
+
+Next f_x
+
+'--------------------------------------------------------------------------------------------------
+
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,132 @@
+Sub xc()
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+
+ar_brand = Array("ES", "LP", "KR", "RD", "MX")
+
+NF = ActiveWorkbook.Name
+
+iii = 1
+
+For cd_year = 2012 To 2016
+    For cd_month = 1 To 12
+        For f_b = 0 To 4
+
+Select Case cd_month
+Case Is < 10
+cd_00_month = 0 & cd_month
+Case Is >= 10
+cd_00_month = cd_month
+End Select
+
+nm_brand = ar_brand(f_b)
+
+
+Select Case cd_month
+    Case 12
+    patch_Dir = "p:\DPP\Business development\Book commercial\" & nm_brand & "\"
+    TR_file_name = "Top Russia Total " & cd_year & " " & ar_brand(f_b) & ".xlsm"
+    
+    Case Else
+    patch_Dir = "p:\DPP\Business development\Book commercial\" & nm_brand & "\" & cd_year & "\History " & cd_year & "\"
+    TR_file_name = "Top Russia Total " & cd_year & "." & cd_00_month & " " & ar_brand(f_b) & ".xlsm"
+End Select
+
+
+full_patch = patch_Dir & TR_file_name
+
+
+'---------------------------------------------------------------------------------------------------------
+ 
+If Dir(full_patch) <> "" Then
+Workbooks.Open Filename:=full_patch, Notify:=False
+act_tr = ActiveWorkbook.Name
+ 
+Workbooks(act_tr).Activate
+new_nm_sh_Contacts = Empty
+new_nm_sh_TR = Empty
+
+For Each sh In ActiveWorkbook.Worksheets
+
+sh.Activate
+val_1x1_cll = Cells(1, 1)
+val_2x2_cll = Cells(2, 2)
+
+
+If sh.Name = "Contacts" And val_1x1_cll <> "Название сектора" Then
+current_nm_sh_Contacts = sh.Name
+sh.Name = "Temp"
+End If
+
+Next sh
+
+For Each sh In ActiveWorkbook.Worksheets
+
+sh.Activate
+val_1x1_cll = Cells(1, 1)
+val_2x2_cll = Cells(2, 2)
+
+nm_this_sh = sh.Name
+
+If val_1x1_cll = "Название сектора" And nm_this_sh <> "Contacts" Then
+current_nm_sh_Contacts = nm_this_sh
+sh.Name = "Contacts"
+new_nm_sh_Contacts = sh.Name
+End If
+
+If val_2x2_cll = "Единый код Л'Ореаль" And nm_this_sh <> nm_brand Then
+current_nm_sh_TR = nm_this_sh
+sh.Name = nm_brand
+new_nm_sh_TR = sh.Name
+End If
+
+Next sh
+
+
+If ActiveWorkbook.Name = act_tr Then
+ActiveWorkbook.Save
+ActiveWindow.Close
+End If
+Application.DisplayAlerts = False
+
+ 
+    
+Workbooks(NF).Activate
+
+
+Cells(iii, 1) = full_patch
+Cells(iii, 2) = current_nm_sh_Contacts
+Cells(iii, 3) = new_nm_sh_Contacts
+Cells(iii, 4) = current_nm_sh_TR
+Cells(iii, 5) = new_nm_sh_TR
+
+iii = iii + 1
+
+End If
+
+Next f_b
+Next cd_month
+Next cd_year
+
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+    
+
+End Sub
+
+
+
+

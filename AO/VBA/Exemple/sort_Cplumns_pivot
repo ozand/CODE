@@ -1,0 +1,24 @@
+
+Private Sub Worksheet_SelectionChange(ByVal Target As Excel.Range)
+
+
+numColumn = ActiveCell.Column
+actCell = ActiveCell.Value
+numRow = ActiveCell.Row
+
+Select Case numColumn
+Case Is = 4, 6, 8, 10
+On Error Resume Next
+ActiveSheet.PivotTables("ÑâîäíàÿÒàáëèöà6").PivotFields("name").AutoSort _
+        xlDescending, "R", ActiveSheet.PivotTables("ÑâîäíàÿÒàáëèöà6").PivotColumnAxis. _
+        PivotLines(numColumn - 2), 1
+End Select
+
+End Sub
+
+
+
+
+
+
+

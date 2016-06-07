@@ -638,11 +638,11 @@ Next f_i
 'check Sheets and if not - add
 '---------------------------------------------------------------------------------------------------------
 chek_name = 0
-out_data = "data_COACH"
+sh_in_data_COACH = "data_COACH"
 nm_sh_work_COCH = "Coaching"
 
 For Each Sh In ThisWorkbook.Worksheets
-If Sh.Name = out_data Then
+If Sh.Name = sh_in_data_COACH Then
 chek_name = chek_name + 1
 Else
 chek_name = chek_name + 0
@@ -652,7 +652,7 @@ Next Sh
 
 If chek_name = 0 Then
 Set Sh = Worksheets.Add()
-Sh.Name = out_data
+Sh.Name = sh_in_data_COACH
 End If
 
 
@@ -717,7 +717,6 @@ For f_m = 0 To 11
     num_colums_coach = num_colums_coach + 1
     ar_Data_COACH(yyy, num_colums_coach) = Cells(i, 10)
     ar_nmHead_COACH(num_colums_coach) = "interest"
-
     num_colums_coach = num_colums_coach + 1
     ar_Data_COACH(yyy, num_colums_coach) = Cells(i, 11)
     ar_nmHead_COACH(num_colums_coach) = "desire"

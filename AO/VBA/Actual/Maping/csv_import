@@ -1,0 +1,22 @@
+Sub Ìàêðîñ2()
+
+Dim FilePatch As String
+FilePatch = "P:\SAPBW\Z_DPP_Y_CUSTOMERS.csv"
+Open FilePatch For Input As #1
+
+row_number = 0
+Do Until EOF(1)
+Line Input #1, lineFromFile
+LineItems = Split(lineFromFile, ";")
+
+ActiveCell.Offset(row_number, 0).Value = LineItems(5)
+ActiveCell.Offset(row_number, 1).Value = LineItems(4)
+ActiveCell.Offset(row_number, 2).Value = LineItems(0)
+ActiveCell.Offset(row_number, 3).Value = LineItems(1)
+ActiveCell.Offset(row_number, 4).Value = LineItems(6)
+ActiveCell.Offset(row_number, 5).Value = LineItems(9)
+ActiveCell.Offset(row_number, 6).Value = LineItems(10)
+row_number = row_number + 1
+
+Loop
+Close #1

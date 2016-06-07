@@ -1,0 +1,10 @@
+select smr.id, Concat(smr.technolog_full_name, smr.partimer_full_name), usr.id,  usr.salon_id , sln.name, sln.address, sln.com_mreg
+
+from seminars as smr
+left join seminar_types as smt ON smr.seminar_type_id = smt.id
+left join seminar_users as smu ON smr.id = smu.seminar_id
+left join users as usr ON smu.user_id = usr.id
+left join salons as sln ON usr.salon_id = sln.id
+where smt.id = 111
+
+

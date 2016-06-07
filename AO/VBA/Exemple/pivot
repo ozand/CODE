@@ -1,0 +1,33 @@
+    Range("I5").Select
+    With ActiveSheet.PivotTables("Ñâîäíàÿ òàáëèöà1").PivotFields( _
+        "[Measures].[Ñóììà ïî ñòîëáöó CA_TY_YTD1]")
+        .Caption = "×èñëî ýëåìåíòîâ â ñòîëáöå CA_TY_YTD1"
+        .Function = xlCount
+        .NumberFormat = "# ##0"
+    End With
+End Sub
+
+
+
+Sub Pivot_All_Count()
+'макрос переключения всех полей текущей сводной таблицы в количество
+
+    Dim pvtTable As PivotTable
+    Dim pvtName As String
+    
+    Intro
+    On Error Resume Next
+    Set pvtTable = ActiveSheet.PivotTables(ActiveCell.PivotTable.Name)
+    On Error GoTo 0
+    If Not pvtTable Is Nothing Then
+        For Each pvtField In pvtTable.DataFields
+            pvtField.Function = xlCount
+            pvtField = "# ##0"
+            pvtField.Value = " " & Mid(pvtField.Name, InStr(1, pvtField.Name, "по полю"), 1000)
+            On Error GoTo 0
+        Next pvtField
+    Else
+        MsgBox "Сначала поставьте активную ячейку в сводную таблицу!", vbExclamation, "Подсказка"
+    End If
+    Outro
+End Sub

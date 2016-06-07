@@ -1,0 +1,20 @@
+
+select usr.full_name, 
+usr.id, 
+usr.shtatnost, 
+usr.chief, 
+(select distinct usr2.chief from users as USR2 where usr2.full_name=usr.chief) as nPlus1,
+
+(case when to_char(smr.started_at, 'YYYY')  = '2014' then count(distinct smu.user_id) end) as count_USR_2014, 
+(case when to_char(smr.started_at, 'YYYY')  = '2015' then count(distinct smu.user_id) end ) as count_USR_2015, 
+(case when to_char(smr.started_at, 'YYYY')  = '2014' then count(distinct (select usr2.salon_id from users as usr2 where smu.user_id = usr2.id)) end) as count_SLN_2014,
+(case when to_char(smr.started_at, 'YYYY')  = '2015' then count(distinct (select usr2.salon_id from users as usr2 where smu.user_id = usr2.id)) end) as count_SLN_2015,
+(case when to_char(smr.started_at, 'YYYY')  = '2014' then sum(smu.paid) end) as Paid_2014,
+(case when to_char(smr.started_at, 'YYYY')  = '2015' then sum(smu.paid) end) as Paid_2015
+
+from users as usr
+left join seminars as smr ON usr.id = smr.technolog_id or usr.id = smr.partimer_id
+left join seminar_users as smu ON smr.id = smu.seminar_id
+
+where to_char (smr.closed_at, 'YYYY') is not Null and to_char(started_at, 'YYYY') in ('2015', '2014') 
+GROUP BY usr.id, usr.full_name, smr.started_at

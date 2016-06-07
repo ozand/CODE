@@ -1,0 +1,390 @@
+Sub data_CC_in_GC()
+
+
+Dim pathc2file As String
+Dim ar_code_Brand(4, 1)
+Dim LastRow_CC, LastColumns_CC As Integer
+Dim num_month
+
+Dim patchTR, actTR, ar_LastRow, in_data, status_head   As String
+Dim ALLTIME, EDU_PY, EDU_TY, place, AVG_HD As Variant
+Dim b, iii, i, x, y, frqOrder   As Integer
+Dim ar_nmAVG_Order()
+
+'Dim   As Worksheet
+Dim ar_Data(), nm_brand, ar_nmHead(150), ar_PYPer_PART_VAL, ar_TYPer_PART_VAL, ar_PYPer_LOR_VAL(), ar_TYPer_LOR_VAL(), ar_nm_month(), ar_nmMregEN(), ar_nmMregLT()
+
+NF = ActiveWorkbook.Name
+
+ar_nm_month = Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+ar_nmMregEN = Array("MOSCOW", "GR", "NORTHWEST", "CENTER", "VOLGA", "SOUTH", "URAL", "SIBERIA", "FAR EAST")
+ar_nmMregLT = Array("Moscou", "GR", "Nord-Ouest", "Centre", "Volga-Centre", "Sud", "Oural", "Siberie", "EO")
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+status_head = 0
+
+
+nm_brand = "RD"
+
+
+
+        
+patchTR = "p:\DPP\Business development\Book commercial\" & nm_brand & "\Top Russia Total 2016 " & nm_brand & ".xlsm"
+in_data = "in_TR"
+
+For Each Sh In ThisWorkbook.Worksheets
+If Sh.Name = in_data Then
+chek_name = chek_name + 1
+Else
+chek_name = chek_name + 0
+End If
+Next Sh
+
+If chek_name = 0 Then
+Set Sh = Worksheets.Add()
+Sh.Name = in_data
+End If
+
+Workbooks.Open Filename:=patchTR, Notify:=False
+actTR = ActiveWorkbook.Name
+Sheets(nm_brand).Select
+ActiveSheet.AutoFilterMode = False
+ar_LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1  ' ????????? ??????
+
+
+ReDim ar_Data(ar_LastRow - 4, 150)  ' num_colums
+
+    iii = 0
+    
+    For i = 4  To ar_LastRow
+    'For i = 4 To ar_LastRow
+    num_colums = 0
+    ar_Data(iii, num_colums) = Cells(i, 29)
+    ar_nmHead(num_colums) = "id"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Trim(Cells(i, 9)), 40)
+    ar_nmHead(num_colums) = "name"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Empty
+    ar_nmHead(num_colums) = ""
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Empty
+    ar_nmHead(num_colums) = ""
+    
+     
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Trim(Cells(i, 12)), 50)
+    ar_nmHead(num_colums) = "address"
+    
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Empty
+    ar_nmHead(num_colums) = ""
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Empty
+    ar_nmHead(num_colums) = ""
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Trim(Cells(i, 20)), 45)
+    ar_nmHead(num_colums) = "phone"
+    
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Empty
+    ar_nmHead(num_colums) = ""
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Trim(Cells(i, 16)), 30)
+    ar_nmHead(num_colums) = "manager"
+    
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Empty
+    ar_nmHead(num_colums) = ""
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Trim(Cells(i, 10)), 30)
+    ar_nmHead(num_colums) = "law_name"
+    
+    
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Empty
+    ar_nmHead(num_colums) = "description"
+        
+  '  num_colums = num_colums + 1
+  '  ar_Data(iii, num_colums) = Cells(i, 14) ' +++
+  ' ar_nmHead(num_colums) = "city_name"
+    
+ 
+     num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(CStr(Cells(i, 3)), 20)
+    ar_nmHead(num_colums) = "partner_code"
+    
+     num_colums = num_colums + 1
+    If Cells(i, 8) = 1 Then
+        sts_DN = "f"
+        Else
+        sts_DN = "t"
+    End If
+    
+    ar_Data(iii, num_colums) = sts_DN
+    ar_nmHead(num_colums) = "is_closed"
+    
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Cells(i, 160) , 45)
+    ar_nmHead(num_colums) = "grade"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Trim(Cells(i, 16)), 30)
+    ar_nmHead(num_colums) = "contact_person"
+          
+    
+    num_colums = num_colums + 1
+ Select Case nm_brand
+    Case "LP"
+    num_brand = 1
+    End Select
+    
+    ar_Data(iii, num_colums) = num_brand
+    ar_nmHead(num_colums) = "brand"
+        
+    
+    num_colums = num_colums + 1
+    cdMonth = Cells(i, 161)
+    
+    If Len(cdMonth) = 0 Then
+       cdMonth = 1
+    End If
+    
+    If cdMonth < 10 And cdMonth >= 1 Then
+       cdMonth = "0" & cdMonth
+    End If
+    
+    cdYear = Cells(i, 65)
+    IF not isNumeric(cdYear)  Then
+        cdYear = 2008
+        Else
+    cdYear = CInt(cdYear)
+    END IF
+    
+    nuM_date_QNC = "01." & cdMonth & "." & cdYear
+    ar_Data(iii, num_colums) = nuM_date_QNC
+    ar_nmHead(num_colums) = "open_date"
+    
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Trim(Cells(i, 7)), 30)
+    ar_nmHead(num_colums) = "representative_full_name"
+    
+   
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Trim(Cells(i, 13)), 30)
+    ar_nmHead(num_colums) = "ext_address"
+        
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Trim(Cells(i, 19)), 30)
+    ar_nmHead(num_colums) = "chain_name"
+    
+    
+            
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Trim(Cells(i, 11)), 30)
+    ar_nmHead(num_colums) = "city_name_geographic"
+    
+    
+        
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Empty
+    ar_nmHead(num_colums) = ""
+    
+    
+            
+    num_colums = num_colums + 1
+    If Cells(i, 40) = 1 Then
+        sts_club = "f"
+        Else
+        sts_club = "t"
+    End If
+    
+    ar_Data(iii, num_colums) = sts_club
+    ar_nmHead(num_colums) = "which_club"
+    
+            
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Cells(i, 27), 45)
+    ar_nmHead(num_colums) = "barber_chairs"
+    
+        
+            
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Cells(i, 4), 45)
+    ar_nmHead(num_colums) = "com_mreg"
+    
+        
+            
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Cells(i, 5), 45)
+    ar_nmHead(num_colums) = "com_reg"
+    
+        
+            
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Cells(i, 6), 45)
+    ar_nmHead(num_colums) = "com_sect"
+        
+            
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Cells(i, 18), 45)
+    ar_nmHead(num_colums) = "client_type"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Cells(i, 160) , 45)
+    ar_nmHead(num_colums) = "mag"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Trim(Cells(i, 22)), 30)
+    ar_nmHead(num_colums) = "site"
+    
+        
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Empty
+    ar_nmHead(num_colums) = ""
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Trim(Cells(i, 21)), 30)
+    ar_nmHead(num_colums) = "email"
+    
+        
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Empty
+    ar_nmHead(num_colums) = ""
+    
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Cells(i, 167), 45)
+    ar_nmHead(num_colums) = "partner"
+    
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Cells(i, 173), 45)
+    ar_nmHead(num_colums) = "partner_private_code"
+    
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Trim(Cells(i, 15)), 30)
+    ar_nmHead(num_colums) = "manager_phone"
+    
+        
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Empty
+    ar_nmHead(num_colums) = ""
+    
+        num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Trim(Cells(i, 14)), 30)
+    ar_nmHead(num_colums) = "manager_mail"
+    
+       num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Empty
+    ar_nmHead(num_colums) = ""
+    
+   
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Left(Cells(i, 6), 45)
+    ar_nmHead(num_colums) = "city"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = "завоеванный салон"
+    ar_nmHead(num_colums) = "salon_conquer"
+    
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = empty
+    ar_nmHead(num_colums) = "show_on_locator"
+           
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(i, 1)
+    ar_nmHead(num_colums) = "row"
+        
+
+
+iii = iii + 1
+
+    
+Next i
+
+    
+ActiveWindow.Close
+Application.DisplayAlerts = False
+  
+    
+Workbooks(NF).Activate
+'Sheets(in_data).Visible = False
+Sheets(in_data).Activate
+
+'clear sheet & create head & create name OR fiil data
+'---------------------------------------------------------------------------------------------------------
+
+ActiveSheet.UsedRange.Cells.ClearContents
+end_POS = iii + 1
+start_POS = 2
+
+Dim n As Name
+For Each n In ThisWorkbook.Names
+    On Error Resume Next
+    n.Delete
+    Next n
+
+For t = 0 To num_colums
+Cells(1, t + 1) = ar_nmHead(t)
+Cells(1, t + 1).Select
+'ctiveWorkbook.Names.Add Name:=ar_nmHead(t), RefersTo:="=" & ActiveSheet.Name & "!" & ActiveCell.Address()
+Next t
+
+
+
+ActiveSheet.Cells(start_POS, 1).Resize(end_POS - start_POS + 1, num_colums + 1) = ar_Data()
+status_head = 1
+
+
+ActiveWorkbook.Names.Add Name:="SOURCE", RefersToR1C1:="=OFFSET(in_TR!R1C1,0,0,COUNTA(in_TR!R1C1:R65535C1),COUNTA(in_TR!R1C1:R1C255))"
+'ActiveWorkbook.Names("SOURCE").Comment = ""
+'Sheets(in_data).Visible = False
+ActiveWorkbook.RefreshAll
+
+'---------------------------------------------------------------------------------------------------------
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+End Sub
+
+
+
+
+
+
