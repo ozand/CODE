@@ -1,0 +1,82 @@
+Function fn_Replace(ByVal txt As String) As String
+    St$ = "-~!@/\#$%^:?&*=|`;"""
+    For i% = 1 To Len(St$)
+        txt = Replace(txt, Mid(St$, i, 1), "")
+        txt = Replace(txt, Chr(10), "")
+    Next
+    fn_Replace = txt
+End Function
+'---------------------------------------------------------------------------------------------------------
+Function fn_VBA_Start() As String
+With Application
+    .ScreenUpdating = False
+    .EnableEvents = False
+    .Calculation = xlCalculationManual
+    '.DisplayPageBreaks = False
+    .DisplayAlerts = False
+End With
+End Function
+'---------------------------------------------------------------------------------------------------------
+Function fn_VBA_End() As String
+With Application
+    .ScreenUpdating = True
+    .Calculation = xlCalculationAutomatic
+    .EnableEvents = True
+    .DisplayStatusBar = True
+    .DisplayAlerts = True
+End With
+End Function
+'---------------------------------------------------------------------------------------------------------
+Function fn_lastRow() As Integer
+Dim result As Integer
+result = Empty
+    With ActiveWorkbook.ActiveSheet.UsedRange
+    result = .Row + .Rows.Count - 1
+    End With
+fn_lastRow = result
+End Function
+'---------------------------------------------------------------------------------------------------------
+Function fn_lastColumn() As Integer
+Dim result As Integer
+result = Empty
+    
+    With ActiveWorkbook.ActiveSheet.UsedRange
+    result = .Column + .Columns.Count - 1
+    End With
+
+fn_lastColumn = result
+End Function
+'---------------------------------------------------------------------------------------------------------
+'---------------------------------------------------------------------------------------------------------
+
+
+Sub json()
+Dim ActColumn&, f_rw&
+Dim ar_Data()
+
+fn_VBA_Start
+ActColumn = ActiveCell.Column
+Cells(1, ActColumn + 1) = "Type"
+Cells(1, ActColumn + 2) = "Before"
+Cells(1, ActColumn + 3) = "After"
+
+start_status = "client_type:"
+LastRow = fn_lastRow
+ReDim ar_Data(2 To LastRow)
+
+For f_rw = 2 To LastRow
+    ar_JSON = Split(Cells(f_rw, ActColumn), Chr(10))      'vbCrLf
+    count_ar = UBound(ar_JSON)
+    For f_ar = 0 To count_ar
+        If ar_JSON(f_ar) = start_status Then
+            Cells(f_rw, ActColumn + 1) = Trim(fn_Replace(ar_JSON(f_ar)))
+            Cells(f_rw, ActColumn + 2) = CStr(Trim(fn_Replace(ar_JSON(f_ar + 1))))
+            Cells(f_rw, ActColumn + 3) = Trim(fn_Replace(ar_JSON(f_ar + 2)))
+            Exit For
+        End If
+    Next f_ar
+Next f_rw
+
+
+fn_VBA_End
+End Sub

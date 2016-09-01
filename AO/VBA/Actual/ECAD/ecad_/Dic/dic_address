@@ -1,0 +1,178 @@
+'Function List
+
+    '
+    Function fn_VBA_Start() As String
+    With Application
+        .ScreenUpdating = False
+        .EnableEvents = False
+        .Calculation = xlCalculationManual
+        '.DisplayPageBreaks = False
+        .DisplayAlerts = False
+    End With
+    End Function
+
+    Function fn_VBA_End() As String
+    With Application
+        .ScreenUpdating = True
+        .Calculation = xlCalculationAutomatic
+        .EnableEvents = True
+        .DisplayStatusBar = True
+        .DisplayAlerts = True
+    End With
+    End Function
+
+    Function fn_CreateSh(cr_sh As String) As String
+    For Each Sh In ThisWorkbook.Worksheets
+        If Sh.Name = cr_sh Then
+        chek_name = 1
+        End If
+    Next Sh
+        If chek_name <> 1 Then
+        Set Sh = Worksheets.Add()
+        Sh.Name = cr_sh
+        End If
+    End Function
+
+    Function fn_openFile(patch As String) As String
+    If Dir(patch) = "" Then
+    MsgBox ("NetF")
+    Else
+    Workbooks.Open Filename:=patch, Notify:=False
+    End If
+    End Function
+
+    Function fn_Replace_symbols(ByVal txt As String) As String
+        St$ = "~!@/\#$%^:?&*=|`;"""
+        For f_i% = 1 To Len(St$)
+            txt = Replace(txt, Mid(St$, f_i, 1), "_")
+            txt = Replace(txt, Chr(10), "_")
+        Next
+        fn_Replace_symbols = txt
+    End Function
+
+
+    Function fn_quartal(month As Integer) As String
+
+    Dim result As String
+    result = Empty
+            Select Case month
+            Case 1, 2, 3
+            result =  "1Q"
+            Case 4, 5, 6
+            result =  "2Q"
+            Case 7, 8, 9
+            result =  "3Q"
+            Case 10, 11, 12
+            result =  "4Q"
+        End Select
+    fn_quartal = result
+    
+    End Function
+
+    Function fn_month_form_00(month as Integer) as String
+    Dim result as String
+    result = Empty
+
+        If month < 10 Then
+            result = "0" & f_q
+        Else
+            result = f_q
+        End If
+
+    fn_month_form_00 = result
+    End Function
+
+    Function fn_patch_history_TR(brand as String, year as Integer, thisMonth as Integer, ver_month as String) as String
+    Dim result as String
+    result = Empty
+
+        Select Case month
+            Case this_month
+            result = "p:\DPP\Business development\Book commercial\" & brand & "\Top Russia Total " & year & " " & brand & ".xlsm"
+            Case Else
+            result = "p:\DPP\Business development\Book commercial\" & brand & "\" & year &"\History " & year & "\Top Russia Total " & year & "." & ver_month & " " & brand & ".xlsm"
+        End Select
+
+    fn_patch_history_TR = result
+
+    End Function
+
+    Function fn_lastRow() as Integer
+    Dim result as Integer
+    result = Empty
+        With ActiveWorkbook.ActiveSheet.UsedRange
+        result = .Row + .Rows.Count - 1
+        End with
+    fn_lastRow = result
+    End Function
+
+
+    Function fn_lastColumn() as Integer
+    Dim result as Integer
+    result = Empty
+        With ActiveWorkbook.ActiveSheet.UsedRange
+        result = .Column  + .Columns.Count - 1
+        End with
+    fn_lastColumn = result
+    End Function
+    
+  
+
+'--------------------------------------------------------------------------------------------------------- 
+
+Sub dic_adress()
+Dim NF as String
+
+With ActiveWorkbook
+WB1 = .Name
+Sh1 = .Sheets.Name
+End With
+
+fn_VBA_Start
+
+LastRow = fn_lastRow
+LastColumn = fn_lastColumn
+
+Const clm_StreetGeo = 28 , clm_CityGeo = 49 , clm_RegGeo = 59 , clm_SectCom = 40 ,   clm_RegCom = 39 ,  clm_MregCom = 38 
+
+Dim dic_StreetGeo: Set dic_StreetGeo = CreateObject("Scripting.Dictionary")
+dic_StreetGeo.RemoveAll
+
+Dim dic_CityGeo: Set dic_CityGeo = CreateObject("Scripting.Dictionary")
+dic_CityGeo.RemoveAll
+
+Dim dic_RegGEO: Set dic_RegGEO = CreateObject("Scripting.Dictionary")
+dic_RegGEO.RemoveAll
+
+Dim dic_SectReg: Set dic_SectReg = CreateObject("Scripting.Dictionary")
+dic_SectReg.RemoveAll
+
+Dim dic_RegMreg: Set dic_RegMreg = CreateObject("Scripting.Dictionary")
+dic_RegMreg.RemoveAll
+
+ar_Data(1 to LastRow, 1 to LastColumn)
+
+iii = 0
+For f_r = 2 to LastRow 
+
+nm_StreetGeo = Cells(f_r, clm_StreetGeo)
+nm_CityGeo = Cells(f_r, clm_CityGeo)
+nm_RegGeo = Cells(f_r, clm_RegGeo)
+nm_SectoreCom = Cells(f_r, clm_SectorGeo)
+nm_RegCom = Cells(f_r, clm_RegGeo)
+nm_MregCom = Cells(f_r, clm_MregGeo)
+
+
+key_dic_StreetGeo = nm_StreetGeo & " "& nm_CityGeo & " " & nm_RegGeo
+
+If Not dic_StreetGeo.Exists(key_dic_StreetGeo) Then
+    dic_StreetGeo.add to_dic_StreetGeo, 
+    Else
+    count_item = dic_StreetGeo.Item(to_dic_StreetGeo)
+    count_item = count_item + 1
+     
+
+sh_in_data = Sh1 & "_new"
+fn_CreateSh (sh_in_data)
+
+

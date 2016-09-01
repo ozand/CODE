@@ -86,7 +86,8 @@ where sln.id = sln2.id
 order by smr.started_at Desc
 limit 1) as "last_educater_cont",
 
-sln.show_on_locator, sln.com_sect, sln.com_reg, sln.city_name_geographic
+sln.show_on_locator, sln.com_sect, sln.com_reg, sln.city_name_geographic, 
+(case when sln.is_closed = 't' then 0 else 1 end),  sln.client_type
 
 
 

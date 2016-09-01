@@ -1,0 +1,43 @@
+Select
+smr.id as smr_id, smt.id as smr_type, smt.name, smt.kpis_type,
+extract(year from smr.started_at) as cd_year,
+extract(month from smr.started_at)  as cd_month,
+extract(day from smr.started_at)  as cd_day,
+(case when smr.salon_id is not null or smr.salon_id not in ( '0' )then 'SALON' else
+(case when smr.studio_id  is not null then 'STUDIO' else '' end)
+ end) as type_place,
+ Concat(smr.studio_id, smr.salon_id) ,
+concat(
+(select concat(std.name, '. ',std.address) from studios as std where smr.studio_id = std.id),
+
+(select concat(sln.name, '. ',sln.address) from salons as sln where smr.salon_id = sln.id)) as Place, 
+(case when smr.closed_at is not null then 'CLOSED' else 'NOT_CLOSED' end) as seminar_closed,
+
+
+(case when smr.partimer_id is not null then smr.partimer_full_name else
+(case when smr.technolog_id  is not null then smr.technolog_full_name else '' end)
+ end) as educater,
+
+usr.id, usr.full_name, usr.role,
+
+(select sln3.id from salons as sln3 where usr.id = sln3.salon_manager_id  and usr.role = 'salon_manager' limit 1 ),
+
+
+
+usr.salon_id, (select concat(sln2.name, '. ',sln2.address) from salons as sln2 where usr.salon_id= sln2.id)
+ 
+
+
+
+
+--(select distinct usr2.chief from users as USR2 where usr2.full_name=usr.chief limit 1 ) as nPlus1
+
+
+from seminars as SMR
+left join seminar_types as smt On smr.seminar_type_id = smt.id
+left join seminar_users as smu ON smu.seminar_id = smr.id
+left join users as usr ON smu.user_id = usr.id
+
+Where extract(month from smr.started_at) <= 6 and extract(year from smr.started_at) in ('2015', '2016') 
+
+--group by smr.started_at, smu.user_Id

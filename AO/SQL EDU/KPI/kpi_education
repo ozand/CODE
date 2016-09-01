@@ -1,0 +1,10 @@
+Select 
+count(smu.id) as count_CNTCT, count(distinct smu.id) as count_uniq_CNTCT,
+count(distinct smu.seminar_id) as count_SMR, 
+count(select distinct usr.salon_id from users as usr where usr.salon_id = smu.user_id ) as count_SLN,
+extract(year from smr.started_at) as cd_year,
+
+from seminar_users as SMU
+left join seminar as smr ON smu.seminar_id = smr.id
+  
+Where extract(month from smr.started_at) <= 6 and extract(year from smr.started_at) in ('2015', '2016')

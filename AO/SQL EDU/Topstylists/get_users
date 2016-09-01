@@ -1,0 +1,22 @@
+select usr.id,
+extract(year from usr.created_at), extract(month from usr.created_at), usr.role, '1' as user, 
+(case when char_length(usr.mobile_number) > 5 then 1 else 0 end ) as mobile, usr.mobile_number,
+(case when char_length(usr.email) > 5  then 1 else 0 end ) as email, usr.email,
+(Case when usr.salon_id is not null then sln.com_mreg else slnMNG.com_mreg end) as com_mreg,
+(Case when usr.salon_id is not null then sln.com_reg else slnMNG.com_reg end) as com_reg,
+(Case when usr.salon_id is not null then sln.com_sect else slnMNG.com_sect end) as com_reg,
+
+(Case when usr.salon_id is not null then usr.salon_id else slnMNG.id end) as salon_id,
+
+(Case when usr.salon_id is not null then concat('(', sln.id, ')', '_', sln.name, '. ',sln.address) else 
+(Case when slnMNG.id is not null then concat('(', slnMNG.id, ')', '_', slnMNG.name, '. ',slnMNG.address) else '' end) end) as salon,
+
+
+(Case when usr.salon_id is not null then 'salon_employee' else 
+(Case when slnMNG.id is not null then 'salon_employee' else 
+(Case when usr.id is not null then 'hairdresser' else 'not_reg_user' end) end) end) as type_master
+
+from users as usr
+
+left join salons as sln ON usr.salon_id is not null and usr.salon_id = sln.id
+left join salons as slnMNG ON usr.salon_id is null and usr.id = slnMNG.salon_manager_id

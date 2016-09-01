@@ -1,0 +1,61 @@
+Function fn_VBA_Start() As String
+With Application
+    .ScreenUpdating = False
+    .EnableEvents = False
+    .Calculation = xlCalculationManual
+    '.DisplayPageBreaks = False
+    .DisplayAlerts = False
+End With
+End Function
+
+Function fn_VBA_End() As String
+With Application
+    .ScreenUpdating = True
+    .Calculation = xlCalculationAutomatic
+    .EnableEvents = True
+    .DisplayStatusBar = True
+    .DisplayAlerts = True
+End With
+End Function
+
+Sub sel()
+
+Dim rg As Range
+Dim new_wrds As String
+Dim f_num_wrd As Integer
+
+fn_VBA_Start
+
+Set inpdata = Selection
+cnt_cl = inpdata.Rows.Count
+
+
+For Each cl In inpdata
+
+        wrds = cl.Value
+        wrds_len = Len(wrds)
+        
+        f_num_wrd = Empty
+        
+        For f_w = 1 To wrds_len
+            f_wrd = Mid(wrds, f_w, 1)
+            
+                If f_wrd = "/" Then
+                    f_num_wrd = f_w
+                End If
+               
+        Next f_w
+
+If Not IsEmpty(f_num_wrd) Then
+new_wrds = Mid(wrds, f_num_wrd + 1, wrds_len - f_num_wrd)
+Else
+new_wrds = wrds
+End If
+
+cl.Value = new_wrds
+
+Next
+
+fn_VBA_End
+
+End Sub

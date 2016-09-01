@@ -759,34 +759,13 @@ For f_m = 0 To 11
     
     num_colums_coach = num_colums_coach + 1
     
-    If Len(Cells(i, 22)) > 0 Then
+    if Len(Cells(i, 22)) > 0 Then
+                
         nm_Mreg = Cells(i, 22)
-
-    If Left(nm_Mreg, 2) = nm_brand Then
-    nm_Mreg = Right(nm_Mreg, Len(nm_Mreg) - 3)
-    End If
-   
-
-
-    
-        If nm_Mreg = "Moscou GR" Then
-        nm_reg = Cells(i, 5)
-        textPos = InStr(nm_reg, "MSK")
-        textPos = InStr(nm_reg, "Moscou") + textPos
-            If textPos > 0 Then
-            nm_Mreg = "Moscou"
-            Else
-            nm_Mreg = "GR"
-    
-            End If
+        If Left(nm_Mreg, 2) = ar_brand(b) Then
+        nm_Mreg = Right(Cells(i, 22), Len(Cells(i, 22)) - 3)
         End If
-        
-        For f_mr = 0 To UBound(ar_nmMregLT)
-        If ar_nmMregLT(f_mr) = nm_Mreg Then
-        nm_Mreg = ar_nmMregEN(f_mr)
-        End If
-        Next f_mr
-        
+       
         Else
         nm_Mreg = 0
     End If

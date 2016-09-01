@@ -1,0 +1,314 @@
+Option Explicit
+
+    Declare PtrSafe Function GetTickCount Lib "kernel32" () As Long
+    Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" _
+            (ByVal hwnd As LongPtr, ByVal pszPath As String, ByVal psa As Any) As LongPtr
+            
+            Const lcColMR& = 1    ' номер столбца на листах с названиями мегарегионов
+Const lcColPName& = 2 ' номер столбца на листах с названиями партнеров
+Const lcColPCode& = 3 ' номер столбца на листах с кодами партнеров
+
+Const sComPathR$ = "\\RUCORPRUWKS0665\Dropbox\For Regions Commercial Team\" ' "начало" пути для сохранения файлов, "нарезанных" по регионам
+'"\\RUCORPRUWKS0665\Dropbox\For Regions Commercial Team\"
+
+Const sComPathP$ = "\\RUCORPRUWKS0665\Dropbox\For Regions Commercial Team\" ' "начало" пути для сохранения файлов, "нарезанных" по партнерам
+'"\\RUCORPRUWKS0665\Dropbox\For Regions Commercial Team\"
+
+Const sWSExName = "start" ' имя листа-исключения (не копируется и не обрабатывается)
+
+' глобальные переменные для взаимодействия с пользовательской формой при коллизиях:
+Public gsFName$ ' имя файла, отображаемое в сообщении в форме
+' выбор для "текущей" коллизии (Перезаписать, Пропустить, Прекратить обработку):
+Public gfNowSave As Boolean, gfNowSkip As Boolean, gfNowExit As Boolean
+' выбор для следующих коллизий (Перезаписывать, Пропускать, Отображать окно диалога):
+Public gfAlwaysSave As Boolean, gfAlwaysSkip As Boolean, gfAlwaysAsk As Boolean
+Public gfUFok As Boolean ' нажата ли кнопка ОК в форме
+
+Public wbTo As Workbook ' "временная" переменная, используется для каждой создаваемой книги
+Public iResult& ' для "оперативного" вывода процесса на лист "start"
+Dim tTestTC& ' начальное время макроса, используется для тайминга процесса
+'---------------------------------------------------------------------------------------------------------
+'Function List
+
+    '
+    Function fn_VBA_Start() As String
+    With Application
+        .ScreenUpdating = False
+        .EnableEvents = False
+        .Calculation = xlCalculationManual
+        '.DisplayPageBreaks = False
+        .DisplayAlerts = False
+    End With
+    End Function
+
+    Function fn_VBA_End() As String
+    With Application
+        .ScreenUpdating = True
+        .Calculation = xlCalculationAutomatic
+        .EnableEvents = True
+        .DisplayStatusBar = True
+        .DisplayAlerts = True
+    End With
+    End Function
+
+    Function fn_lastRow() As Integer
+    Dim result As Integer
+    result = Empty
+        With ActiveWorkbook.ActiveSheet.UsedRange
+        result = .Row + .Rows.Count - 1
+        End With
+    fn_lastRow = result
+    End Function
+
+
+    Function fn_lastColumn() As Integer
+    Dim result As Integer
+    result = Empty
+        With ActiveWorkbook.ActiveSheet.UsedRange
+        result = .Column + .Columns.Count - 1
+        End With
+    fn_lastColumn = result
+    End Function
+    
+  
+
+'---------------------------------------------------------------------------------------------------------
+
+
+
+   Function SendEmailUsingOutlook(ByVal Email$, ByVal MailText$, Optional ByVal Subject$ = "", _
+                               Optional ByVal AttachFilename As Variant) As Boolean
+    ' функция производит отправку письма с заданной темой и текстом на адрес Email
+    ' с почтового ящика, настроенного в Outlook для отправки писем "по-умолчанию"
+    ' Если задан параметр AttachFilename, к отправляемому письму прикрепляется файл (файлы)
+
+    On Error Resume Next: Err.Clear
+    Dim OA As Object: Set OA = CreateObject("Outlook.Application")
+    Dim file As Workbook
+    Dim i%
+    
+    If OA Is Nothing Then MsgBox "Не удалось запустить OUTLOOK для отправки почты", vbCritical: Exit Function
+ 
+    With OA.CreateItem(0)   'создаем новое сообщение
+        .To = Email$: .Subject = Subject$: .Body = MailText$
+        If VarType(AttachFilename) = vbString Then .Attachments.Add AttachFilename
+        If VarType(AttachFilename) = vbObject Then    ' AttachFilename as Collection
+            For Each file In AttachFilename: .Attachments.Add file: Next
+        End If
+        For i = 1 To 100000: DoEvents: Next    ' без паузы не отправляются письма без вложений
+        Err.Clear: .Send
+        SendEmailUsingOutlook = Err = 0
+    End With
+'    Set OutApp = Nothing
+End Function
+
+'---------------------------------------------------------------------------------------------------------
+Function mySave&(smPath$, smFName$, ByRef wsRes As Worksheet)
+' возвращает 1 - если созданный файл сохранен, _
+             0 - если файл не сохранен по выбору пользователя, _
+            -1 - если файл не сохранен из-за какой-л. ошибки, _
+            -2 - если необходимо прервать работу макроса (по выбору польз-ля)
+  
+  CreateFolderWithSubfolders smPath
+    
+  On Error Resume Next
+    If Dir(smPath & smFName) = "" Then ' Такого файла еще нет
+      wbTo.SaveAs Filename:=smPath & smFName, FileFormat:=xlOpenXMLWorkbook, CreateBackup:=False
+      If Err.Number <> 0 Then
+        Debug.Print "Не удалось сохранить файл " & smFName, Err.Number
+        Err.Clear
+        mySave = -1: GoTo exFun
+      End If
+      mySave = 1: GoTo exFun
+    Else ' Файл уже существует
+      If gfAlwaysAsk Then
+        gfUFok = False: gsFName = smFName: ufMyAlert.Show
+        If Not gfUFok Then ' в форме нажали крестик
+          MsgBox "Обработка прервана.", vbExclamation, ""
+          mySave = -2: GoTo exFun
+        End If
+        If gfNowSave Then
+          Application.DisplayAlerts = False
+              wbTo.SaveAs Filename:=smPath & smFName, FileFormat:=xlOpenXMLWorkbook, CreateBackup:=False
+          Application.DisplayAlerts = True
+          If Err.Number <> 0 Then
+            Debug.Print "Не удалось сохранить файл " & smFName, Err.Number
+            Err.Clear
+            mySave = -1: GoTo exFun
+          End If
+          mySave = 1: GoTo exFun
+        ElseIf gfNowSkip Then
+          mySave = 0: GoTo exFun
+        ElseIf gfNowExit Then
+          MsgBox "Обработка прервана.", vbExclamation, ""
+          mySave = -2: GoTo exFun
+        End If
+      ElseIf gfAlwaysSave Then
+        Application.DisplayAlerts = False
+            wbTo.SaveAs Filename:=smPath & smFName, FileFormat:=xlOpenXMLWorkbook, CreateBackup:=False
+        Application.DisplayAlerts = True
+        If Err.Number <> 0 Then
+          Debug.Print "Не удалось сохранить файл " & smFName, Err.Number
+          Err.Clear
+          mySave = -1: GoTo exFun
+        End If
+        mySave = 1: GoTo exFun
+      ElseIf gfAlwaysSkip Then
+        mySave = 0: GoTo exFun
+      End If
+    End If
+exFun:
+    wbTo.Close 0
+    Set wbTo = Nothing
+  On Error GoTo 0
+  
+  wsRes.Parent.Activate
+  iResult = iResult + 1
+  If iResult > 1 Then
+    wsRes.[c1:e1].Resize(iResult - 1).Copy wsRes.[c2:e2].Resize(iResult - 1)
+  End If
+  Application.ScreenUpdating = True
+    wsRes.[c1].Value = Format((GetTickCount - tTestTC) / 1000, "0.000") & " sec"
+    wsRes.[d1].Value = Choose(mySave + 3, "break", "error", "skip", "saved")
+    wsRes.[e1].Value = smPath & smFName
+  Application.ScreenUpdating = False
+  
+End Function
+
+'---------------------------------------------------------------------------------------------------------
+                                      
+Sub CreateFolderWithSubfolders(ByVal ПутьСоздаваемойПапки$)
+  If Len(Dir(ПутьСоздаваемойПапки$, vbDirectory)) = 0 Then    ' если папка отсутствует
+    SHCreateDirectoryEx Application.hwnd, ПутьСоздаваемойПапки$, ByVal 0&    ' создаём путь
+  End If
+End Sub
+
+Sub Narezka()
+  Dim wbThis As Workbook, ws As Worksheet
+  Dim dicMRegs As Object, dicPartners As Object
+  Dim lrMR&, lrP&
+  Dim arTmpMR(), arTmpPN(), arTmpPC(), i&, iii&
+  
+  Dim arPrt(50, 2), iMR&, iPC&
+  Dim sPath$, sFName$, sComName$, vTmp, iTmp&, sTmp$, vMsg, attach$, res, Pmail, nm_Mreg$, nm_PRTN$, cd_PRTN$
+  Dim fRes& ' для анализа результата вызова функции сохранения
+  
+  tTestTC = GetTickCount
+  Set wbThis = Application.ThisWorkbook
+  wbThis.Sheets("start").[c:e].Clear: iResult = 0
+  
+  sTmp = wbThis.Name
+  iTmp = InStrRev(sTmp, ".")
+  If iTmp > 0 Then sTmp = Left(sTmp, iTmp - 1)
+  
+  vTmp = VBA.InputBox("Укажите ""общую"" часть для создаваемых файлов", "", sTmp)
+  If StrPtr(vTmp) = 0 Then
+    MsgBox "Нажата кнопка Отмена. Процедура прервана", vbCritical, "Ошибка"
+    Exit Sub
+  ElseIf Trim(vTmp) = "" Then
+    MsgBox "Введено пустое значение. Процедура прервана", vbCritical, "Ошибка"
+    Exit Sub
+  ElseIf Trim(vTmp) Like "*[\/:*?""<>|]*" Then
+    vMsg = MsgBox("Использованы символы, недопустимые в именах файлов." _
+      & vbCrLf & "Заменить их на символ _ (подчеркивания)?", vbCritical + vbYesNo, "Предупреждение")
+    If vMsg = vbYes Then
+      sTmp = Trim(vTmp)
+      For i = 1 To 9
+        sTmp = Replace(sTmp, Mid("\/:*?""<>|", i, 1), "_")
+      Next
+    Else
+      Exit Sub
+    End If
+  Else
+    sTmp = vTmp
+  End If
+  
+  Application.ScreenUpdating = False
+  Application.Calculation = xlCalculationManual
+  
+  Set dicPartners = CreateObject("scripting.dictionary")
+  
+  Sheets("BONUS").Select
+    
+    iii = 0
+    For i = 2 To fn_lastRow
+        nm_Mreg = Cells(i, lcColMR)
+        nm_PRTN = Cells(i, lcColPName)
+        cd_PRTN = Cells(i, lcColPCode)
+
+        If Not dicPartners.exists(cd_PRTN) Then
+        iii = iii + 1
+        dicPartners.Add cd_PRTN, nm_PRTN
+        arPrt(iii, 0) = nm_Mreg
+        arPrt(iii, 1) = nm_PRTN
+        arPrt(iii, 2) = cd_PRTN
+        End If
+            
+    Next i
+     
+ 
+  ' вначале - устанавливаем переключатели для обработки коллизий:
+  gfAlwaysAsk = True
+  gfAlwaysSave = False
+  gfAlwaysSkip = False
+    
+   
+  ' по партнерам
+  
+  
+  For iPC = 1 To iii
+    
+    nm_Mreg = arPrt(iPC, 0)
+    nm_PRTN = arPrt(iPC, 1)
+    cd_PRTN = arPrt(iPC, 2)
+  
+    wbThis.Worksheets.Copy
+    Set wbTo = Application.ActiveWorkbook
+    Application.DisplayAlerts = False
+      wbTo.Sheets(sWSExName).Delete
+    Application.DisplayAlerts = True
+    
+    For Each ws In wbThis.Worksheets
+      If ws.Name <> sWSExName Then
+        ws.[a1].CurrentRegion.Copy
+        wbTo.Worksheets(ws.Name).[a1].PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, _
+            SkipBlanks:=False, Transpose:=False
+        With wbTo.Worksheets(ws.Name)
+          lrMR = .Cells(ws.Rows.Count, lcColMR).End(xlUp).Row
+          For i = lrMR To 2 Step -1
+            If CStr(.Cells(i, lcColPCode).Value) <> cd_PRTN Then .Rows(i).Delete
+          Next
+        End With
+      End If
+    Next
+
+    sPath = sComPathP & "Partners\" & nm_Mreg & "\" & cd_PRTN & "\BONUS\"
+    
+    CreateFolderWithSubfolders sPath
+    sFName = sTmp & " " & cd_PRTN & " " & nm_PRTN & ".xlsx"
+    Pmail = wbTo.Worksheets("BONUS").Cells(2, 17)
+    fRes = mySave(sPath, sFName, wbThis.Sheets(sWSExName))
+    If fRes = -2 Then GoTo exObr
+
+ 'отправляем письмо с 1 вложением
+    'attach$ = sPath & sFName       ' прикрепляем текущий файл Excel
+    ' адрес получателя - в ячейке A1, текст письма - в ячейке A2
+    'res = SendEmailUsingOutlook(Pmail, "Здравствуйте!" & vbNewLine & "Во вложении расчет по новым клиентам за июнь.", sFName, attach$)
+    'If res Then Debug.Print "Письмо 2 отправлено успешно" Else Debug.Print "Ошибка отправки"
+  Next
+
+  MsgBox "Обработка завершена." & vbCrLf _
+    & Format((GetTickCount - tTestTC) / 1000, "0.000") & " sec", vbInformation, ""
+  
+exObr:
+'  If Not wbTo Is Nothing Then wbTo.Close 0
+
+fn_VBA_End
+  
+End Sub
+
+
+
+
+
+

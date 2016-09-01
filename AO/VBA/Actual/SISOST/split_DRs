@@ -17,7 +17,7 @@ Function Replace_symbols(ByVal txt As String) As String
     Replace_symbols = txt
 End Function
 
-'--------------------------------------------------------------------------------------------------------- 
+'---------------------------------------------------------------------------------------------------------
 Sub toDr()
 
     Dim sts_del As Boolean
@@ -26,7 +26,7 @@ Sub toDr()
     ar_mreg = Array("MOSCOW", "NORTHWEST", "CENTER", "SOUTH", "URAL", "SIBERIA", "FAR EAST")
     mRegsF = Array("Moscou GR", "Nord-Ouest", "Centre", "Sud", "Oural", "Siberie", "EO")
     
-    
+    Dim thisDay As Integer
     
     
     num_brand = UBound(ar_brand)
@@ -85,7 +85,7 @@ End If
             Case Is = "Total"
                 sts_del = False
             Case Is = "Partners"
-                sts_del = False              
+                sts_del = False
             Case Else
                 sts_del = True
             End Select
@@ -102,10 +102,11 @@ End If
             Cells(1, 1).Select
             
         Next f_b
-        
-For Each c In ActiveSheet.UsedRange.SpecialCells(xlCellTypeFormulas)
-        c.Formula = Replace(c.Formula, "#REF!", "", 1, -1, vbTextCompare)
-    Next       
+ActiveSheet.UsedRange.Select
+
+Cells.Replace What:=";*ССЫЛКА!", Replacement:="", LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
 
 
 ActiveSheet.Calculate
@@ -125,11 +126,12 @@ End If
 
     Sheets(ar_brand(0)).Select
     
+    thisDay = Microsoft.VisualBasic.DateAndTime.Day(Now)
      
     nmCreatPatch = "\\RUCORPRUWKS0665\For Regions Commercial Team\DR\" & mRegsF(i) & "\Analysis\IN_OUT_STOCK\" & numYear & "\" & act_month & "\"
-    nmfile = "SISOSTOCK_" & numYear & "_" & act_month & "_" & nm_mreg & ".xlsx"
+    nmfile = "SISOSTOCK_" & numYear & "_" & act_month & "_" & nm_mreg & "v" & thisDay & ".xlsx"
         
-    CreateFolderWithSubfolders nmCreatPatch        
+    CreateFolderWithSubfolders nmCreatPatch
 
         NFD = nmCreatPatch & nmfile
         ActiveWorkbook.SaveAs NFD
@@ -147,7 +149,9 @@ With Application
 .EnableEvents = True
 .DisplayStatusBar = True
 .DisplayAlerts = True
-End With    
+End With
         
 End Sub
+
+
 

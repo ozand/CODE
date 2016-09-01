@@ -1,0 +1,61 @@
+select Distinct email,
+
+trim(
+Concat(
+(case when
+(case when role = 'master' then count(role) over (partition by email) else 0 end) + 
+(case when role = 'seller' then count(role) over (partition by email) else 0 end) +
+(case when role = 'beauty_consultant' then count(role) over (partition by email) else 0 end) +
+(case when role = 'model' then count(role) over (partition by email) else 0 end) +
+(case when role = 'ambassador' then count(role) over (partition by email) else 0 end) 
+> 0 then 'master' end ) ,
+' ',
+(case when 
+(case when role = 'salon_manager' then count(role) over (partition by email) else 0 end)
+> 0 then 'salon_manager' end ) ,
+' ',
+(case when
+(case when role = 'cs' then count(role) over (partition by email) else 0 end) +
+(case when role = 'representative' then count(role) over (partition by email) else 0 end) +
+(case when role = 'dr' then count(role) over (partition by email) else 0 end) +
+(case when role = 'supervisor' then count(role) over (partition by email) else 0 end) 
+> 0 then 'com_team' end ) ,
+' ',
+(case when
+(case when role = 'technolog' then count(role) over (partition by email) end) +
+(case when role = 'partimer' then count(role) over (partition by email) end) +
+(case when role = 'studio_manager' then count(role) over (partition by email) end) +
+(case when role = 'partner' then count(role) over (partition by email) end) +
+(case when role = 'auditor' then count(role) over (partition by email) end) +
+(case when role = 'regional_technolog' then count(role) over (partition by email) end) +
+(case when role = 'super_technolog' then count(role) over (partition by email) end) +
+(case when role = 'admin' then count(role) over (partition by email) end) 
+> 0 then 'edu_team' end ))) as role ,
+
+
+(case when role = 'master' then count(role) over (partition by email) end) as master,
+(case when role = 'seller' then count(role) over (partition by email) end) as seller,
+(case when role = 'beauty_consultant' then count(role) over (partition by email) end) as ambassador,
+(case when role = 'model' then count(role) over (partition by email) end) as ambassador,
+(case when role = 'ambassador' then count(role) over (partition by email) end) as ambassador,
+
+
+(case when role = 'salon_manager' then count(role) over (partition by email) end) as salon_manager,
+
+(case when role = 'cs' then count(role) over (partition by email) end) as cs,
+(case when role = 'representative' then count(role) over (partition by email) end) as representative,
+(case when role = 'dr' then count(role) over (partition by email) end) as dr,
+(case when role = 'supervisor' then count(role) over (partition by email) end) as supervisor,
+
+(case when role = 'technolog' then count(role) over (partition by email) end) as technolog,
+(case when role = 'partimer' then count(role) over (partition by email) end) as partimer,
+(case when role = 'studio_manager' then count(role) over (partition by email) end) as studio_manager,
+(case when role = 'partner' then count(role) over (partition by email) end) as partner,
+(case when role = 'auditor' then count(role) over (partition by email) end) as auditor,
+(case when role = 'regional_technolog' then count(role) over (partition by email) end) as regional_technolog,
+(case when role = 'super_technolog' then count(role) over (partition by email) end) as super_technolog,
+
+(case when role = 'admin' then count(role) over (partition by email) end) as admin
+
+from users
+order by email

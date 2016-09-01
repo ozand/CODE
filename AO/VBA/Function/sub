@@ -1,0 +1,11 @@
+    Sub IsOpenTRtoClsd()
+        Dim wbBook As Workbook
+        For Each wbBook In Workbooks
+            If wbBook.Name <> ThisWorkbook.Name Then
+                If Windows(wbBook.Name).Visible Then
+                    If wbBook.Name Like "Top Russia*" Then wbBook.Close: Exit For
+                End If
+            End If
+        Next wbBook
+    End Sub
+    

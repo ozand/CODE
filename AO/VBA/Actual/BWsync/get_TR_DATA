@@ -1,0 +1,205 @@
+Function fn_VBA_Start() As String
+With Application
+    .ScreenUpdating = False
+    .EnableEvents = False
+    .Calculation = xlCalculationManual
+    '.DisplayPageBreaks = False
+    .DisplayAlerts = False
+End With
+End Function
+
+Function fn_VBA_End() As String
+With Application
+    .ScreenUpdating = True
+    .Calculation = xlCalculationAutomatic
+    .EnableEvents = True
+    .DisplayStatusBar = True
+    .DisplayAlerts = True
+End With
+End Function
+
+Function fn_CreateSh(cr_sh As String) As String
+For Each Sh In ThisWorkbook.Worksheets
+    If Sh.Name = cr_sh Then
+    chek_name = 1
+    End If
+Next Sh
+    If chek_name <> 1 Then
+    Set Sh = Worksheets.Add()
+    Sh.Name = cr_sh
+    End If
+End Function
+
+Function fn_openFile(patch As String) As String
+If Dir(patch) = "" Then
+Else
+Workbooks.Open Filename:=patchTR, Notify:=False
+End If
+End Function
+
+'---------------------------------------------------------------------------------------------------------
+
+Option Compare Text
+
+Sub data_CC_in_GC()
+
+Dim ar_code_Brand(6, 1)
+Dim patchTR, actTR, in_data As String
+Dim b, iii, i, x, y, frqOrder   As Integer
+Dim ar_type_clients(1 To 4, 1 To 15)
+
+'Dim   As Worksheet
+Dim ar_Data(), ar_brand(), ar_PYPer_PRTN_VAL, ar_TYPer_PRTN_VAL, ar_PYPer_LOR_VAL(), ar_TYPer_LOR_VAL(), ar_nm_month(), ar_nmMregEN(), ar_nmMregLT()
+
+NF = ActiveWorkbook.Name
+
+thisYear = 2016
+
+'colums CA PRTNN VAL for LTM
+'---------------------------------------------------------------------------------------------------------
+
+    ar_brand = Array("LP", "KR", "RD", "MX")
+    ar_num_brand = Array("23", "20", "26", "24")
+    num_ar_brand = UBound(ar_brand)
+    ar_nm_month = Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+    ar_nm_sln_type_rus = Array("sales to personel", "e-commerce", "e-retailer", "pure_player", "салон", "сеть салонов", "сеть магазинов", "другое", "школа", "нейл-бар", "сеть нейл-баров", "салон-маг.", "магазин", "ч/м")
+    ar_num_sln_type = Array("11", "12", "13", "14", "16", "17", "18", "20", "22", "50", "51", "52", "53", "54")
+
+'---------------------------------------------------------------------------------------------------------
+'stoped Excel Activities
+'---------------------------------------------------------------------------------------------------------
+  fn_VBA_Start
+'---------------------------------------------------------------------------------------------------------
+
+status_head = 0
+
+ReDim ar_Data(1 To 200000, 1 To 28) ' num_colums)
+
+iii = 0
+For b = 0 To num_ar_brand
+
+        
+patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(b) & "\Top Russia Total " & thisYear & " " & ar_brand(b) & ".xlsm"
+in_data = "in_TR"
+
+fn_CreateSh (in_data)
+
+Workbooks.Open Filename:=patchTR, Notify:=False
+actTR = ActiveWorkbook.Name
+
+'--------------------------------------------------------------------------------------------------------- 
+Sheets("Contacts").Select
+Dim dic_nm_Sectore: Set dic_nm_Sectore = CreateObject("Scripting.Dictionary")
+dic_nm_Sectore.RemoveAll
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+
+for f_c = 2 to LastRow
+    nm_sector = Cells( f_c, 1 )
+    cd_sector = Cells( f_c, 26)
+
+
+If Not dic_nm_Sectore.Exists(nm_sector) Then
+       dic_nm_Sectore.Add LCase(nm_sector), cd_sector
+End If
+
+Next f_c
+'--------------------------------------------------------------------------------------------------------- 
+
+Sheets(ar_brand(b)).Select
+ActiveSheet.AutoFilterMode = False
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+
+    For i = 4 To LastRow
+    
+    
+    cd_Univers = Cells(i, 2)
+    If Len(cd_Univers) <> 9 Then
+    GoTo end_for
+    Else
+    iii = iii + 1
+    End If
+
+    
+    For f_sl = 0 To UBound(ar_nm_sln_type_rus)
+    
+    type_sln_rus = Trim(Cells(i, 18))
+    If Len(type_sln_rus) = 0 Then type_sln_rus = "салон"
+ 
+    If StrComp(ar_nm_sln_type_rus(f_sl), type_sln_rus, vbTextCompare) = 0 Then
+        num_sln_type = ar_num_sln_type(f_sl)
+        Exit For
+        Else
+        num_sln_type = "20"
+
+    End If
+    Next f_sl
+    
+    
+    cd_clnt_type = ""
+    nm_region = LCase(Cells(i, 6))
+    cd_region = dic_nm_Sectore.Item(nm_region)
+    
+    nm_salon = Left(Cells(i, 9), 40) & ". " & Left(Cells(i, 12), 50) & ", " & Left(Cells(i, 13), 20) & ", " & Left(Cells(i, 11), 20)
+    cd_chain = Cells(i, 19)
+    nm_city = Cells(i, 11)
+    nm_club = Cells(i, 40)
+    If Len(nm_club) = 0 Then
+    nm_club = "Others"
+    End If
+        
+
+    ar_Data(iii, 1) = 1200
+    ar_Data(iii, 2) = 1200
+    ar_Data(iii, 3) = 2
+    ar_Data(iii, 4) = ar_num_brand(b)
+    ar_Data(iii, 5) = ""
+    ar_Data(iii, 6) = cd_Univers
+    ar_Data(iii, 7) = cd_region
+    ar_Data(iii, 8) = ""' cd_chain
+    ar_Data(iii, 9) = nm_salon
+    ar_Data(iii, 10) = ""
+    ar_Data(iii, 11) = nm_city
+    ar_Data(iii, 12) = nm_club
+    ar_Data(iii, 13) = num_sln_type
+    ar_Data(iii, 14) = ""
+    ar_Data(iii, 15) = ""
+    ar_Data(iii, 16) = ""
+    ar_Data(iii, 17) = ""
+    ar_Data(iii, 18) = ""
+    ar_Data(iii, 19) = ""
+    ar_Data(iii, 20) = ""
+    ar_Data(iii, 21) = ""
+    ar_Data(iii, 22) = ""
+    ar_Data(iii, 23) = ""
+    ar_Data(iii, 24) = ""
+    ar_Data(iii, 25) = "5"
+    ar_Data(iii, 26) = "TERR"
+    ar_Data(iii, 27) = "RU"
+    ar_Data(iii, 28) = "Russia"
+
+'---------------------------------------------------------------------------------------------------------
+end_for:
+
+Next i
+    
+ActiveWindow.Close
+Application.DisplayAlerts = False
+
+Next b
+
+Workbooks(NF).Activate
+Sheets(in_data).Activate
+
+'clear sheet & create head & create name OR fiil data
+'---------------------------------------------------------------------------------------------------------
+
+ActiveSheet.UsedRange.Cells.ClearContents
+
+ActiveSheet.Cells(1, 1).Resize(iii, 28) = ar_Data()
+
+
+
+fn_VBA_End
+
+End Sub
+

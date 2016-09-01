@@ -1,0 +1,725 @@
+Option Compare Text
+Sub GetDataTR()
+
+Dim pathc2file$
+Dim cd_ThisMonth&, cd_month_qnc&
+Dim nm_PatchTR$, nm_brand$, num_LastRow$, nm_Mreg$, nm_Sector$, nm_Mreg_ext$, nm_month_qnc$, nm_business$, nm_Salon$, nm_Salon_addr$, nm_Salon_city$, nm_TypeClntRus$, nm_chain$, nm_Y$, nm_period$
+Dim cd_ThisYear&, mag_min_price&, num_month&, mag_max_price&, mag_hd_place&, cd_year_qnc&, cd_sts_dn_cln&, num_StatusHead&, cd_chain&
+Dim num_ev_ca#
+Dim nm_ActTR$, in_data$
+Dim f_b&, iii&, i&, x&, y&, frqOrder&, f_i&, f_y&, f_m&, val_ca_PY_YTD&, val_CA_MYTD_PY&, val_ca&, val_ca_cumul&, val_ca_quarter&, val_ca_TY_YTD&, val_CA_MYTD_TY&
+Dim ar_Data(), ar_brand(), ar_nmHead()
+
+nm_WB = ActiveWorkbook.Name
+in_data = "in_TR"
+fn_CreateSh (in_data)
+
+cd_ThisMonth = CInt(InputBox("Month"))
+cd_ThisYear = 2016
+
+'colums CA PRTNN VAL for LTM
+'---------------------------------------------------------------------------------------------------------
+
+
+    'colums CA LOREAL VAL
+    ar_month_eng = Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+    ar_brand = Array("LP", "KR", "RD", "MX", "ES", "DE", "CR")
+        num_ar_brand = UBound(ar_brand)
+
+fn_VBA_Start
+IsOpenTRtoClsd
+
+iii = 0
+For f_b = 0 To num_ar_brand
+
+    nm_brand = ar_brand(f_b)
+    nm_PatchTR = "p:\DPP\Business development\Book commercial\" & nm_brand & "\Top Russia Total " & cd_ThisYear & " " & nm_brand & ".xlsm"
+    
+    nm_ActTR = fn_openFile(nm_PatchTR, nm_brand)
+    num_LastRow = fn_num_LastRow
+    
+    For f_i = 4 To num_LastRow
+
+    Select Case iii
+        Case 0
+        end_clm = 200
+        ReDim ar_Data(1 To 100000, 1 To end_clm)
+        ReDim ar_nmHead(1 To end_clm)
+        Case 1
+        ReDim Preserve ar_Data(1 To 100000, 1 To num_last_colum)
+        ReDim Preserve ar_nmHead(1 To num_last_colum)
+    End Select
+
+    nm_Mreg = Cells(f_i, 4)
+    If Not IsEmpty(nm_Mreg) Then iii = iii + 1
+
+    nm_Sector = Cells(f_i, 6)
+    nm_Mreg_ext = fn_mreg_ext(nm_Mreg, nm_Sector)
+    nm_Mreg_LT = fn_mreg_lat(nm_Mreg_ext)
+    nm_REG = Cells(f_i, 5)
+    nm_FLSM = Cells(f_i, 165)
+    nm_SREP = Cells(f_i, 7)
+    nm_Salon = Cells(f_i, 9)
+    nm_Salon_addr = Cells(f_i, 12)
+    nm_Salon_city = Cells(f_i, 11)
+    nm_month_qnc = Cells(f_i, 64)
+    cd_month_qnc = fn_mont_num(nm_month_qnc)
+    cd_year_qnc = fn_getYearType(cd_ThisYear, fn_num2num0(Cells(f_i, 65)), 1)
+    nm_TypeClntRus = Cells(f_i, 18)
+    nm_club_type = Cells(f_i, 40)
+    nm_chain = Cells(f_i, 19)
+    cd_chain = fn_num2numNull(Cells(f_i, 20))
+    cd_Univers = Cells(f_i, 2)
+    mag_min_price = fn_rnd_num(Cells(f_i, 23))
+    mag_max_price = fn_rnd_num(Cells(f_i, 25))
+        mag_price = fn_mag(mag_min_price, mag_max_price, mag_hd_place, nm_business)
+    mag_hd_place = fn_rnd_num(Cells(f_i, 27))
+        mag_type_place = fn_mag(mag_min_price, mag_max_price, mag_hd_place, "place")
+        vl_mag = mag_price & mag_type_place
+        If Len(vl_mag) <> 2 Then vl_mag = Null
+    cnt_AVG_HD = fn_rnd_num(Cells(f_i, 28))
+    nm_business = fn_type_business(nm_brand)
+    vr_TypeEmotion = Cells(f_i, 41)
+    cd_sts_dn_cln = Cells(f_i, 8)
+    nm_Partners = Cells(f_i, 167)
+    cd_Partner = Cells(f_i, 173)
+    num_ev_ca = fn_num2num0(Cells(f_i, 92))
+    cd_idECAD = Cells(f_i, 29)
+    EDU_ALLTIME_MSTR = Cells(f_i, 30)
+    EDU_PY_MSTR = Cells(f_i, 31)
+    EDU_TY_MSTR = Cells(f_i, 32)
+    EDU_ALLTIME_CNTCT = Cells(f_i, 33)
+    EDU_PY_CNTCT = Cells(f_i, 34)
+    EDU_TY_CNTCT = Cells(f_i, 35)
+    val_comKPI = Cells(f_i, 209)
+
+    num_colums = 1
+    ar_Data(iii, num_colums) = nm_brand
+    ar_nmHead(num_colums) = "brand"
+        
+    num_colums = num_colums + 1
+    type_brand = fn_type_business(nm_brand)
+    ar_Data(iii, num_colums) = type_brand
+    ar_nmHead(num_colums) = "bussines"
+            
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = Cells(f_i, 1)
+    ar_nmHead(num_colums) = "rowTR"
+    
+    num_colums = num_colums + 1
+    cd_brand_row = nm_brand & Cells(f_i, 1)
+    ar_Data(iii, num_colums) = cd_brand_row
+    ar_nmHead(num_colums) = "BRAND_rowTR"
+    
+    num_colums = num_colums + 1
+        If Len(cd_Univers) <> 9 Then
+        cd_Univers = cd_brand_row
+        Else: cd_Univers = cd_Univers
+        End If
+    ar_Data(iii, num_colums) = cd_Univers
+    ar_nmHead(num_colums) = "unvCD"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = nm_brand & Cells(f_i, 2)
+    ar_nmHead(num_colums) = "BRAND_unvCD"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = nm_Mreg
+    ar_nmHead(num_colums) = "mreg"
+            
+    num_colus = num_colums + 1
+    ar_Data(iii, num_colums) = nm_Mreg_LT
+    ar_nmHead(num_colums) = "mreg_EXT"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = nm_REG
+    ar_nmHead(num_colums) = "REG"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = nm_FLSM
+    ar_nmHead(num_colums) = "FLSM"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = nm_Sector
+    ar_nmHead(num_colums) = "SEC"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = nm_SREP
+    ar_nmHead(num_colums) = "SREP"
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_salon_name(nm_Salon, nm_Salon_addr, nm_Salon_city)
+    ar_nmHead(num_colums) = "salon"
+     
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = nm_chain
+    ar_nmHead(num_colums) = "Chain_name"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = nm_Salon_city
+    ar_nmHead(num_colums) = "city"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_clnt_type(nm_TypeClntRus, 1)
+    ar_nmHead(num_colums) = "type_SLN"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_clnt_type(nm_TypeClntRus, 2)
+    ar_nmHead(num_colums) = "salon_type_eng"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_clnt_type(nm_TypeClntRus, 3)
+    ar_nmHead(num_colums) = "salon_type_short_eng"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_clnt_type(nm_TypeClntRus, 4)
+    ar_nmHead(num_colums) = "salon_type_chain_eng"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = cd_chain
+    ar_nmHead(num_colums) = "cd_chain"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_getNmChainTop(nm_chain, cd_chain, nm_TypeClntRus)
+    ar_nmHead(num_colums) = "nm_Top10_chain"
+     
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = nm_club_type
+    ar_nmHead(num_colums) = "type_confirmed_CLUB"
+       
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = vr_TypeEmotion
+    ar_nmHead(num_colums) = "type_emotion"
+         
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = 1 & "." & cd_month_qnc & "." & cd_year_qnc
+    ar_nmHead(num_colums) = "date_CNQ_Y"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = cd_month_qnc
+    ar_nmHead(num_colums) = "date_month_num"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_month_eng(nm_month_qnc)
+    ar_nmHead(num_colums) = "date_month_name"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_getYearType(cd_ThisYear, cd_year_qnc, 1)
+    ar_nmHead(num_colums) = "date_year"
+  
+    num_colums = num_colums + 1
+        nm_TypeGA_Y = fn_getYearType(cd_ThisYear, cd_year_qnc, 2)
+    ar_Data(iii, num_colums) = nm_TypeGA_Y
+    ar_nmHead(num_colums) = "nm_TypeGA_YEAR"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = vl_mag
+    ar_nmHead(num_colums) = "type_MAG"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = mag_price
+    ar_nmHead(num_colums) = "type_MAG_PRICE"
+    
+    num_colums = num_colums + 1
+      ar_Data(iii, num_colums) = mag_type_place
+    ar_nmHead(num_colums) = "type_MAG_type_place"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = cd_sts_dn_cln
+    ar_nmHead(num_colums) = "status_DN_num"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_type_active_DN(cd_sts_dn_cln)
+    ar_nmHead(num_colums) = "status_DN_name"
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_GetLTM(f_i, cd_ThisMonth, "avg_ca")
+    ar_nmHead(num_colums) = "CA_AVG_LTM"
+   
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_GetLTM(f_i, cd_ThisMonth, "type_avg_ca")
+    ar_nmHead(num_colums) = "CA_AVG_LTM_name"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_GetLTM(f_i, cd_ThisMonth, "frqOrders")
+    ar_nmHead(num_colums) = "frq_order_LTM"
+
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_num2numNull(num_ev_ca)
+    ar_nmHead(num_colums) = "CA_ev"
+   
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_getVectoreEV(num_ev_ca)
+    ar_nmHead(num_colums) = "CA_ev_name"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = cd_idECAD
+    ar_nmHead(num_colums) = "EDU_id_ECAD"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_num2numNull(EDU_ALLTIME_MSTR)
+    ar_nmHead(num_colums) = "EDU_ALLTIME_MSTR"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_num2numNull(EDU_PY_MSTR)
+    ar_nmHead(num_colums) = "EDU_PY_MSTR"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_num2numNull(EDU_TY_MSTR)
+    ar_nmHead(num_colums) = "EDU_TY_MSTR"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_num2numNull(EDU_ALLTIME_CNTCT)
+    ar_nmHead(num_colums) = "EDU_ALLTIME_CNTCT"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_num2numNull(EDU_PY_CNTCT)
+    ar_nmHead(num_colums) = "EDU_PY_CNTCT"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_num2numNull(EDU_TY_CNTCT)
+    ar_nmHead(num_colums) = "EDU_TY_CNTCT"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_num2numNull(mag_hd_place)
+    ar_nmHead(num_colums) = "type_place_HD"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_num2numNull(cnt_AVG_HD)
+    ar_nmHead(num_colums) = "type_AVG_HD"
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = val_comKPI
+    ar_nmHead(num_colums) = "com_KPI"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = nm_Partners
+    ar_nmHead(num_colums) = "nm_PRTNner"
+          
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = cd_Partner
+    ar_nmHead(num_colums) = "cd_PRTNner"
+
+
+    '---------------------------------------------------------------------------------------------------------
+    'CA_MONTHLY&CUMUL&QUARTER_LOR_VAL
+    '---------------------------------------------------------------------------------------------------------
+    xyz = 0
+    qq = 0
+    num_colums = num_colums
+    clm_ca_q = Empty
+    For f_y = cd_ThisYear - 1 To cd_ThisYear
+        nm_Y = fn_getYearType(cd_ThisYear, f_y, 2)
+        If f_y = cd_ThisYear Then nm_period = "YTD": num_shift_clm = 12 Else nm_period = "Total": num_shift_clm = 0
+      
+            val_ca_cumul = Empty
+            nm_ca_quarter = Empty
+            val_ca_quarter = Empty
+
+        For f_m = 1 To 12
+            
+            val_ca = Empty
+            val_ca = fn_getMonthlyCA(f_i, f_m, cd_ThisMonth, nm_Y, "LOR", nm_period)
+            val_ca_cumul = val_ca_cumul + val_ca
+            
+            clm_ca_m = num_colums + f_m + num_shift_clm
+                ar_Data(iii, clm_ca_m) = fn_num2numNull(val_ca)
+                ar_nmHead(clm_ca_m) = "CA_" & nm_Y & "_" & "M" & f_m
+            clm_ca_ytd = num_colums + f_m + 24 + num_shift_clm
+                ar_Data(iii, clm_ca_ytd) = fn_num2numNull(val_ca_cumul)
+                ar_nmHead(clm_ca_ytd) = "CA_" & nm_Y & "_" & "YTD" & f_m
+
+            Select Case f_y
+                Case cd_ThisYear - 1
+                    If f_m = cd_month_qnc Then val_ca_PY_YTD = val_ca_cumul: val_CA_MYTD_PY = val_ca
+                Case cd_ThisYear
+                    If f_m = cd_month_qnc Then val_ca_TY_YTD = val_ca_cumul: val_CA_MYTD_TY = val_ca
+            End Select
+
+            '---------------------------------------------------------------------------------------------------------
+            'QUARTER
+            If fn_quartal(f_m) = nm_ca_quarter Then
+                val_ca_quarter = val_ca_quarter + val_ca
+            Else
+                nm_ca_quarter = fn_quartal(f_m)
+                val_ca_quarter = val_ca
+                qq = qq + 1
+                clm_ca_q = num_colums + 48 + qq
+            End If
+
+                ar_Data(iii, clm_ca_q) = fn_num2numNull(val_ca_quarter)
+                ar_nmHead(clm_ca_q) = "CA_" & nm_Y & "_" & nm_ca_quarter
+
+        Next f_m
+        xyz = xyz + 1
+    Next f_y
+
+ '---------------------------------------------------------------------------------------------------------
+ ' first conq order
+ '---------------------------------------------------------------------------------------------------------
+
+    num_colums = num_colums + 24 * xyz + 8
+    
+    fst_order_LOR_TY = Empty
+    fst_order_PRTN_TY = Empty
+    fst_order_LOR_PY = Empty
+    fst_order_PRTN_PY = Empty
+    fst_order_LOR_M_TY = Empty
+    fst_order_LOR_M_PY = Empty
+        
+    Select Case nm_TypeGA_Y
+        Case "PY"
+            fst_order_LOR_PY = fn_getMonthlyCA(f_i, cd_ThisMonth, cd_ThisMonth, "PY", "LOR", "YTD")
+            fst_order_PRTN_PY = fn_getMonthlyCA(f_i, cd_ThisMonth, cd_ThisMonth, "PY", "PRTN", "YTD")
+            If cd_month_qnc = cd_ThisMonth Then fst_order_LOR_M_PY = fn_getMonthlyCA(f_i, cd_ThisMonth, cd_ThisMonth, "PY", "LOR", "YTD")
+        Case "TY"
+            fst_order_LOR_TY = fn_getMonthlyCA(f_i, cd_ThisMonth, cd_ThisMonth, "TY", "LOR", "YTD")
+            fst_order_PRTN_TY = fn_getMonthlyCA(f_i, cd_ThisMonth, cd_ThisMonth, "TY", "PRTN", "YTD")
+            If cd_month_qnc = cd_ThisMonth Then fst_order_LOR_M_TY = fn_getMonthlyCA(f_i, cd_ThisMonth, cd_ThisMonth, "TY", "LOR", "YTD")
+    End Select
+
+
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fst_order_LOR_PY
+    ar_nmHead(num_colums) = "PY_CNQ_Order"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fst_order_LOR_M_PY
+    ar_nmHead(num_colums) = "M_PY_CNQ_Order"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fst_order_LOR_TY
+    ar_nmHead(num_colums) = "TY_CNQ_Order"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fst_order_LOR_M_TY
+    ar_nmHead(num_colums) = "M_TY_CNQ_Order"
+    
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fst_order_PRTN_PY
+    ar_nmHead(num_colums) = "PY_CNQ_Order_PRTN_CA"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fst_order_PRTN_TY
+    ar_nmHead(num_colums) = "TY_CNQ_Order_PRTN_CA"
+
+'---------------------------------------------------------------------------------------------------------
+  'creat ca val loreal PYvsTY YTD
+'---------------------------------------------------------------------------------------------------------
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = val_ca_PY_YTD
+    ar_nmHead(num_colums) = "CA_PY_YTD"
+     
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_avgCA(val_ca_PY_YTD, cd_ThisMonth)
+    ar_nmHead(num_colums) = "AVG_CA_PY_YTD"
+        
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = val_CA_MYTD_PY
+    ar_nmHead(num_colums) = "CA_PY_M"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_avgCA(val_CA_MYTD_PY, cd_ThisMonth)
+    ar_nmHead(num_colums) = "AVG_CA_PY_M"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = val_ca_TY_YTD
+    ar_nmHead(num_colums) = "CA_TY_YTD"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_avgCA(val_ca_TY_YTD, cd_ThisMonth)
+    ar_nmHead(num_colums) = "AVG_CA_TY_YTD"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = val_CA_MYTD_TY
+    ar_nmHead(num_colums) = "CA_TY_M"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = fn_avgCA(val_CA_MYTD_TY, cd_ThisMonth)
+    ar_nmHead(num_colums) = "CA_AVG_TY_M"
+     
+    
+    num_colums = num_colums + 1
+    If val_ca_PY_YTD <> 0 And val_ca_TY_YTD = 0 Then
+    type_cln_react = "lost"
+    val_ca_PY_YTD_lost = val_ca_PY_YTD * -1
+    End If
+
+    
+    If val_ca_PY_YTD = 0 And val_ca_TY_YTD = 0 Then
+    sts_clnt_act = "null"
+    Else
+    type_cln_react = "act"
+    val_ca_PY_YTD_lost = ""
+    End If
+        
+        
+    If sts_clnt_act <> 0 Then
+        type_cln_react = "lost"
+        val_ca_PY_YTD_lost = val_ca_PY_YTD
+        Else
+        type_cln_react = "act"
+        val_ca_PY_YTD_lost = ""
+    End If
+    ar_Data(iii, num_colums) = type_cln_react
+    ar_nmHead(num_colums) = "type_LOST"
+    
+         
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = val_ca_PY_YTD_lost
+    ar_nmHead(num_colums) = "CA_LOST_PY"
+    
+    
+'---------------------------------------------------------------------------------------------------------
+'dt_constante
+'---------------------------------------------------------------------------------------------------------
+    num_colums = num_colums + 1
+    dt_st = 0
+    
+   'If val_ca_PY_YTD > 0 Then dt_st = dt_st + 1
+   'If val_ca_TY_YTD > 0 Then dt_st = dt_st + 1
+    If cd_sts_dn_cln = 1 Then dt_st = dt_st + 1
+    If nm_TypeGA_Y = "PPY" Then dt_st = dt_st + 1
+
+    If dt_st = 2 Then
+    dt_st_nm = 1
+
+    Else
+    dt_st_nm = 0
+
+    End If
+    ar_Data(iii, num_colums) = dt_st_nm
+    ar_nmHead(num_colums) = "LfL"
+    
+    num_colums = num_colums + 1
+        
+    Select Case nm_TypeGA_Y
+    Case "PPY"
+             
+    If dt_st_nm = 1 Then
+    nm_TypeGA_Y_2 = nm_TypeGA_Y & " LfL"
+    Else
+    nm_TypeGA_Y_2 = nm_TypeGA_Y & " not LfL"
+    End If
+    
+    Case Else
+    nm_TypeGA_Y_2 = nm_TypeGA_Y
+    End Select
+    
+    
+    
+    ar_Data(iii, num_colums) = nm_TypeGA_Y_2
+    ar_nmHead(num_colums) = "nm_TypeGA_YEAR_DT"
+     
+    
+ 
+    '---------------------------------------------------------------------------------------------------------
+    If dt_st_nm = 1 Then
+    val_ca_PY_YTD_dt = val_ca_PY_YTD
+    val_ca_TY_YTD_dt = val_ca_TY_YTD
+    val_CA_MYTD_PY_dt = val_CA_MYTD_PY
+    val_CA_MYTD_TY_dt = val_CA_MYTD_TY
+    Else
+    val_ca_PY_YTD_dt = Null
+    val_ca_TY_YTD_dt = Null
+    val_CA_MYTD_PY_dt = Null
+    val_CA_MYTD_TY_dt = Null
+
+    End If
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = val_ca_PY_YTD_dt
+    ar_nmHead(num_colums) = "CA_PY_LfL"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = val_ca_TY_YTD_dt
+    ar_nmHead(num_colums) = "CA_TY_LfL"
+    
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = val_CA_MYTD_PY_dt
+    ar_nmHead(num_colums) = "CA_M_PY_LfL"
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = val_CA_MYTD_TY_dt
+    ar_nmHead(num_colums) = "CA_M_TY_LfL"
+    
+    
+    
+
+'---------------------------------------------------------------------------------------------------------
+'CA YTD split by GA
+
+
+    For f_qe = 1 To 3
+    
+
+
+        Select Case f_qe
+        Case 1
+        find_nm_TypeGA_Y = "PPY"
+
+        Case 2
+        find_nm_TypeGA_Y = "CNQ_PY"
+
+        Case 3
+        find_nm_TypeGA_Y = "CNQ_TY"
+
+        End Select
+
+    If nm_TypeGA_Y = find_nm_TypeGA_Y Then
+    val_ca_PY_YTD_GA = val_ca_PY_YTD
+    val_ca_TY_YTD_GA = val_ca_TY_YTD
+    val_CA_MYTD_PY_GA = val_CA_MYTD_PY
+    val_CA_MYTD_TY_GA = val_CA_MYTD_TY
+
+    Else
+    val_ca_PY_YTD_GA = Null
+    val_ca_TY_YTD_GA = Null
+    val_CA_MYTD_PY_GA = Null
+    val_CA_MYTD_TY_GA = Null
+    End If
+          
+    If val_ca_PY_YTD_GA = 0 Then val_ca_PY_YTD_GA = Null
+    If val_ca_TY_YTD_GA = 0 Then val_ca_TY_YTD_GA = Null
+    If val_ca_PY_YTD_GA = 0 Then val_CA_MYTD_PY_GA = Null
+    If val_ca_TY_YTD_GA = 0 Then val_CA_MYTD_TY_GA = Null
+         
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = val_ca_PY_YTD_GA
+    ar_nmHead(num_colums) = "CA_PY_" & find_nm_TypeGA_Y
+ 
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = val_ca_TY_YTD_GA
+    ar_nmHead(num_colums) = "CA_TY_" & find_nm_TypeGA_Y
+    
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = val_CA_MYTD_PY_GA
+    ar_nmHead(num_colums) = "CA_M_PY_" & find_nm_TypeGA_Y
+ 
+    num_colums = num_colums + 1
+    ar_Data(iii, num_colums) = val_CA_MYTD_TY_GA
+    ar_nmHead(num_colums) = "CA_M_TY_" & find_nm_TypeGA_Y
+    
+
+    Next f_qe
+
+
+'---------------------------------------------------------------------------------------------------------
+
+If CInt(cd_year_qnc) = cd_ThisYear And cd_month_qnc <= cd_ThisMonth Then
+    nm_sts_Act_CLN = "NEW"
+    Else
+        If val_ca_TY_YTD <> 0 And CInt(cd_year_qnc) <> cd_ThisYear Then
+            nm_sts_Act_CLN = "REACTIVATED"
+            Else
+                If sumCA12M <> 0 And val_ca_TY_YTD = 0 Then
+                    nm_sts_Act_CLN = "NOT_REACTIVATED"
+                    Else
+                        If sumCA_PY2LTM <> 0 And sumCA12M = 0 Then
+                        nm_sts_Act_CLN = "LOST"
+                            Else
+                            nm_sts_Act_CLN = "OTHER"
+                        End If
+                End If
+        End If
+End If
+
+num_colums = num_colums + 1
+ar_Data(iii, num_colums) = nm_sts_Act_CLN
+ar_nmHead(num_colums) = "Status_CLNT"
+
+'---------------------------------------------------------------------------------------------------------
+'creat closed data
+'---------------------------------------------------------------------------------------------------------
+
+
+nm_clsd_open_month = Empty
+
+clm_m = 0
+
+Select Case nm_sts_Act_CLN
+Case "LOST"
+      
+        For f_m = cd_ThisMonth To 1 Step -1
+        clm_m = clm_PYper_LOR_VAL + f_m - 1
+        
+        If Cells(f_i, clm_m) <> 0 Then
+        num_clsd_open_month = f_m
+        nm_clsd_open_month = fn_getNameMonthEN(f_m)
+        Exit For
+        End If
+    
+        Next f_m
+
+Case "NEW"
+
+nm_clsd_open_month = nmMonth
+
+Case Else
+nm_clsd_open_month = Empty
+End Select
+
+    
+num_colums = num_colums + 1
+ar_Data(iii, num_colums) = nm_clsd_open_month
+ar_nmHead(num_colums) = "Closed_Open_month"
+
+'---------------------------------------------------------------------------------------------------------
+num_last_colum = num_colums
+
+Next f_i
+ 
+If nm_ActTR <> nm_WB Then
+ActiveWindow.Close
+Else
+MsgBox ("ERR" & ar_brand(f_b))
+End If
+
+Application.DisplayAlerts = False
+
+Next f_b
+  
+    
+Workbooks(nm_WB).Activate
+If Sheets(in_data).Visible = False Then
+Sheets(in_data).Visible = True
+End If
+Sheets(in_data).Activate
+
+'clear sheet & create head & create name OR fiil data
+'---------------------------------------------------------------------------------------------------------
+
+ActiveSheet.UsedRange.Cells.ClearContents
+end_POS = iii
+start_POS = 2
+
+Dim n As Name
+For Each n In ThisWorkbook.Names
+    On Error Resume Next
+    n.Delete
+    Next n
+
+For t = 1 To num_colums
+Cells(1, t) = ar_nmHead(t)
+Cells(1, t).Select
+ActiveWorkbook.Names.Add Name:=ar_nmHead(t), RefersTo:="=" & ActiveSheet.Name & "!" & ActiveCell.Address()
+Next t
+
+
+ActiveSheet.Cells(start_POS, 1).Resize(end_POS - start_POS, num_colums) = ar_Data()
+num_StatusHead = 1
+
+
+ActiveWorkbook.Names.Add Name:="SOURCE", RefersToR1C1:="=OFFSET(in_TR!R1C1,0,0,COUNTA(in_TR!R1C1:R65535C1),COUNTA(in_TR!R1C1:R1C255))"
+'ActiveWorkbook.Names("SOURCE").Comment = ""
+
+ActiveWorkbook.RefreshAll
+Sheets(in_data).Visible = False
+'---------------------------------------------------------------------------------------------------------
+
+fn_VBA_End
+
+End Sub

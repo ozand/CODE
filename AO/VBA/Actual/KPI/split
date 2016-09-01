@@ -1,0 +1,327 @@
+
+
+Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" (ByVal hwnd As Long, ByVal pszPath As String, ByVal psa As Any) As Long
+                                      
+Sub CreateFolderWithSubfolders(ByVal PatchCreateFolder$)
+ 
+   If Len(Dir(PatchCreateFolder$, vbDirectory)) = 0 Then
+       SHCreateDirectoryEx Application.hwnd, PatchCreateFolder$, ByVal 0&
+   End If
+End Sub
+
+Function Replace_symbols(ByVal txt As String) As String
+    St$ = "~!@/\#$%^&*=|`-"""
+    For i% = 1 To Len(St$)
+        txt = Replace(txt, Mid(St$, i, 1), "_")
+    Next
+    Replace_symbols = txt
+End Function
+
+Sub KPI_DATA_SPLIT()
+
+Dim arr1()
+Dim arr2()
+Dim num_row(2), ar_Split(), DynMas(), new_DynMas(), arr_nm_SREP(), ar_sh_data()
+Dim j As Long
+Dim i As Long
+Dim iColumns As Integer
+Dim f_ar_a, f_b, f_c, f_d, f_ar_i, f_r, LastRow, colum As Integer
+Dim lRangeDel As Range
+Dim lRangeH As Range
+Dim nm_Mreg, nm_findVAl, NF, val_Cell_This, val_Cell_Previous As String
+
+Dim NFW, lPath, nMreg, nmPatch, LastRowFM, nEmployer, nmCreatPatch2, nmCreatPatch, nMonth, nYear, LP, KR, RD, MX, SHEF, FN As String
+Dim oWbk As Workbook
+
+
+clm_dr_TR = 3
+clm_flsm_TR = 6
+
+clm_dr_CNTCT = 4
+clm_flsm_CNTCT = 8
+
+clm_srep_CNTCT = 12
+clm_srep_email_CNTCT = 15
+
+clm_dr_COACH = 22
+clm_flsm_COACH = 1
+
+
+'----------------------------------------------------------------------------------------------------------
+With Application
+.Calculation = xlCalculationManual
+.DisplayAlerts = False
+.ScreenUpdating = False
+End With
+NF = ActiveWorkbook.Name
+act_month = CInt(InputBox("Month"))
+act_year = CInt(InputBox("Year"))
+ar_nm_month = Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+nm_month = ar_nm_month(act_month - 1)
+ar_sh_data = Array("DPP", "Cnt_SREP", "data_COACH")
+'---------------------------------------------------------------------------------------------------------
+    
+For f_sh = 0 To 2
+    
+    '---------------------------------------------------------------------------------------------------------
+    in_data = ar_sh_data(f_sh)
+        
+    Sheets(in_data).Select
+    ActiveSheet.AutoFilterMode = False
+    LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+    LastColmn = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+         
+    Select Case f_sh
+    Case 0
+        ReDim ar_Data_TR(1 To LastRow, 1 To LastColmn)
+        
+        iii = 1
+        For xRow = 2 To LastRow
+            
+            For y_clm = 1 To LastColmn
+            ar_Data_TR(iii, y_clm) = Cells(xRow, y_clm)
+            Next y_clm
+            If Len(Cells(xRow, 1)) > 1 Then iii = iii + 1
+        Next xRow
+        longT_TR = iii
+        longH_TR = LastColmn
+    Case 1
+        ReDim ar_Data_CNTCT(1 To LastRow, 1 To LastColmn)
+        
+        xxx = 1
+        For xRow = 2 To LastRow
+            
+            For y_clm = 1 To LastColmn
+            ar_Data_CNTCT(xxx, y_clm) = Cells(xRow, y_clm)
+            Next y_clm
+            If Len(Cells(xRow, 1)) > 1 Then xxx = xxx + 1
+        Next xRow
+        longT_CNTCT = xxx
+        longH_CNTCT = LastColmn
+    Case 2
+        ReDim ar_Data_COACH(1 To LastRow, 1 To LastColmn)
+        
+        yyy = 1
+        For xRow = 2 To LastRow
+            
+            For y_clm = 1 To LastColmn
+            ar_Data_COACH(yyy, y_clm) = Cells(xRow, y_clm)
+            Next y_clm
+            If Len(Cells(xRow, 1)) > 1 Then yyy = yyy + 1
+        Next xRow
+        longT_COACH = yyy
+        longH_COACH = LastColmn
+    End Select
+
+Next f_sh
+    
+'---------------------------------------------------------------------------------------------------------
+
+'---------------------------------------------------------------------------------------------------------
+'uniq split type
+'---------------------------------------------------------------------------------------------------------
+
+
+
+Dim dic_DRs: Set dic_DRs = CreateObject("Scripting.Dictionary")
+Dim dic_FLSMs: Set dic_FLSMs = CreateObject("Scripting.Dictionary")
+
+
+For i = 2 To longT_CNTCT
+
+    uniq_val_DR = ar_Data_CNTCT(i, clm_dr_CNTCT)
+    uniq_val_FLSM = ar_Data_CNTCT(i, clm_flsm_CNTCT)
+
+    uniq_val_SREP = ar_Data_CNTCT(i, clm_srep_CNTCT)
+   
+    data_month = ar_Data_CNTCT(i, 1)
+
+    If data_month = nm_month  Then
+        
+        If Not dic_DRs.Exists(uniq_val_DR) And Not IsEmpty(uniq_val_DR) Then
+        dic_DRs.Add uniq_val_DR, uniq_val_DR
+        End If
+        
+        If Not dic_FLSMs.Exists(uniq_val_FLSM) And Not IsEmpty(uniq_val_FLSM) Then
+        dic_FLSMs.Add uniq_val_FLSM, uniq_val_FLSM
+        End If
+
+        
+    End If
+
+Next i
+'---------------------------------------------------------------------------------------------------------
+
+arr_nm_DR = dic_DRs.Items
+arr_nm_FLSM = dic_FLSMs.Items
+
+
+For f_a = 0 To 1  ' split by EmplHier
+
+Select Case f_a
+    Case 0
+        count_SPLIT = dic_DRs.Count
+
+        clm_split_TR = clm_dr_TR
+        clm_split_CNTCT = clm_dr_CNTCT
+        clm_split_COACH = clm_dr_COACH
+    Case 1
+        count_SPLIT = dic_FLSMs.Count
+
+        clm_split_TR = clm_flsm_TR
+        clm_split_CNTCT = clm_flsm_CNTCT
+        clm_split_COACH = clm_flsm_COACH
+End Select
+
+        For arr_x = 0 To count_SPLIT
+
+Select Case f_a
+    Case 0
+        nm_val_split = arr_nm_DR(arr_x)
+    Case 1
+        nm_val_split = arr_nm_FLSM(arr_x)
+End Select
+
+
+        
+ReDim ar_Data_TR_new(1 To longT_TR, 1 To longH_TR)
+ReDim ar_Data_CNTCT_new(1 To longT_CNTCT, 1 To longH_CNTCT)
+ReDim ar_Data_COACH_new(1 To longT_COACH, 1 To longH_COACH)
+        
+        iii = 0
+        xxx = 0
+        yyy = 0
+        
+        nm_Mreg = Empty
+        nm_FLSM = Empty
+            
+            '---------------------------------------------------------------------------------------------------------
+            For f_sh = 0 To 2
+            in_data = ar_sh_data(f_sh)
+                    
+            Select Case f_sh
+            
+                '---------------------------------------------------------------------------------------------------------
+                Case 0
+                                                            
+                For arr_i = 2 To longT_TR
+                
+                find_val = ar_Data_TR(arr_i, clm_split_TR)
+                    If nm_val_split = find_val Then
+                    iii = iii + 1
+                        For f_clm_arr = 1 To longH_TR
+                        ar_Data_TR_new(iii, f_clm_arr) = ar_Data_TR(arr_i, f_clm_arr)
+                        Next f_clm_arr
+                        
+
+                    End If
+
+                Next arr_i
+                Sheets(in_data).Select
+                
+                LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+                LastColmn = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+                
+                ActiveSheet.Cells(2, 1).Resize(LastRow, LastColmn).Cells.ClearContents
+                ActiveSheet.Cells(2, 1).Resize(iii + 1, f_clm_arr) = ar_Data_TR_new()
+
+                '---------------------------------------------------------------------------------------------------------
+
+            Case 1
+                                                            
+                For arr_ii = 2 To longT_CNTCT
+                
+                find_val = ar_Data_CNTCT(arr_ii, clm_split_CNTCT)
+                
+                If nm_val_split = find_val Then
+                xxx = xxx + 1
+                    For f_clm_arr = 1 To longH_CNTCT
+                    ar_Data_CNTCT_new(xxx, f_clm_arr) = ar_Data_CNTCT(arr_ii, f_clm_arr)
+                    Next f_clm_arr
+                    
+                nm_Mreg = ar_Data_CNTCT(arr_ii, clm_dr_CNTCT)
+                nm_FLSM = ar_Data_CNTCT(arr_ii, clm_flsm_CNTCT)
+                End If
+
+                Next arr_ii
+                Sheets(in_data).Select
+                
+                LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+                LastColmn = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+                
+                ActiveSheet.Cells(2, 1).Resize(LastRow, LastColmn).Cells.ClearContents
+                ActiveSheet.Cells(2, 1).Resize(xxx + 1, f_clm_arr) = ar_Data_CNTCT_new()
+
+            '---------------------------------------------------------------------------------------------------------
+
+            
+            Case 2
+                                                           
+                For arr_iii = 2 To longT_COACH
+                
+                find_val = ar_Data_COACH(arr_iii, clm_split_COACH)
+                
+                If nm_val_split = find_val Then
+                yyy = yyy + 1
+                    For f_clm_arr = 1 To longH_COACH
+                    ar_Data_COACH_new(yyy, f_clm_arr) = ar_Data_COACH(arr_iii, f_clm_arr)
+                    Next f_clm_arr
+                    
+                End If
+
+                Next arr_iii
+                Sheets(in_data).Select
+                
+                LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+                LastColmn = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+                
+                ActiveSheet.Cells(2, 1).Resize(LastRow, LastColmn).Cells.ClearContents
+                ActiveSheet.Cells(2, 1).Resize(yyy + 1, f_clm_arr) = ar_Data_COACH_new()
+        
+            '---------------------------------------------------------------------------------------------------------
+            End Select
+            Next f_sh
+            
+      
+            
+            
+        Select Case f_a
+        Case 0
+        nmPath = "\\Rucorpruwks0665\cards\" & nm_Mreg & "\" & "KPI\"
+        nmFile = "KPI_" & "2016_" & nm_month & "_" & nm_Mreg & ".xlsm"
+        Case 1
+        nmPath = "\\Rucorpruwks0665\cards\" & nm_Mreg & "\" & nm_FLSM & "\" & "KPI\"
+        nmFile = "KPI_" & "2016_" & nm_month & "_" & nm_FLSM & ".xlsm"
+        End Select
+        
+        
+        Application.Calculation = xlCalculationAutomatic
+        
+        For Each PivotCache In ActiveWorkbook.PivotCaches
+        PivotCache.Refresh
+        Next
+               
+        
+        Sheets("KPI").Select
+        Application.Calculation = xlCalculationManual
+        
+        CreateFolderWithSubfolders nmPath
+        ActiveWorkbook.SaveAs Filename:=nmPath & nmFile, _
+        FileFormat:=xlOpenXMLWorkbookMacroEnabled, CreateBackup:=False
+            
+        Next arr_x
+Next f_a
+        
+
+
+With Application
+            .ScreenUpdating = True
+            .Calculation = xlCalculationAutomatic
+            .EnableEvents = True
+            .DisplayStatusBar = True
+            .DisplayAlerts = True
+End With
+
+End Sub
+
+

@@ -1,0 +1,467 @@
+Option Compare Text
+
+Function fn_VBA_Start() As String
+With Application
+    .ScreenUpdating = False
+    .EnableEvents = False
+    .Calculation = xlCalculationManual
+    '.DisplayPageBreaks = False
+    .DisplayAlerts = False
+End With
+End Function
+
+Function fn_VBA_End() As String
+With Application
+    .ScreenUpdating = True
+    .Calculation = xlCalculationAutomatic
+    .EnableEvents = True
+    .DisplayStatusBar = True
+    .DisplayAlerts = True
+End With
+End Function
+
+Function fn_CreateSh(cr_sh As String) As String
+For Each Sh In ThisWorkbook.Worksheets
+    If Sh.Name = cr_sh Then
+    chek_name = 1
+    End If
+Next Sh
+    If chek_name <> 1 Then
+    Set Sh = Worksheets.Add()
+    Sh.Name = cr_sh
+    End If
+End Function
+
+Function fn_openFile(patch As String) As String
+If Dir(patch) = "" Then
+MsgBox ("NetF")
+Else
+Workbooks.Open Filename:=patch, Notify:=False
+End If
+End Function
+
+Function fn_Replace_symbols(ByVal txt As String) As String
+    St$ = "~!@/\#$%^:?&*=|`;"""
+    For f_i% = 1 To Len(St$)
+        txt = Replace(txt, Mid(St$, f_i, 1), "_")
+        txt = Replace(txt, Chr(10), "_")
+    Next
+    fn_Replace_symbols = txt
+End Function
+
+
+Function fn_quartal(month As Integer) As String
+
+Dim result As String
+result = Empty
+        Select Case month
+        Case 1, 2, 3
+        result = "1Q"
+        Case 4, 5, 6
+        result = "2Q"
+        Case 7, 8, 9
+        result = "3Q"
+        Case 10, 11, 12
+        result = "4Q"
+    End Select
+fn_quartal = result
+   
+End Function
+
+
+'---------------------------------------------------------------------------------------------------------
+
+Sub data_TR()
+
+Dim brand, ar_Colmn(), patchTR, nm_FLSM, nm_Mreg, nm_SREP, type_CLNT As String
+Dim comp_colo, comp_rev, st_cmp, nmFile, disk, map_search, actTR, NF As String
+Dim num_ar_Brand, num_ar_Colmn, ar_num_LastRow(), f_b, iii, f_i, nc, ee, cdMonth, cdYear, CA1 As Integer
+Dim eee, num_colums, CA, Q1, Q2, Q3, Q4, a, z, dogovor, club_2015, st_pot_club, clnt_err, st_club, f As Integer
+Dim Type_bonus As Double
+Dim in_data, Sh As Worksheet
+Dim ar_Data(), ar_CA_PART_VAL(), ar_nmHead(), ar_nmAVG_Order()
+Dim discount, koef As Double
+Dim strt_wrk_date As Date
+Dim str_month As Integer
+Dim sts_edu_t As Boolean
+
+
+NF = ActiveWorkbook.Name
+act_month = CInt(InputBox("Month"))
+act_year = 2016
+
+'colums CA PARTN VAL for LTM
+'---------------------------------------------------------------------------------------------------------
+ar_nm_month = Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+ar_nmMregEN = Array("MOSCOW", "GR", "NORTHWEST", "CENTER", "VOLGA", "SOUTH", "URAL", "SIBERIA", "FAR EAST")
+ar_nmMregLT = Array("Moscou", "GR", "Nord-Ouest", "Centre", "Volga-Centre", "Sud", "Oural", "Siberie", "EO")
+ar_nm_month_rus = Array("январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь")
+ar_brand = Array("MX", "ES", "LP", "KR", "RD")
+status_head = 0
+
+fn_VBA_Start
+
+'---------------------------------------------------------------------------------------------------------
+Sheets("eduT").Select
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+
+Dim dic_smr_user: Set dic_smr_user = CreateObject("Scripting.Dictionary")
+dic_smr_user.RemoveAll
+
+Dim dic_smr: Set dic_smr = CreateObject("Scripting.Dictionary")
+dic_smr.RemoveAll
+
+For f_ed = 2 To LastRow
+    edu_pancip = Cells(f_ed, 1)
+    edu_date = Cells(f_ed, 12)
+    edu_smr = Cells(f_ed, 14)
+    
+    edu_key = edu_pancip & "|" & edu_smr
+    
+    If Not dic_smr_user.Exists(edu_key) Then
+    dic_smr_user.Add edu_key, edu_date
+    Else
+        in_d_edudate = dic_smr_user.Item(edu_key)
+        If in_d_edudate < edu_date Then
+        dic_smr_user.Item(edu_key) = edu_date
+        End If
+    End If
+    
+    If Not dic_smr.Exists(edu_smr) Then
+    dic_smr.Add edu_smr, edu_smr
+    End If
+    
+Next f_ed
+
+
+'---------------------------------------------------------------------------------------------------------
+
+
+sh_in_data = "Cnt_SREP"
+status_head = 0
+
+fn_CreateSh (sh_in_data)
+Sheets(sh_in_data).Select
+'---------------------------------------------------------------------------------------------------------
+For f_q = 1 To act_month
+
+    If f_q < 10 Then
+        mm_act_month = "0" & f_q
+    Else
+        mm_act_month = f_q
+    End If
+
+'---------------------------------------------------------------------------------------------------------
+Dim dic_user: Set dic_user = CreateObject("Scripting.Dictionary")
+dic_user.RemoveAll
+
+ReDim ar_Data(500000, 100) ' num_colums)
+ReDim ar_nmHead(100)
+
+For f_b = 0 To UBound(ar_brand)
+nm_brand = ar_brand(f_b)
+nm_sh_work = "Contacts"
+
+Select Case f_q
+Case act_month
+patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(f_b) & "\Top Russia Total " & act_year & " " & ar_brand(f_b) & ".xlsm"
+Case Else
+patchTR = "p:\DPP\Business development\Book commercial\" & ar_brand(f_b) & "\2016\History 2016\Top Russia Total " & act_year & "." & mm_act_month & " " & ar_brand(f_b) & ".xlsm"
+End Select
+
+'----------------------------------------------------------------------------------------------------
+
+fn_openFile (patchTR)
+
+actTR = ActiveWorkbook.Name
+
+Sheets(nm_sh_work).Select
+ActiveSheet.AutoFilterMode = False
+num_LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+LastColum = ActiveSheet.UsedRange.Column - 1 + ActiveSheet.UsedRange.Columns.Count
+
+
+'-----------------------------------------------------------
+  
+    iii = 0
+
+    For f_i = 2 To num_LastRow
+    sts_new_empl = 0
+    st_next = 0
+        
+            nm_SREP = Trim(Cells(f_i, 3))
+            nm_FLSM = Trim(Cells(f_i, 6))
+            nm_sector = Trim(Cells(f_i, 1))
+            nm_reg = Trim(Cells(f_i, 11))
+            nm_Mreg = Trim(Cells(f_i, 10))
+            nm_sector = Trim(Cells(f_i, 1))
+    
+    If Not dic_user.Exists(nm_SREP) Then
+    dic_user.Add nm_SREP, nm_brand
+    sts_new_empl = 1
+    Else
+        usr_brnd = dic_user.Item(nm_SREP)
+        If nm_brand <> usr_brnd Then
+        dic_user.Item(nm_SREP) = usr_brnd & "|" & nm_brand        
+        End if
+    End If 
+    
+     
+ If   sts_new_empl = 1 Then  
+        
+        num_colums = 0
+        ar_Data(iii, num_colums) = ar_nm_month(f_q - 1)
+        ar_nmHead(num_colums) = "months"
+        
+        num_colums = num_colums + 1
+        num_months = f_q
+        ar_Data(iii, num_colums) = num_months
+        ar_nmHead(num_colums) = "num_months"
+        
+        
+        For f_bb = 0 to UBound(ar_brand)
+        nm2_brand = ar_brand (f_bb)
+        
+            num_colums = num_colums + 1
+            usr_brnd = dic_user.Item(nm_SREP)
+            If InStr(1, usr_brnd, nm2_brand , vbTextCompare) <> 0 Then sts_brand = nm2_brand Else sts_brand =  ""
+            ar_Data(iii, num_colums) = sts_brand
+            ar_nmHead(num_colums) = nm2_brand
+        
+        Next f_bb
+        
+        
+        num_colums = num_colums + 1
+        nm_Mreg = Cells(f_i, 10)
+        If Len(nm_Mreg) < 1 Then
+            nm_Mreg = Empty
+            Else
+                If InStr(1, nm_Mreg, nm_brand, vbTextCompare) = 0 Then
+                nm_Mreg = nm_Mreg
+                Else
+                nm_Mreg = Right(nm_Mreg, Len(nm_Mreg) - 3)
+                End If
+        End If
+        ar_Data(iii, num_colums) = nm_Mreg
+        ar_nmHead(num_colums) = "mreg"
+    
+    'Mreg LT-> EN + split Moscou GR
+    '---------------------------------------------------------------------------------------------------------
+                
+        num_colums = num_colums + 1
+        textPos = 0
+        
+        If nm_Mreg = "Moscou GR" Then
+        nm_sec = Cells(f_i, 1)
+        textPos = InStr(nm_sec, "MSK")
+        textPos = InStr(nm_sec, "Moscou") + textPos
+            If textPos > 0 Then
+            nm_Mreg = "Moscou"
+            Else
+            nm_Mreg = "GR"
+
+            End If
+        End If
+        
+        For f_mr = 0 To UBound(ar_nmMregLT)
+        If ar_nmMregLT(f_mr) = nm_Mreg Then
+        nm_Mreg = ar_nmMregEN(f_mr)
+        End If
+        Next f_mr
+        
+        ar_Data(iii, num_colums) = nm_Mreg
+        ar_nmHead(num_colums) = "mreg_EXT"
+    
+    '---------------------------------------------------------------------------------------------------------
+        
+        num_colums = num_colums + 1
+        ar_Data(iii, num_colums) = nm_reg
+        ar_nmHead(num_colums) = "REG"
+        
+        num_colums = num_colums + 1
+        
+        ar_Data(iii, num_colums) = nm_FLSM
+        ar_nmHead(num_colums) = "FLSM"
+        
+        num_colums = num_colums + 1
+        ar_Data(iii, num_colums) = nm_sector
+        ar_nmHead(num_colums) = "SEC"
+        
+        num_colums = num_colums + 1
+        ar_Data(iii, num_colums) = nm_SREP
+        ar_nmHead(num_colums) = "SREP"
+        
+        num_colums = num_colums + 1
+        ar_Data(iii, num_colums) = Cells(f_i, 4)
+        ar_nmHead(num_colums) = "staff"
+        
+        num_colums = num_colums + 1
+        ar_Data(iii, num_colums) = Trim(Cells(f_i, 8))
+        ar_nmHead(num_colums) = "cont_email"
+        
+        num_colums = num_colums + 1
+        ar_Data(iii, num_colums) = Trim(Cells(f_i, 10))
+        ar_nmHead(num_colums) = "partner"
+            
+        num_colums = num_colums + 1
+        strt_wrk_date = Cells(f_i, 12)
+        ar_Data(iii, num_colums) = strt_wrk_date
+        ar_nmHead(num_colums) = "experience"
+        
+        
+        strt_wrk_date = CDate(strt_wrk_date)
+        str_year = Year(strt_wrk_date)
+        str_month = month(strt_wrk_date)
+        str_quartal = fn_quartal(str_month)
+        
+        
+        
+        Select Case str_year
+            Case act_year
+                str_year = "TY"
+            Case act_year - 1
+                str_year = "PY"
+            Case Is < 1990
+                str_year = "TY"
+                str_quartal = Empty
+            Case Else
+                str_year = "PPY"
+                str_quartal = Empty
+        End Select
+        
+
+        num_colums = num_colums + 1
+        ar_Data(iii, num_colums) = str_year
+        ar_nmHead(num_colums) = "experience_year"
+        
+        num_colums = num_colums + 1
+        ar_Data(iii, num_colums) = str_quartal
+        ar_nmHead(num_colums) = "experience_quartal"
+        
+        
+        testpos = Empty
+        testpos = InStr(1, LCase(nm_SREP), "вакан", vbTextCompare)
+        
+        If testpos <> 0 Then
+        st_vacancy = "vacancy"
+        st_next = 1
+            Else
+            st_vacancy = "active"
+        End If
+        
+        If nm_SREP = nm_FLSM Then st_vacancy = "FLSMasSREP"
+        st_next = 1
+        
+        num_colums = num_colums + 1
+        ar_Data(iii, num_colums) = st_vacancy
+        ar_nmHead(num_colums) = "vacancy_status"
+        
+        num_colums = num_colums + 1
+        If st_vacancy = "active" Then sts_act = 1 Else sts_act = 0
+        ar_Data(iii, num_colums) = sts_act
+        ar_nmHead(num_colums) = "act_status"
+        
+            
+        sts_educated_usr = 0
+        
+        For f_edu_smr = 0 To dic_smr.Count - 1
+            
+            nm_seminar = dic_smr.Items()(f_edu_smr)
+            find_items = nm_SREP & "|" & nm_seminar
+            
+
+            sts_edu_t = dic_smr_user.Exists(find_items)
+            
+                If dic_smr_user.Exists(find_items) = True Then
+                usr_smr_data = dic_smr_user.Item(find_items)
+                usr_smr_fact = 1
+                sts_educated_usr = sts_educated_usr + 1
+                Else
+
+                usr_smr_data = Empty
+                usr_smr_fact = Empty
+                End If
+                
+            num_colums = num_colums + 1
+            ar_Data(iii, num_colums) = usr_smr_fact
+            ar_nmHead(num_colums) = nm_seminar
+            
+            num_colums = num_colums + 1
+            ar_Data(iii, num_colums) = usr_smr_data
+            ar_nmHead(num_colums) = "at_" & nm_seminar
+            
+        Next f_edu_smr
+            
+        num_colums = num_colums + 1
+        If sts_educated_usr = 0 Then
+        sts_educated_usr = 0
+        Else
+        sts_educated_usr = 1
+        End If
+        
+        ar_Data(iii, num_colums) = sts_educated_usr
+        ar_nmHead(num_colums) = "status_educated"
+
+    
+        
+    If  sts_act = 1  Then iii = iii + 1
+
+End if
+    
+Next f_i
+
+If ActiveWorkbook.Name <> NF Then
+ActiveWindow.Close
+End If
+Application.DisplayAlerts = False
+    
+Workbooks(NF).Activate
+Sheets(sh_in_data).Activate
+
+Next f_b
+
+'clear sheet & create head & create name OR fiil data
+'---------------------------------------------------------------------------------------------------------
+If status_head = 0 Then
+ActiveSheet.UsedRange.Cells.ClearContents
+end_POS = iii + 1
+start_POS = 2
+
+
+For t = 0 To num_colums
+    If IsEmpty(ar_nmHead(t)) Then
+    head_clmn_name = t
+    Else
+    head_clmn_name = ar_nmHead(t)
+    End If
+Cells(1, t + 1) = head_clmn_name
+Cells(1, t + 1).Select
+Next t
+
+
+
+Else
+start_POS = end_POS + 1
+end_POS = start_POS + iii - 1
+End If
+
+ActiveSheet.Cells(start_POS, 1).Resize(end_POS - start_POS + 1, num_colums + 1) = ar_Data()
+status_head = 1
+
+
+Next f_q
+
+ActiveWorkbook.RefreshAll
+
+'---------------------------------------------------------------------------------------------------------
+ActiveWindow.DisplayGridlines = False
+num_LastRowE = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+'---------------------------------------------------------------------------------------------------------
+
+fn_VBA_End
+
+End Sub
+
+
+
+

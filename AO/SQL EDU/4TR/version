@@ -1,0 +1,3 @@
+select *
+from versions
+where item_type like '%Salon' and event like 'update' and extract(year from created_at) > 2015 and object_changes like '%salon_type%'

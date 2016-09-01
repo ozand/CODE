@@ -1,0 +1,11 @@
+select spcr.status, spc.id, spc.name, spc.brand_id, spcr.salon_id,
+(case spc.brand_id 
+when 1 then 'LP'
+when 3 then 'ES'
+when 5 then 'MX'
+when 6 then 'KR'
+when 7 then 'RD'
+end )
+
+from special_program_club_records as spcr
+left join special_program_clubs as spc ON spcr.club_id = spc.id

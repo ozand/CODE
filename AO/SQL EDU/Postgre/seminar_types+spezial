@@ -1,0 +1,11 @@
+select stp.id, stp.group, stp.name,  stp.is_free, stp.duration, stp.description, stp.capacity, stp.level, stp.deprecated, stp.course_type, stp.archived, stp.roles_record, stp.visible_for_roles, stp.specialization_id, stp.kpis_type, stp.base_price , szn.name_spez, szn.weight,
+count(szn.weight) over (partition by szn.name_spez)
+															
+from seminar_types as stp
+left join 
+dblink('dbname=academie', 
+'select szn.id as id, szn.brand_id as brand_id, szn.name as name_spez,  szn.weight as weight
+from specializations as szn'
+) AS szn(id integer,  brand_id int, name_spez text , weight text )
+ON
+stp.specialization_id = szn.id and szn.brand_id = 5

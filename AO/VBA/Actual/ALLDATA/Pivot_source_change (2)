@@ -1,0 +1,35 @@
+
+Sub RefreshAllPivotTables()
+
+Dim PT As PivotTable
+Dim WS As Worksheet
+
+With Application
+.ScreenUpdating = False
+.EnableEvents = False
+.Calculation = xlCalculationManual
+'.DisplayPageBreaks = False
+.DisplayAlerts = False
+End With
+
+    For Each WS In ThisWorkbook.Worksheets
+
+        For Each PT In WS.PivotTables
+        
+        PT.ChangePivotCache ActiveWorkbook.PivotCaches.Create(SourceType:=xlDatabase, SourceData:="SOURCE")
+        
+        
+          PT.PivotCache.Refresh
+        Next PT
+
+    Next WS
+
+With Application
+.ScreenUpdating = True
+.Calculation = xlCalculationAutomatic
+.EnableEvents = True
+.DisplayStatusBar = True
+.DisplayAlerts = True
+End With
+
+End Sub

@@ -1,4 +1,6 @@
-Function fn_VBA_Start() as String
+Option Compare Text
+
+Function fn_VBA_Start() As String
 With Application
     .ScreenUpdating = False
     .EnableEvents = False
@@ -8,7 +10,7 @@ With Application
 End With
 End Function
 
-Function fn_VBA_End() as String
+Function fn_VBA_End() As String
 With Application
     .ScreenUpdating = True
     .Calculation = xlCalculationAutomatic
@@ -16,9 +18,9 @@ With Application
     .DisplayStatusBar = True
     .DisplayAlerts = True
 End With
-End Function   
+End Function
 
-Function fn_CreateSh(cr_sh As String) as String
+Function fn_CreateSh(cr_sh As String) As String
 For Each Sh In ThisWorkbook.Worksheets
     If Sh.Name = cr_sh Then
     chek_name = 1
@@ -30,16 +32,32 @@ Next Sh
     End If
 End Function
 
-Function fn_openFile(patch as String) as String
+Function fn_openFile(patch As String) As String
 If Dir(patch) = "" Then
 Else
 Workbooks.Open Filename:=patchTR, Notify:=False
 End If
 End Function
 
-'--------------------------------------------------------------------------------------------------------- 
 
-Option Compare Text
+  Function fn_mont_num&(in_data$)
+    Dim result&
+    Dim f_m&, num_month&
+
+    ar_nm_month_qnc_rus = Array("январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь")
+    result = 1
+        For f_m = 0 To 11
+        If ar_nm_month_qnc_rus(f_m) = in_data Then
+        result = f_m + 1
+        Exit For
+        End If
+        Next f_m
+    
+    fn_mont_num = result
+    End Function
+
+'---------------------------------------------------------------------------------------------------------
+
 
 Sub data_CC_in_GC()
 
@@ -54,12 +72,10 @@ Dim ALLTIME, EDU_PY, EDU_TY, place, AVG_HD As Variant
 Dim b, iii, i, x, y, frqOrder   As Integer
 Dim ar_nmAVG_Order(), ar_type_clients(1 To 4, 1 To 15)
 
-'Dim   As Worksheet
 Dim ar_Data(), ar_brand(), ar_nmHead(170), ar_PYPer_PRTN_VAL, ar_TYPer_PRTN_VAL, ar_PYPer_LOR_VAL(), ar_TYPer_LOR_VAL(), ar_nm_month(), ar_nmMregEN(), ar_nmMregLT()
 
 NF = ActiveWorkbook.Name
-act_month = InputBox("Month")
-act_month = CInt(act_month)
+act_month = CInt(InputBox("Month"))
 thisYear = 2016
 
 'colums CA PRTNN VAL for LTM
@@ -80,19 +96,92 @@ thisYear = 2016
     ar_nmMregLT = Array("Moscou", "GR", "Nord-Ouest", "Centre", "Sud", "Oural", "Siberie", "EO")
     ar_nmCompetitors = Array("Estel", "Schwarzkopf", "Wella", "Londa", "Keune", "Revlon", "Goldwell", "Cutrin", "Kadus", "Indola", "Paul Mitchell", "Label", "Syoss", "Chi", "Seah", "Kydra", "Sebastian", "American Crew", "Alterna", "Other")
 
-   
+    ar_brand = Array("LP", "KR", "RD", "MX", "ES", "DE", "CR")
+    num_ar_brand = UBound(ar_brand)
+
+     ar_type_clients(1, 1) = "салон"
+    ar_type_clients(2, 1) = "salon"
+    ar_type_clients(3, 1) = "salon"
+    ar_type_clients(4, 1) = "single"
+
+    ar_type_clients(1, 2) = "сеть салонов"
+    ar_type_clients(2, 2) = "chain_salons"
+    ar_type_clients(3, 2) = "salon"
+    ar_type_clients(4, 2) = "chain"
+
+    ar_type_clients(1, 3) = "ч/м"
+    ar_type_clients(2, 3) = "hdres"
+    ar_type_clients(3, 3) = "salon"
+    ar_type_clients(4, 3) = "single"
+
+    ar_type_clients(1, 4) = "сеть магазинов"
+    ar_type_clients(2, 4) = "chain_shops"
+    ar_type_clients(3, 4) = "shop"
+    ar_type_clients(4, 4) = "chain"
+
+    ar_type_clients(1, 5) = "магазин"
+    ar_type_clients(2, 5) = "shop"
+    ar_type_clients(3, 5) = "shop"
+    ar_type_clients(4, 5) = "single"
+
+    ar_type_clients(1, 6) = "салон-маг."
+    ar_type_clients(2, 6) = "salon"
+    ar_type_clients(3, 6) = "salon"
+    ar_type_clients(4, 6) = "single"
+
+    ar_type_clients(1, 7) = "(пусто)"
+    ar_type_clients(2, 7) = "other"
+    ar_type_clients(3, 7) = "other"
+    ar_type_clients(4, 7) = "single"
+
+    ar_type_clients(1, 8) = "школа"
+    ar_type_clients(2, 8) = "school"
+    ar_type_clients(3, 8) = "school"
+    ar_type_clients(4, 8) = "single"
+
+    ar_type_clients(1, 9) = "другое"
+    ar_type_clients(2, 9) = "other"
+    ar_type_clients(3, 9) = "other"
+    ar_type_clients(4, 9) = "single"
+
+    ar_type_clients(1, 10) = "нейл-бар"
+    ar_type_clients(2, 10) = "nails_bar"
+    ar_type_clients(3, 10) = "nails"
+    ar_type_clients(4, 10) = "single"
+
+    ar_type_clients(1, 11) = "сеть нейл-баров"
+    ar_type_clients(2, 11) = "chain_nails"
+    ar_type_clients(3, 11) = "nails"
+    ar_type_clients(4, 11) = "chain"
+
+    ar_type_clients(1, 12) = "pure_player"
+    ar_type_clients(2, 12) = "pure_player"
+    ar_type_clients(3, 12) = "e-commerce"
+    ar_type_clients(4, 12) = "single"
+
+    ar_type_clients(1, 13) = "e-retailer"
+    ar_type_clients(2, 13) = "e-retailer"
+    ar_type_clients(3, 13) = "e-commerce"
+    ar_type_clients(4, 13) = "single"
+
+    ar_type_clients(1, 14) = "E-Commerce"
+    ar_type_clients(2, 14) = "E-Commerce"
+    ar_type_clients(3, 14) = "e-commerce"
+    ar_type_clients(4, 14) = "single"
+
+
+    ar_type_clients(1, 15) = "Sales to personel"
+    ar_type_clients(2, 15) = "Sales to personel"
+    ar_type_clients(3, 15) = "e-commerce"
+    ar_type_clients(4, 15) = "single"
+
     ar_nmAVG_Order = Array(0, 2.5, 5, 10, 15, 20, 25, 30, 50, 60, 70, 100000)
-'---------------------------------------------------------------------------------------------------------
-'stoped Excel Activities
-'---------------------------------------------------------------------------------------------------------
-  fn_VBA_Start
-'---------------------------------------------------------------------------------------------------------
+
+fn_VBA_Start
 
 status_head = 0
 
 
-ar_brand = Array("LP", "KR", "RD", "MX", "ES", "DE", "CR")
-num_ar_brand = UBound(ar_brand)
 
 For b = 0 To num_ar_brand
         
@@ -154,7 +243,14 @@ ReDim ar_Data(ar_LastRow(b) - 4, 170) ' num_colums)
     ar_nmHead(num_colums) = "BRAND_unvCD"
     
     num_colums = num_colums + 1
+    
     nm_Mreg = Cells(i, 4)
+    If Mid(nm_Mreg, 3, 1) = " " Then
+    nm_Mreg = Right(nm_Mreg, Len(nm_Mreg) - 2)
+    End If
+    
+    
+    
     ar_Data(iii, num_colums) = nm_Mreg
     ar_nmHead(num_colums) = "mreg"
     
@@ -211,7 +307,8 @@ ReDim ar_Data(ar_LastRow(b) - 4, 170) ' num_colums)
     
  
      num_colums = num_colums + 1
-    ar_Data(iii, num_colums) = Cells(i, 19)
+    nm_chain = Cells(i, 19)
+    ar_Data(iii, num_colums) = nm_chain
     ar_nmHead(num_colums) = "Chain_name"
     
      num_colums = num_colums + 1
@@ -221,7 +318,7 @@ ReDim ar_Data(ar_LastRow(b) - 4, 170) ' num_colums)
     
     num_colums = num_colums + 1
     type_sln_rus = Trim(Cells(i, 18))
-    If Len(type_sln_rus) = 0 Then type_sln_rus = "салон"
+    If Len(type_sln_rus) = 0 Then type_sln_rus = "?????"
     ar_Data(iii, num_colums) = type_sln_rus
     ar_nmHead(num_colums) = "type_SLN"
     
@@ -246,8 +343,6 @@ ReDim ar_Data(ar_LastRow(b) - 4, 170) ' num_colums)
     ar_nmHead(num_colums) = "salon_type_eng"
     
     num_colums = num_colums + 1
-
-
     ar_Data(iii, num_colums) = nm_salon_type_short_eng
     ar_nmHead(num_colums) = "salon_type_short_eng"
     
@@ -255,7 +350,22 @@ ReDim ar_Data(ar_LastRow(b) - 4, 170) ' num_colums)
     ar_Data(iii, num_colums) = nm_salon_type_chain_eng
     ar_nmHead(num_colums) = "salon_type_chain_eng"
     
-   
+    num_colums = num_colums + 1
+    cd_chain = Cells(i, 20)
+    ar_Data(iii, num_colums) = cd_chain
+    ar_nmHead(num_colums) = "cd_chain"
+    
+    num_colums = num_colums + 1
+    
+    If Left(cd_chain, 2) = "92" Then
+    nm_Top10_chain = nm_chain
+    Else
+    nm_Top10_chain = Empty
+    End If
+    ar_Data(iii, num_colums) = nm_Top10_chain
+    ar_nmHead(num_colums) = "nm_Top10_chain"
+    
+       
     num_colums = num_colums + 1
     ar_Data(iii, num_colums) = Cells(i, 40)
     ar_nmHead(num_colums) = "type_confirmed_CLUB"
@@ -299,7 +409,7 @@ ReDim ar_Data(ar_LastRow(b) - 4, 170) ' num_colums)
     '---------------------------------------------------------------------------------------------------------
     
     num_colums = num_colums + 1
-        If Cells(i, 161) <> "" Then cdMonth = Cells(i, 161) Else cdMonth = 1
+        cdMonth = fn_mont_num(Cells(i, 64))
         If Len(Cells(i, 65)) = 4 Then cdYear = Cells(i, 65) Else cdYear = 2008
     
     ar_Data(iii, num_colums) = cdMonth & "-" & cdYear
@@ -313,11 +423,10 @@ ReDim ar_Data(ar_LastRow(b) - 4, 170) ' num_colums)
     num_colums = num_colums + 1
 
     For f_m = 0 To 11
-    
-    If cdMonth - 1 = f_m Then
-    nmMonth = ar_nm_month(f_m)
-    Exit For
-    End If
+        If cdMonth - 1 = f_m Then
+            nmMonth = ar_nm_month(f_m)
+            Exit For
+        End If
     Next f_m
     
     ar_Data(iii, num_colums) = nmMonth
@@ -349,11 +458,11 @@ ReDim ar_Data(ar_LastRow(b) - 4, 170) ' num_colums)
     mag_min_price = Cells(i, 23)
     mag_max_price = Cells(i, 25)
         
-    If isNumeric(mag_min_price) or   isNumeric(mag_max_price)    Then
+    If IsNumeric(mag_min_price) Or IsNumeric(mag_max_price) Then
     mag_avg_price = Application.WorksheetFunction.Average(mag_min_price, mag_max_price)
     Else
     mag_avg_price = mag_min_price + mag_max_price
-    End if
+    End If
     
     If type_brand = "Hair" Then
     
@@ -463,7 +572,7 @@ ReDim ar_Data(ar_LastRow(b) - 4, 170) ' num_colums)
     sumCA_PY2LTM = 0
     frqOrder = 0
         
-    ' CA до последних 12ти месяце
+    ' CA ?? ????????? 12?? ??????
     For iq = 1 To act_month
     
         If IsNumeric(Cells(i, ar_PYPer_PRTN_VAL(iq))) Then
@@ -477,7 +586,7 @@ ReDim ar_Data(ar_LastRow(b) - 4, 170) ' num_colums)
  
     
     
-    ' CA послдених 12-ти месяцев
+    ' CA ????????? 12-?? ???????
     For iq = act_month + 1 To 12
     
     
@@ -723,6 +832,8 @@ End If
 
 
     For f_m = 0 To 11
+    num_colums = num_colums + 1
+    
       If f_m < CInt(act_month) Then
     clm_m = str_TYper_LOR_VAL + f_m
     m_val = Cells(i, clm_m) / 1000
@@ -809,14 +920,14 @@ Next f_m
     m_val = 0
     
         For f_m = 0 To 2
-        q_m_clct = q_m_clct + 1 
+        q_m_clct = q_m_clct + 1
         
         clm_m = str_PYper_LOR_VAL + q_m_c
-        if q_m_clct <= act_month then
+        If q_m_clct <= act_month Then
         m_val = Cells(i, clm_m)
-        else
+        Else
         m_val = 0
-        ENd if
+        End If
         
         m_val_q = m_val_q + m_val
         
@@ -844,14 +955,14 @@ Next f_m
     m_val = 0
     
         For f_m = 0 To 2
-        q_m_clct = q_m_clct + 1 
+        q_m_clct = q_m_clct + 1
         clm_m = str_TYper_LOR_VAL + q_m_c
         
-        if q_m_clct <= act_month then
+        If q_m_clct <= act_month Then
         m_val = Cells(i, clm_m)
-        else
+        Else
         m_val = 0
-        End if
+        End If
         m_val_q = m_val_q + m_val
         
         q_m_c = q_m_c + 1
@@ -878,14 +989,14 @@ Next f_m
     num_cnq_year = CInt(cdYear)
     
     
-          fst_order_LOR_TY = Null
-          fst_order_PRTN_TY = Null
-          fst_order_LOR_PY = Null
-          fst_order_PRTN_PY = Null
-          fst_order_LOR_M_TY = Null
-          fst_order_PRTN_M_TY = Null
-          fst_order_LOR_M_PY = Null
-          fst_order_PRTN_M_PY = Null
+          fst_order_LOR_TY = Empty
+          fst_order_PRTN_TY = Empty
+          fst_order_LOR_PY = Empty
+          fst_order_PRTN_PY = Empty
+          fst_order_LOR_M_TY = Empty
+          fst_order_PRTN_M_TY = Empty
+          fst_order_LOR_M_PY = Empty
+          fst_order_PRTN_M_PY = Empty
         
           Select Case num_cnq_year
           
@@ -1228,71 +1339,10 @@ Next f_m
 
     Next f_qe
 
-'---------------------------------------------------------------------------------------------------------
-'creat closed data
-'---------------------------------------------------------------------------------------------------------
-sts_cls_f = False
-num_clsd_month = ""
-num_clsd_year = ""
-clm_m = 0
-
-If st_dn_cln = 0 Then
-
-
-    For f_yy = 1 To 2
-        
-        Select Case f_yy
-            Case 1
-            strt_month_clm = str_TYper_LOR_VAL
-            Case 2
-            strt_month_clm = str_PYper_LOR_VAL
-        End Select
-
-       
-        
-        For f_m = 11 To 0 Step -1
-
-
-        clm_m = strt_month_clm + f_m
-        
-If f_yy = 2 Then
-
-End If
-            
-        If Cells(i, clm_m) <> 0 Then
-        num_clsd_month = 1 + f_m
-        
-        Select Case f_yy
-            Case 1
-            num_clsd_year = thisYear
-            Case 2
-            num_clsd_year = thisYear - 1
-        End Select
-        
-        sts_cls_f = True
-        Exit For
-        End If
-    
-        Next f_m
-            If sts_cls_f = True Then
-            Exit For
-            End If
-    Next f_yy
-Else
-
-End If
-    
-num_colums = num_colums + 1
-ar_Data(iii, num_colums) = num_clsd_month
-ar_nmHead(num_colums) = "Closed_M"
-
-num_colums = num_colums + 1
-ar_Data(iii, num_colums) = num_clsd_year
-ar_nmHead(num_colums) = "Closed_Y"
 
 '---------------------------------------------------------------------------------------------------------
 
-If CInt(cdYear) = thisYear and cdMonth <= act_month Then
+If CInt(cdYear) = thisYear And cdMonth <= act_month Then
     nm_sts_Act_CLN = "NEW"
     Else
         If ca_ytd_TY <> 0 And CInt(cdYear) <> thisYear Then
@@ -1315,11 +1365,77 @@ ar_Data(iii, num_colums) = nm_sts_Act_CLN
 ar_nmHead(num_colums) = "Status_CLNT"
 
 
+Select Case CInt(cdYear)
+    Case is > thisYear - 2
+    nm_sts_Act_CLN = "NEW"
+    Case Else
+        If ca_ytd_TY <> 0  Then
+            nm_sts_Act_CLN = "REACTIVATED"
+            Else
+                If sumCA12M <> 0 And ca_ytd_TY = 0 Then
+                    nm_sts_Act_CLN = "NOT_REACTIVATED"
+                    Else
+                        If sumCA_PY2LTM <> 0 And sumCA12M = 0 Then
+                        nm_sts_Act_CLN = "LOST"
+                            Else
+                            nm_sts_Act_CLN = "OTHER"
+                        End If
+                End If
+        End If
+End Select
+
+num_colums = num_colums + 1
+ar_Data(iii, num_colums) = nm_sts_Act_CLN
+ar_nmHead(num_colums) = "Status_CLNT2"
+
+
+
+'---------------------------------------------------------------------------------------------------------
+'creat closed data
+'---------------------------------------------------------------------------------------------------------
+
+
+nm_clsd_open_month = Empty
+
+clm_m = 0
+
+Select Case nm_sts_Act_CLN
+Case "LOST"
+      
+        For f_m = act_month To 1 Step -1
+        clm_m = str_PYper_LOR_VAL + f_m - 1
+        
+        If Cells(i, clm_m) <> 0 Then
+        num_clsd_open_month = f_m
+        nm_clsd_open_month = ar_nm_month(f_m - 1)
+        Exit For
+        End If
+    
+        Next f_m
+
+Case "NEW"
+
+nm_clsd_open_month = nmMonth
+
+Case Else
+nm_clsd_open_month = Empty
+End Select
+
+    
+num_colums = num_colums + 1
+ar_Data(iii, num_colums) = nm_clsd_open_month
+ar_nmHead(num_colums) = "Closed_Open_month"
+
 '---------------------------------------------------------------------------------------------------------
 iii = iii + 1
 Next i
-    
+ 
+If actTR <> NF Then
 ActiveWindow.Close
+Else
+MsgBox ("ERR" & ar_brand(b))
+End If
+
 Application.DisplayAlerts = False
   
   
@@ -1364,13 +1480,9 @@ Sheets(in_data).Visible = False
 ActiveWorkbook.RefreshAll
 
 '---------------------------------------------------------------------------------------------------------
+fn_VBA_End
 
-With Application
-.ScreenUpdating = True
-.Calculation = xlCalculationAutomatic
-.EnableEvents = True
-.DisplayStatusBar = True
-.DisplayAlerts = True
-End With
 
 End Sub
+
+

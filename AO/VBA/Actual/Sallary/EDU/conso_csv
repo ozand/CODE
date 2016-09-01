@@ -1,0 +1,135 @@
+'---------------------------------------------------------------------------------------------------------
+    Function fn_VBA_Start() As String
+    With Application
+        .ScreenUpdating = False
+        .EnableEvents = False
+        .Calculation = xlCalculationManual
+        '.DisplayPageBreaks = False
+        .DisplayAlerts = False
+    End With
+    End Function
+    '---------------------------------------------------------------------------------------------------------
+    Function fn_VBA_End() As String
+    With Application
+        .ScreenUpdating = True
+        .Calculation = xlCalculationAutomatic
+        .EnableEvents = True
+        .DisplayStatusBar = True
+        .DisplayAlerts = True
+    End With
+    End Function
+    '---------------------------------------------------------------------------------------------------------
+    Function fn_CreateSh(cr_sh As String) As String
+    For Each Sh In ThisWorkbook.Worksheets
+        If Sh.Name = cr_sh Then
+        chek_name = 1
+        End If
+    Next Sh
+        If chek_name <> 1 Then
+        Set Sh = Worksheets.Add()
+        Sh.Name = cr_sh
+        End If
+    End Function
+'---------------------------------------------------------------------------------------------------------
+    Function fn_month_form_00(month&) As String
+    Dim result As String
+    result = Empty
+
+        If month < 10 Then
+            result = "0" & month
+        Else
+            result = month
+        End If
+
+    fn_month_form_00 = result
+    End Function
+'---------------------------------------------------------------------------------------------------------
+'---------------------------------------------------------------------------------------------------------
+
+Sub conso()
+
+Dim ar_brand(), ar_Data()
+Dim act_month00$, lnk_datafolder$, NF$, in_data$, nm_brand$, nm_file$
+Dim thisYear&, f_b&, str_rw&, iii&, clm_x&, f_r&, act_month&
+Dim val_ar_data As Variant
+
+fn_VBA_Start
+
+ar_Brands = Array("LP", "MX", "KR", "RD", "ES")
+
+act_month = CInt(InputBox("Month"))
+act_month00 = fn_month_form_00(act_month)
+
+thisYear = 2016
+
+lnk_datafolder = "p:\DPP\Business development\Statistics Service\EDU\Sallary\"
+
+NF = ActiveWorkbook.Name
+in_data = "Partimer"
+
+iii = 1
+For f_b = 0 To 4
+nm_brand = ar_Brands(f_b)
+
+    nm_file = in_data & "_" & nm_brand & "_" & act_month00 & thisYear
+    fn_CreateSh (in_data)
+ 
+    Workbooks.OpenText Filename:=lnk_datafolder & nm_file & ".csv", _
+            Origin:=65001, StartRow:=1, DataType:=xlDelimited, TextQualifier:= _
+            xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, Semicolon:=True, _
+            Comma:=False, Space:=False, Other:=False, TrailingMinusNumbers:=True
+
+num_LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+num_LastColum = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+     
+    Select Case f_b
+        Case 0
+            str_rw = 1
+            ReDim ar_Data(1 To 999999, 1 To num_LastColum + 1)
+        Case Else
+            str_rw = 2
+    End Select
+     
+    For f_r = str_rw To num_LastRow
+        clm_x = 1
+        For f_c = 0 To num_LastColum
+                If iii = 1 Then
+                ar_Data(1, 1) = "brand"
+                End If
+                    If f_c = 0 Then
+                        val_ar_data = nm_brand
+                        Else
+                        val_ar_data = Cells(f_r, f_c)
+                    End If
+                   
+                             
+                ar_Data(iii, clm_x) = val_ar_data
+                
+                clm_x = clm_x + 1
+        Next f_c
+        
+    Select Case iii
+    
+    Case 1
+        iii = iii + 1
+    Case Else
+        If ar_Data(iii, 5) = act_month Then
+        iii = iii + 1
+        End If
+   
+    End Select
+    
+    Next f_r
+
+Workbooks(nm_file).Close
+
+Next f_b
+
+Workbooks(NF).Activate
+Sheets(in_data).Select
+ActiveSheet.UsedRange.Clear
+ActiveSheet.Cells(1, 1).Resize(iii + 1, num_LastColum + 1) = ar_Data()
+
+fn_VBA_End
+
+End Sub
