@@ -1,3 +1,5 @@
+Attribute VB_Name = "get_Contacts"
+
 Sub getKPIfromContact()
 
 Dim nm_ActWb$
@@ -22,7 +24,7 @@ cd_ActualYear   = 2016
 ar_Brand        = Array("MX", "ES", "LP", "KR", "RD")
 
 nm_ShOutData    = "Contacts"
-nm_ShInData     = "Cnt_SREP"
+nm_ShInData     = "Cnt_Persone"
 
 MyLib.VBA_Start
 MyLib.CreateSh (nm_ShInData)
@@ -160,9 +162,6 @@ ShLSAoutData = "eduT"
 LSADataPatch = "p:\DPP\Business development\LSA\DATA\EduT.xlsm"
 MyLib.OpenFile(LSADataPatch, ShLSAoutData)
 For f_c = 2 to MyLib.getLastRow
-    
-
-
 
 nm_ShInUniqPersone = "Dict"
 MyLib.CreateSh (nm_ShInUniqPersone)
