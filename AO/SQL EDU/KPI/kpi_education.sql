@@ -12,7 +12,7 @@ smt.duration,
     else smt.base_price * (Case when spp.status is not null then 0.5 else 1 end)
      end) as base_price,
 
-pmt.price,
+pmt.ykassa,
 
 
 extract(year from smr.started_at) as cd_year,
@@ -110,8 +110,8 @@ left join
 left join 
 	 
 dblink('dbname=academie', 
-	'select distinct brand_id as brand_id, master_id as master_id, seminar_id as seminar_id, price as price
-	from payments') AS pmt (brand_id integer, master_id integer, seminar_id integer, price integer)
+	'select distinct brand_id as brand_id, master_id as master_id, seminar_id as seminar_id, (Case when price is not null then 1 end) as ykassa
+	from payments') AS pmt (brand_id integer, master_id integer, seminar_id integer, ykassa integer)
  ON  smr.id = pmt.seminar_id and usr.id = pmt.master_id and pmt.brand_id = 1
 
 Where   extract(year from smr.started_at) in ('2015', '2016') and extract(month from smr.started_at) <= 7
