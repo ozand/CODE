@@ -1,0 +1,93 @@
+Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" _
+                                     (ByVal hwnd As Long, ByVal pszPath As String, _
+                                      ByVal psa As Any) As Long
+Sub CreateFolderWithSubfolders(ByVal ПутьСоздаваемойПапки$)
+ 
+   If Len(Dir(ПутьСоздаваемойПапки$, vbDirectory)) = 0 Then    ' если папка отсутствует
+       SHCreateDirectoryEx Application.hwnd, ПутьСоздаваемойПапки$, ByVal 0&    ' создаём путь
+   End If
+End Sub
+Sub Redesigner()
+    Dim NFD, eSub, nmCreatPatch, ChDir As String
+    Dim inpdata As Range, realdata As Range, ns As Worksheet
+    Dim i&, j&, k&, c&, r&, hc&, hr&
+    Dim out(), dataArr, hcArr, hrArr
+    
+    hr = 1
+    hc = 12
+    num_date = InputBox("First Day Month 05.09.2016")
+    
+ar_nm_day = Array("ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС")
+ar_head = Array("cdVisitInstance", "cdVisitType", "cdRegion", "cdStore", "cdCancellationReason", "cdCreationReason", "dtPlannedStart", "dtPlannedEnd", "cdStatus", "nrSequence", "dsComments", "flHighImportance", "Flexi1", "Flexi2")
+
+
+    Set inpdata = Selection
+    If inpdata.Rows.Count <= hr Or inpdata.Columns.Count <= hc Then Exit Sub
+    Set realdata = inpdata.Offset(hr, hc).Resize(inpdata.Rows.Count - hr, inpdata.Columns.Count - hc)
+    dataArr = realdata.Value
+    If hr Then hrArr = inpdata.Offset(0, hc).Resize(hr, inpdata.Columns.Count - hc).Value
+    If hc Then hcArr = inpdata.Offset(hr, 0).Resize(inpdata.Rows.Count - hr, hc).Value
+    
+    ReDim out(1 To Application.CountA(realdata), 1 To hr + hc + 1)
+        
+    For i = 1 To UBound(dataArr, 1)
+        For j = 1 To UBound(dataArr, 2)
+            If dataArr(i, j) <> 0 Then
+                k = k + 1
+                c = 1
+                out(k, c) = "dpp" & hcArr(i, 2) & hcArr(i, 4) &" "& Month(Now) & Day(Now) & " " & k + 1
+            
+                c = 1 + c
+                out(k, c) = "DEFT"
+                c = 1 + c
+                out(k, c) = hcArr(i, 2)
+                c = 1 + c
+                out(k, c) = hcArr(i, 4)
+                c = 1 + c
+                out(k, c) = Empty
+                c = 1 + c
+                out(k, c) = Empty
+                    
+                
+                c = 1 + c
+                v_week = Left(hrArr(1, j), 1)
+                nm_day = Right(hrArr(1, j), 2)
+                For f_b = 0 To 6
+                If nm_day = ar_nm_day(f_b) Then
+                num_day = f_b + 1
+                Exit For
+                End If
+                Next f_b
+                out(k, c) = num_day
+                v_time = dataArr(i, j)
+                out(k, c) = v_time
+                shift_day = ((v_week - 1) * 7 + num_day - 1)
+                act_date_rout = DateAdd("d", DateValue(num_date), shift_day)
+                act_date_rout = act_date_rout + TimeSerial(v_time + 8, 0, 0)
+                out(k, c) = Format(act_date_rout, "yyyy-mm-dd hh:mm:ss")
+                
+                
+            End If
+    Next j, i
+    Sheets("OUT").Activate
+    Cells(2, 1).Resize(UBound(out, 1), UBound(out, 2)) = out
+    For f_c = 0 To UBound(ar_head)
+    Cells(1, f_c + 1) = ar_head(f_c)
+    Next f_c
+    Columns("G:G").Select
+    Selection.NumberFormat = "yyyy-mm-dd h:mm:ss"
+    
+    ActiveSheet.Select
+    ActiveSheet.Copy
+    nmCreatPatch = "u:\ES\" & RTM & "\" & "SFA" & "\" & nYear & "\" & nMonth & "\" & nSH
+    
+    CreateFolderWithSubfolders nmCreatPatch
+    
+    ActiveWorkbook.SaveAs Filename:="u:\ES\SFA\ImportVisitInstance_" & Year(Now) & Month(Now) & Day(Now) & Day(Now) & "05092016" & "1.txt", FileFormat:=xlText, _
+    CreateBackup:=False
+    ActiveWindow.Close
+    
+End Sub
+
+inFile = "<\\rucorprufil2\LOREAL\DPP\GENERAL\LIAISON DPP\>" & nmBrand & "\" & nmBrand & "_liaison_2016_" & monthT & " ñâîäíûé.xlsm"
+outFile = "<\\rucorprufil2\LOREAL\DPP\GENERAL\LIAISON DPP\>" & nmBrand & "\" & nmBrand & "_liaison_2016_" & monthT & "_" & dayT & ".xlsx"

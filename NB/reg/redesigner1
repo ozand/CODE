@@ -1,0 +1,27 @@
+
+
+Sub redesigner1()
+    Set sInput = Worksheets("Input")
+    Set sOutput = Worksheets("Output")
+    
+    startRow = 5
+    StartCol = 3
+    k = 1
+    
+    sInput.Activate
+    lRow = Lib.lastRow
+    lCol = Lib.lastColumn
+    
+    For i = startRow To lRow
+        For j = StartCol To lCol
+            If Cells(i, j).Value > 0 Then
+                sOutput.Cells(k, 1).Value = sInput.Cells(4, j).Value
+                sOutput.Cells(k, 2).Value = sInput.Cells(i, 1).Value
+                sOutput.Cells(k, 3).Value = sInput.Cells(i, j).Value
+                k = k + 1
+            End If
+        Next j
+    Next i
+    
+
+End Sub

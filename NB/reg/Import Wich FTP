@@ -1,0 +1,13 @@
+Sub Ìàêðîñ2()
+    Dim sh As Object
+    Dim sr As Variant
+    Set sh = ActiveSheet
+    
+    With GetObject("U:\SFA\ExportVisitInstanceCustom_13052016_15052016.xlsx")
+    
+        .Worksheets(1).Range("A:B,D:E,J:Q,AB:AV").Copy sh.Cells(1, 1)
+        '.Worksheets(1).Array("1,2,4,5,10:17,28,29,33,35").Copy sh.Cells(1, 1)
+        .Close 0
+    End With
+    
+End Sub

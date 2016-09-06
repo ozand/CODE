@@ -1,0 +1,29 @@
+Sub Redesigner()
+    Dim i As Long
+    Dim hc As Integer, hr As Integer
+    Dim ns As Worksheet
+     
+    hr = InputBox("Сколько строк с подписями сверху?")
+    hc = InputBox("Сколько столбцов с подписями слева?")
+     
+    Application.ScreenUpdating = False
+     
+    i = 1
+    Set inpdata = Selection
+    Set ns = Worksheets.Add
+     
+    For r = (hr + 1) To inpdata.Rows.Count
+        For c = (hc + 1) To inpdata.Columns.Count
+            For j = 1 To hc
+                ns.Cells(i, j) = inpdata.Cells(r, j)
+            Next j
+             
+            For k = 1 To hr
+                ns.Cells(i, j + k - 1) = inpdata.Cells(k, c)
+            Next k
+             
+            ns.Cells(i, j + k - 1) = inpdata.Cells(r, c)
+            i = i + 1
+        Next c
+    Next r
+End Sub

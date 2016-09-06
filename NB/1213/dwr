@@ -1,0 +1,43 @@
+Sub index()
+ 
+    CurrentRow = 2
+    EndRow = 1000
+    CellValue = ""
+    
+    AddressColumn = "a"
+    PostalCodeColumn = "c"
+    
+Dim oMatches, oMatch
+    Dim RegEx As Object
+    Set RegEx = CreateObject("vbscript.regexp")
+ 
+    While CurrentRow <= EndRow
+    
+        CellValue = CStr(Cells(CurrentRow, AddressColumn).Value)
+        
+        With RegEx
+            .Global = False
+            .IgnoreCase = True
+            .Pattern = "\s*(\d{6})\s*"
+    
+        End With
+        
+        If RegEx.Test(CellValue) Then
+            Set oMatches = RegEx.Execute(CellValue)
+            Set oMatch = oMatches(0)
+             Cells(CurrentRow, PostalCodeColumn).Value = "'" & oMatch.SubMatches(0)
+             CellValue = RegEx.Replace(CellValue, ", ")
+        Else
+            Cells(CurrentRow, PostalCodeColumn).Value = ""
+        End If
+            
+          
+        Cells(CurrentRow, AddressColumn).Value = CellValue
+        
+        CurrentRow = CurrentRow + 1
+        
+    Wend
+ 
+ 
+End Sub
+Black Star	

@@ -1,0 +1,26 @@
+Sub SplitSheets4()
+    Dim CurW As Window
+    Dim TempW As Window
+    Dim OutlookApp As Object, SM As Object
+    Set CurW = ActiveWindow
+    Set TempW = ActiveWorkbook.NewWindow
+    CurW.SelectedSheets.Copy
+    TempW.Close
+
+    Set OutlookApp = CreateObject("Outlook.Application")
+    Set SM = OutlookApp.CreateItem(olMailItem)  'Создаем объект
+ 
+    SM.To = "Nikolay.BUTUZOV@loreal.com"                      'Вставьте требуемый электронный адрес
+    SM.Subject = "Vizit_Report_Tens"                       'Заполнение поля "Тема"
+    SM.Body = "Добрый день. Высылаю вам отчет по визитам за прошедший месяц."                      'Заполнение поля "Сообщение"
+    SM.Attachments.Add "C:\Users\nikolay.butuzov\Desktop\Книга4.xlsx"       'Путь к прикрепляемому файлу
+    
+    On Error Resume Next                        'Перехват возможной ошибки
+    SM.Send                                     'Посылаем сообщение
+    
+    OutlookApp.Quit                             'Закрываем OutLook (если нужно)
+    
+    Set SM = Nothing                            'Очищаем использовавшиеся объекты
+    Set OutlookApp = Nothing
+
+End Sub

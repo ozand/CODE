@@ -95,7 +95,8 @@ ar_LastRow(b) = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
     num_colums = num_colums + 1
     ar_Data(iii, num_colums) = cd_brand_Univers
     If iii = 0 Then ar_nmHead(num_colums) = "BRAND_unvCD"
-    
+
+      
     '---------------------------------------------------------------------------------------------------------
     'cerate uniq mSeries
     '---------------------------------------------------------------------------------------------------------

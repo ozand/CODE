@@ -1,0 +1,122 @@
+Sub Redesigner()
+Dim ar_dataHead("cdVisitInstance", "Flexi2")), ar_dataVal(), ar_new_head(13, 1)
+
+ 
+NF = ActiveWorkbook.Name
+
+LastRow = ActiveSheet.UsedRange.Row + ActiveSheet.UsedRange.Rows.Count - 1
+LastColumn = ActiveSheet.UsedRange.Column + ActiveSheet.UsedRange.Columns.Count - 1
+
+ iii = 1
+ ReDim ar_dataHead(1 To LastColumn)
+ ReDim ar_dataVal(1 To LastRow, 1 To LastColumn)
+ 
+ For f_row = 1 To LastRow
+ 
+ 
+ cl_clmn = Cells(f_row, 1).Value
+ sts_ppd = 0
+ 
+ 
+ If f_row = 1 Then
+   
+        For f_c = 0 To UBound(ar_new_head)
+        
+            For f_b = 1 To LastColumn
+            nm_head = Cells(1, f_b)
+            If ar_new_head(f_c, 0) = nm_head Then
+            ar_new_head(f_c, 1) = f_b
+            End If
+            
+            Next f_b
+        
+        
+        Next f_c
+    
+  
+    
+ 
+ sts_ppd = 1
+ End If
+ 
+ If Left(cl_clmn, 3) = "ppd" Then
+ sts_ppd = 1
+ End If
+ 
+ If Left(cl_clmn, 4) = "8423" Then
+ sts_ppd = 1
+ End If
+ 
+ 
+ Select Case sts_ppd
+     
+ Case 1
+ 
+
+    For f_x = 0 To UBound(ar_new_head)
+    num_clm = ar_new_head(f_x, 1)
+    
+    
+    Select Case ar_new_head(f_x, 0)
+    
+        Case "dtPlannedStart"
+        If f_row = 1 Then
+        cl_clmn = Cells(f_row, num_clm).Value
+        Else
+        cl_clmn = Format(Cells(f_row, num_clm).Value, "yyyy-mm-dd hh:mm:ss")
+        End If
+        
+        Case "dtPlannedEnd"
+        If f_row = 1 Then
+        cl_clmn = Cells(f_row, num_clm).Value
+        Else
+        cl_clmn = Format(Cells(f_row, num_clm).Value, "yyyy-mm-dd hh:mm:ss")
+        End If
+    
+    Case "cdStatus"
+        If f_row = 1 Then
+        cl_clmn = Cells(f_row, num_clm).Value
+        Else
+        cl_clmn = "CANC"
+        End If
+        
+    Case "flHighImportance"
+        If f_row = 1 Then
+        cl_clmn = Cells(f_row, num_clm).Value
+        Else
+        cl_clmn = Empty
+        End If
+    
+    Case Else
+    cl_clmn = Cells(f_row, num_clm).Value
+    End Select
+    
+    
+    
+    ar_dataVal(iii, f_x + 1) = cl_clmn
+    
+    Next f_x
+    
+    
+    
+
+ 
+ iii = iii + 1
+ End Select
+  
+ 
+ Next f_row
+ 
+ 
+ Worksheets.Add
+ ActiveSheet.Cells(1, 1).Resize(iii, LastColumn) = ar_dataVal()
+     
+     
+         Columns("G:H").Select
+    Selection.NumberFormat = "yyyy-mm-dd h:mm:ss"
+ End Sub
+
+
+
+
+
