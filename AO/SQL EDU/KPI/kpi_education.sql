@@ -6,13 +6,21 @@ smt.name,
 smt.kpis_type, 
 smt.duration, 
 (case when smt.is_free is true then 'free' else 'paid' end) as is_free,
-smt.base_price,
+
+
+(Case when std.coefficient is not null then std.coefficient * smt.base_price * (Case when spp.status is not null then 0.5 else 1 end)
+    else smt.base_price * (Case when spp.status is not null then 0.5 else 1 end)
+     end) as base_price,
+
+pmt.price,
+
+
 extract(year from smr.started_at) as cd_year,
 extract(month from smr.started_at)  as cd_month,
 extract(day from smr.started_at)  as cd_day,
 smr.started_at as cd_data_smr_start,
 smr.closed_at as cd_data_smr_closed,
-smr.created_at as cd_data_smr_creat,
+smr.created_at as cd_data_smr_creat, 
 
 
 (Case when smr.trip is true or false then
@@ -83,7 +91,7 @@ left join seminar_types as smt On smr.seminar_type_id = smt.id
 left join seminar_users as smu ON smu.seminar_id = smr.id
 left join users as usr ON smu.user_id = usr.id
 left join salons as sln ON usr.salon_id is not null and usr.salon_id = sln.id
-left join salons as slnPlace ON smr.salAn_id is not null and smr.salon_id = slnPlace.id
+left join salons as slnPlace ON smr.salon_id is not null and smr.salon_id = slnPlace.id
 left join salons as slnMNG ON usr.salon_id is null and usr.id = slnMNG.salon_manager_id
 left join studios as std ON smr.studio_id is not null and smr.studio_id = std.id
 left join 
@@ -95,9 +103,17 @@ left join
 	ON
 	(Case when usr.salon_id is not null then usr.salon_id else slnMNG.id end) = spp.salon_id and spp.brand_id = 1 and 
 		(case  when spp.name like '%Expert%' then spp.status
-			when spp.name like '%МБК%' then   spp.status
+			    when spp.name like '%МБК%' then   spp.status
 				end)  in ('accepted', 'invited' )
 	-- LP-1:ES-3:MX-5:KR-6:RD-7
 
+left join 
+	 
+dblink('dbname=academie', 
+	'select distinct brand_id as brand_id, master_id as master_id, seminar_id as seminar_id, price as price
+	from payments') AS pmt (brand_id integer, master_id integer, seminar_id integer, price integer)
+ ON  smr.id = pmt.seminar_id and usr.id = pmt.master_id and pmt.brand_id = 1
+
 Where   extract(year from smr.started_at) in ('2015', '2016') and extract(month from smr.started_at) <= 7
+--GROUP BY smr.id, smt.name, smt.id, std.coefficient, spp.status, slnplace.name, slnplace.address, std.name
 --group by smr.started_at, smu.user_Id
