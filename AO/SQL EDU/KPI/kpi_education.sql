@@ -71,7 +71,10 @@ usr.id, usr.full_name, usr.role,
 (Case when sln.id is not null then
 	(Case when sln.is_closed = 't' then 'in_ptnc_base' else 'in_act_base' end) else
 	(Case when slnMNG.id is not null then
-(Case when slnMNG.is_closed = 't' then 'in_ptnc_base' else 'in_act_base' end) end) end) as active_clnt
+(Case when slnMNG.is_closed = 't' then 'in_ptnc_base' else 'in_act_base' end) end) end) as active_clnt, 
+
+spp.status as Club
+
 
 --(select distinct usr2.chief from users as USR2 where usr2.full_name=usr.chief limit 1 ) as nPlus1
 
@@ -80,12 +83,21 @@ left join seminar_types as smt On smr.seminar_type_id = smt.id
 left join seminar_users as smu ON smu.seminar_id = smr.id
 left join users as usr ON smu.user_id = usr.id
 left join salons as sln ON usr.salon_id is not null and usr.salon_id = sln.id
-left join salons as slnPlace ON smr.salon_id is not null and smr.salon_id = slnPlace.id
+left join salons as slnPlace ON smr.salAn_id is not null and smr.salon_id = slnPlace.id
 left join salons as slnMNG ON usr.salon_id is null and usr.id = slnMNG.salon_manager_id
-
---left join salons as slnManag ON usr.id = sln.salon_manager_id 
-
 left join studios as std ON smr.studio_id is not null and smr.studio_id = std.id
+left join 
+	dblink('dbname=academie', 
+	'select spcr.status as status, spc.id as id, spc.name as name, spc.brand_id as brand_id, spcr.salon_id as salon_id
+
+	from special_program_club_records as spcr
+	left join special_program_clubs as spc ON spcr.club_id = spc.id') AS spp (status  text, id integer, name text, brand_id  integer, salon_id  integer )
+	ON
+	(Case when usr.salon_id is not null then usr.salon_id else slnMNG.id end) = spp.salon_id and spp.brand_id = 1 and 
+		(case  when spp.name like '%Expert%' then spp.status
+			when spp.name like '%МБК%' then   spp.status
+				end)  in ('accepted', 'invited' )
+	-- LP-1:ES-3:MX-5:KR-6:RD-7
 
 Where   extract(year from smr.started_at) in ('2015', '2016') and extract(month from smr.started_at) <= 7
 --group by smr.started_at, smu.user_Id
