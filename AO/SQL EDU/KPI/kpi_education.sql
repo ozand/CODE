@@ -17,61 +17,61 @@ smr.created_at as cd_data_smr_creat,
 
 (Case when smr.trip is true or false then
     (case when smr.trip = 't' then 1 else 0 end) 
-else
-    (case when smr.business_trip = 't' then '1' else 0 end)
-end) as trip,
+        else
+            (case when smr.business_trip = 't' then '1' else 0 end)
+                end) as trip,
 
 (case when smr.salon_id is not null or smr.salon_id not in ( '0' )then 'SALON' else
-(case when smr.studio_id  is not null and (Select std.studio_type from studios as std where smr.studio_id = std.id) = 'classroom' then 'CLASSROOM' else 
-(case when smr.studio_id  is not null and (Select std.studio_type from studios as std where smr.studio_id = std.id) = 'studio' then 'STUDIO' else  'NOT_TYPE' 
-end) end) end) as type_place,
+    (case when smr.studio_id  is not null and (Select std.studio_type from studios as std where smr.studio_id = std.id) = 'classroom' then 'CLASSROOM' else 
+        (case when smr.studio_id  is not null and (Select std.studio_type from studios as std where smr.studio_id = std.id) = 'studio' then 'STUDIO' else  'NOT_TYPE' 
+            end) end) end) as type_place,
 
-(case when smr.salon_id is not null or smr.salon_id not in ( '0' )then Concat('inSalon_', slnPlace.name,'. ',slnPlace.address) else
-(case when smr.studio_id  is not null or smr.studio_id not in ( '0' ) then concat(std.name, '. ',std.address)  else '' end)
- end) as name_place,
+(case when smr.salon_id is not null or smr.salon_id not in ( '0' )then Concat(slnPlace.name,'. ',slnPlace.address) else
+    (case when smr.studio_id  is not null or smr.studio_id not in ( '0' ) then concat(std.name, '. ',std.address)  else '' end)
+        end) as name_place,
 
 (case when smr.closed_at is not null then 'CLOSED' else 'NOT_CLOSED' end) as seminar_closed,
 
 (case when smr.partimer_id is not null then smr.partimer_id else
-(case when smr.technolog_id  is not null then smr.technolog_id else
-(case when smr.partner_id  is not null then smr.partner_id end) end) end) as educater_id,
+    (case when smr.technolog_id  is not null then smr.technolog_id else
+        (case when smr.partner_id  is not null then smr.partner_id end) end) end) as educater_id,
 
 (case when smr.partimer_id is not null then smr.partimer_full_name else
-(case when smr.technolog_id  is not null then smr.technolog_full_name else 
-(case when smr.partner_id  is not null then smr.partner_full_name else 'Not_found' end) end) end) as educater,
+    (case when smr.technolog_id  is not null then smr.technolog_full_name else 
+        (case when smr.partner_id  is not null then smr.partner_full_name else 'Not_found' end) end) end) as educater,
 
 (case when smr.technolog_id is not null then (select usr_edu.role from users as usr_edu where smr.technolog_id = usr_edu.id) else
-(case when smr.partimer_id is not null then (select usr_edu.role from users as usr_edu where smr.partimer_id = usr_edu.id) else
-(case when smr.partner_id is not null then (select usr_edu.role from users as usr_edu where smr.partner_id = usr_edu.id) 
- end) end )end) as edu_role,
+    (case when smr.partimer_id is not null then (select usr_edu.role from users as usr_edu where smr.partimer_id = usr_edu.id) else
+        (case when smr.partner_id is not null then (select usr_edu.role from users as usr_edu where smr.partner_id = usr_edu.id) 
+            end) end )end) as edu_role,
 
 usr.id, usr.full_name, usr.role, 
 
 (case when usr.email is not null then 1 else 0 end ) as status_email,
-(case when usr.mobile_number is not null then 1 else 0 end ) as status_mobile,
-(case when usr.last_request_at is not null then 1 else 0 end ) as status_ecad_active_user,
+    (case when usr.mobile_number is not null then 1 else 0 end ) as status_mobile,
+        (case when usr.last_request_at is not null then 1 else 0 end ) as status_ecad_active_user,
 
 --usr.mobile_number, usr.email
 
 (Case when usr.salon_id is not null then 'salon_master' else 
-(Case when slnMNG.id is not null then 'salon_master' else 
-(Case when usr.id is not null then 'hairdresser' else 'not_reg_user' end) end) end) as type_master,
+    (Case when slnMNG.id is not null then 'salon_master' else 
+        (Case when usr.id is not null then 'hairdresser' else 'not_reg_user' end) end) end) as type_master,
 
 (Case when usr.salon_id is not null then usr.salon_id else slnMNG.id end) as salon_id,
 
 (Case when usr.salon_id is not null then concat(sln.id, '_', sln.name, '. ',sln.address) else 
-(Case when slnMNG.id is not null then concat(slnMNG.id, '_', slnMNG.name, '. ',slnMNG.address) else '' end) end) as salon,
+    (Case when slnMNG.id is not null then concat(slnMNG.id, '_', slnMNG.name, '. ',slnMNG.address) else '' end) end) as salon,
 
 (Case when usr.salon_id is not null then sln.com_mreg else slnMNG.com_mreg end) as com_mreg,
-(Case when usr.salon_id is not null then sln.com_mreg else slnMNG.com_reg end) as com_reg,
-(Case when usr.salon_id is not null then sln.com_sect else slnMNG.com_sect end) as com_sect,
-(Case when usr.salon_id is not null then sln.client_type else slnMNG.client_type end) as client_type,
+    (Case when usr.salon_id is not null then sln.com_mreg else slnMNG.com_reg end) as com_reg,
+        (Case when usr.salon_id is not null then sln.com_sect else slnMNG.com_sect end) as com_sect,
+            (Case when usr.salon_id is not null then sln.client_type else slnMNG.client_type end) as client_type,
 
 
 (Case when sln.id is not null then
 	(Case when sln.is_closed = 't' then 'in_ptnc_base' else 'in_act_base' end) else
-	(Case when slnMNG.id is not null then
-(Case when slnMNG.is_closed = 't' then 'in_ptnc_base' else 'in_act_base' end) end) end) as active_clnt
+	    (Case when slnMNG.id is not null then
+            (Case when slnMNG.is_closed = 't' then 'in_ptnc_base' else 'in_act_base' end) end) end) as active_clnt
 
 --(select distinct usr2.chief from users as USR2 where usr2.full_name=usr.chief limit 1 ) as nPlus1
 
