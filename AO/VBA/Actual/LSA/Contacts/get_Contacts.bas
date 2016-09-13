@@ -12,7 +12,7 @@ Dim Experience As Variant
 Dim dic_People As Variant, dic_LSA as Variant
 Dim varKey As Variant, varItem As Variant
 Dim sts_add2dic as Boolean
-Dim objPersone As myPersone
+Dim objUser As UserData
 Dim objLSA As myLSA
 
 Set dic_People = CreateObject("Scripting.Dictionary"): dic_People.RemoveAll
@@ -68,38 +68,38 @@ For f_mnth = 1 To cd_ActualMonth
                 For f_p = 1 To 2
                     sts_add2dic = false
                     Select Case f_p
-                        Case 1: key_Persone = nm_month & nm_FLSM: sts_add2dic = true
-                        Case 2: key_Persone = nm_month & nm_Srep: If nm_vacancy_status = "active" Then sts_add2dic = true
+                        Case 1: keyUser = nm_month & nm_FLSM: sts_add2dic = true
+                        Case 2: keyUser = nm_month & nm_Srep: If nm_vacancy_status = "active" Then sts_add2dic = true
                     End Select
 
-                    If Not dic_People.Exists(key_Persone) and sts_add2dic = true Then
-                        Set objPersone = New myPersone
-                        objPersone.cdDateStat    = DateSerial(cd_ActualYear, cd_ActualMonth, 1)
-                        objPersone.MegaReg       = nm_mreg_EXT
+                    If Not dic_People.Exists(keyUser) and sts_add2dic = true Then
+                        Set objUser = New UserData
+                        objUser.cdDateStat    = DateSerial(cd_ActualYear, cd_ActualMonth, 1)
+                        objUser.MegaReg       = nm_mreg_EXT
                         Select Case f_p
                             Case 1
-                                objPersone.Name             = nm_FLSM
-                                objPersone.Role             = "FLSM"
-                                objPersone.Experience       = "OLD"
+                                objUser.PersonName       = nm_FLSM
+                                objUser.Role             = "FLSM"
+                                objUser.Experience       = "OLD"
                             Case 2
-                                objPersone.Name             = nm_Srep
-                                objPersone.Status           = nm_Staff
-                                objPersone.Mail             = cont_email
-                                objPersone.Experience       = Experience
-                                objPersone.Role             = "SREP"
+                                objUser.PersonName       = nm_Srep
+                                objUser.Status           = nm_Staff
+                                objUser.Mail             = cont_email
+                                objUser.Experience       = Experience
+                                objUser.Role             = "SREP"
                         End Select
-                        dic_People.Add key_Persone, objPersone
+                        dic_People.Add keyUser, objUser
                     End If
 
-                    If dic_People.Exists(key_Persone) Then 
+                    If dic_People.Exists(keyUser) Then 
                         Select Case nm_brand
-                            Case "LP": dic_People.Item(key_Persone).Brand_LP = nm_brand
-                            Case "MX": dic_People.Item(key_Persone).Brand_MX = nm_brand
-                            Case "KR": dic_People.Item(key_Persone).Brand_KR = nm_brand
-                            Case "RD": dic_People.Item(key_Persone).Brand_RD = nm_brand
-                            Case "ES": dic_People.Item(key_Persone).Brand_ES = nm_brand
-                            Case "DE": dic_People.Item(key_Persone).Brand_DE = nm_brand
-                            Case "CR": dic_People.Item(key_Persone).Brand_CR = nm_brand
+                            Case "LP": dic_People.Item(keyUser).Brand_LP = nm_brand
+                            Case "MX": dic_People.Item(keyUser).Brand_MX = nm_brand
+                            Case "KR": dic_People.Item(keyUser).Brand_KR = nm_brand
+                            Case "RD": dic_People.Item(keyUser).Brand_RD = nm_brand
+                            Case "ES": dic_People.Item(keyUser).Brand_ES = nm_brand
+                            Case "DE": dic_People.Item(keyUser).Brand_DE = nm_brand
+                            Case "CR": dic_People.Item(keyUser).Brand_CR = nm_brand
                         End Select
                     End If
                 Next f_p
@@ -131,7 +131,7 @@ For f_mnth = 1 To cd_ActualMonth
             End If
 
         Next f_rw
-        
+    myLib.CloseNoMotherBook(nm_ActWb)    
     Next f_brnd
 Next f_mnth
 
@@ -157,33 +157,64 @@ Cells(2, 16).Select
 ActiveWindow.FreezePanes = True
 ActiveWindow.DisplayGridlines = False
 
-Dim LSADataPatch as String$, ShLSAoutData$
-ShLSAoutData = "eduT"
-LSADataPatch = "p:\DPP\Business development\LSA\DATA\EduT.xlsm"
-MyLib.OpenFile(LSADataPatch, ShLSAoutData)
 For f_c = 2 to MyLib.getLastRow
 
-nm_ShInUniqPersone = "Dict"
-MyLib.CreateSh (nm_ShInUniqPersone)
-MyLib.sheetActivateCleer(nm_ShInUniqPersone)
+    nm_ShInUniqPersone = "Users"
+    MyLib.CreateSh (nm_ShInUniqPersone)
+    MyLib.sheetActivateCleer(nm_ShInUniqPersone)
 
-For Each myPersone In dic_People.Items
-    i = i + 1
-    n = 0
-    n = n + 1: Cells(i, n) = MyLib.getNameMonthEN(Month(myPersone.cdDateStat))
-    n = n + 1: Cells(i, n) = Year(myPersone.cdDateStat)
-    n = n + 1: Cells(i, n) = myPersone.Name
-    n = n + 1: Cells(i, n) = myPersone.Role
-    n = n + 1: Cells(i, n) = myPersone.Status
-    n = n + 1: Cells(i, n) = myPersone.Experience
-    n = n + 1: Cells(i, n) = myPersone.Brand_LP
-    n = n + 1: Cells(i, n) = myPersone.Brand_MX
-    n = n + 1: Cells(i, n) = myPersone.Brand_KR
-    n = n + 1: Cells(i, n) = myPersone.Brand_RD
-    n = n + 1: Cells(i, n) = myPersone.Brand_ES
-    n = n + 1: Cells(i, n) = myPersone.Brand_DE
-    n = n + 1: Cells(i, n) = myPersone.Brand_CR
+    i = 1
+    For Each UserData In dic_People.Items
+        i = i + 1
+        n = 0
+        n = n + 1: Cells(i, n) = MyLib.getNameMonthEN(Month(UserData.cdDateStat))
+        n = n + 1: Cells(i, n) = Year(UserData.cdDateStat)
+        n = n + 1: Cells(i, n) = UserData.Name
+        n = n + 1: Cells(i, n) = UserData.Role
+        n = n + 1: Cells(i, n) = UserData.Status
+        n = n + 1: Cells(i, n) = UserData.Experience
+        n = n + 1: Cells(i, n) = UserData.Brand_LP
+        n = n + 1: Cells(i, n) = UserData.Brand_MX
+        n = n + 1: Cells(i, n) = UserData.Brand_KR
+        n = n + 1: Cells(i, n) = UserData.Brand_RD
+        n = n + 1: Cells(i, n) = UserData.Brand_ES
+        n = n + 1: Cells(i, n) = UserData.Brand_DE
+        n = n + 1: Cells(i, n) = UserData.Brand_CR
+    Next
+Next f_c
+Dim LSADataPatch as String$, ShLSAoutData$
+Dim ShIn$
+Dim smr As Seminars, smu As SeminarUsers
+Dim progress As IProgress
+Dim i As Double
+
+ShLSAoutData = "eduT"
+LSADataPatch = "p:\DPP\Business development\LSA\DATA\EduT.xlsm"
+nmWbLSA = MyLib.OpenFile(LSADataPatch, ShLSAoutData)
+Workbooks(nmWbLSA).Activate
+Set smr = New Seminars
+ShIn = "eduT"
+ShOut = "Education"
+
+Sheets(ShIn).Select
+smr.FillFromSheet ActiveSheet
+
+Workbooks(nm_ActWb).Activate    
+myLib.CreateSh (ShOut)
+myLib.sheetActivateCleer (ShOut)
+
+i = 1
+For Each smu In smr
+i = i + 1
+    With smu
+        n = 1: Cells(i, n)      = .PersonName
+        n = n + 1: Cells(i, n)  = .EduDate
+        n = n + 1: Cells(i, n)  = .SeminarName
+        n = n + 1: Cells(i, n)  = .Educater
+    End With
 Next
+             
+
 
 MyLib.VBA_End
 End Sub

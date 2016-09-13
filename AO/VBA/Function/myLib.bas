@@ -1,4 +1,5 @@
-    Attribute VB_Name = "myLib"
+  Attribute VB_Name = "myLib"
+  
   '---------------------------------------------------------------------------------------------------------
     Function Replace_symbols(ByVal txt As String) As String
         St$ = "~!@/\#$%^:?&*=|`;"""
@@ -29,7 +30,7 @@
     End With
     End Function
     '---------------------------------------------------------------------------------------------------------
-    Function CreateSh(cr_sh As String) As String
+    Sub CreateSh(ByVal cr_sh As String)
     For Each Sh In ThisWorkbook.Worksheets
         If Sh.Name = cr_sh Then
         chek_name = 1
@@ -39,7 +40,8 @@
         Set Sh = Worksheets.Add()
         Sh.Name = cr_sh
         End If
-    End Function
+        Sheets(cr_sh).Select
+    End Sub
     '---------------------------------------------------------------------------------------------------------
     Function OpenFile(ByRef patch As String, nm_sh As String) As String
     Dim result$
@@ -138,57 +140,57 @@
     Dim f_sl&
 
     '--array
-        ar_type_clients(1, 1) = "салон"
+        ar_type_clients(1, 1) = "�����"
         ar_type_clients(2, 1) = "salon"
         ar_type_clients(3, 1) = "salon"
         ar_type_clients(4, 1) = "single"
 
-        ar_type_clients(1, 2) = "сеть салонов"
+        ar_type_clients(1, 2) = "���� �������"
         ar_type_clients(2, 2) = "chain_salons"
         ar_type_clients(3, 2) = "salon"
         ar_type_clients(4, 2) = "chain"
 
-        ar_type_clients(1, 3) = "ч/м"
+        ar_type_clients(1, 3) = "�/�"
         ar_type_clients(2, 3) = "hdres"
         ar_type_clients(3, 3) = "salon"
         ar_type_clients(4, 3) = "single"
 
-        ar_type_clients(1, 4) = "сеть магазинов"
+        ar_type_clients(1, 4) = "���� ���������"
         ar_type_clients(2, 4) = "chain_shops"
         ar_type_clients(3, 4) = "shop"
         ar_type_clients(4, 4) = "chain"
 
-        ar_type_clients(1, 5) = "магазин"
+        ar_type_clients(1, 5) = "�������"
         ar_type_clients(2, 5) = "shop"
         ar_type_clients(3, 5) = "shop"
         ar_type_clients(4, 5) = "single"
 
-        ar_type_clients(1, 6) = "салон-маг."
+        ar_type_clients(1, 6) = "�����-���."
         ar_type_clients(2, 6) = "salon"
         ar_type_clients(3, 6) = "salon"
         ar_type_clients(4, 6) = "single"
 
-        ar_type_clients(1, 7) = "(пусто)"
+        ar_type_clients(1, 7) = "(�����)"
         ar_type_clients(2, 7) = "other"
         ar_type_clients(3, 7) = "other"
         ar_type_clients(4, 7) = "single"
 
-        ar_type_clients(1, 8) = "школа"
+        ar_type_clients(1, 8) = "�����"
         ar_type_clients(2, 8) = "school"
         ar_type_clients(3, 8) = "school"
         ar_type_clients(4, 8) = "single"
 
-        ar_type_clients(1, 9) = "другое"
+        ar_type_clients(1, 9) = "������"
         ar_type_clients(2, 9) = "other"
         ar_type_clients(3, 9) = "other"
         ar_type_clients(4, 9) = "single"
 
-        ar_type_clients(1, 10) = "нейл-бар"
+        ar_type_clients(1, 10) = "����-���"
         ar_type_clients(2, 10) = "nails_bar"
         ar_type_clients(3, 10) = "nails"
         ar_type_clients(4, 10) = "single"
 
-        ar_type_clients(1, 11) = "сеть нейл-баров"
+        ar_type_clients(1, 11) = "���� ����-�����"
         ar_type_clients(2, 11) = "chain_nails"
         ar_type_clients(3, 11) = "nails"
         ar_type_clients(4, 11) = "chain"
@@ -273,7 +275,7 @@
     Dim result&
     Dim f_m&, num_month&
 
-    ar_nm_month_qnc_rus = Array("январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь")
+    ar_nm_month_qnc_rus = Array("������", "�������", "����", "������", "���", "����", "����", "������", "��������", "�������", "������", "�������")
     result = 1
         For f_m = 0 To 11
         If ar_nm_month_qnc_rus(f_m) = in_data Then
@@ -290,7 +292,7 @@
     Dim f_m&, num_month&
     ar_month_eng = Array(0, "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
     result = Empty
-    If IsNumeric(in_data) Then
+    If isNumeric(in_data) Then
         Select Case in_data
             Case Is > 0, Is < 13
             result = ar_month_eng(in_data)
@@ -306,7 +308,7 @@
     Dim result$
     Dim f_m&
 
-    ar_month_rus = Array("январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь")
+    ar_month_rus = Array("������", "�������", "����", "������", "���", "����", "����", "������", "��������", "�������", "������", "�������")
     ar_month_eng = Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
     
         For f_m = 0 To 11
@@ -350,7 +352,7 @@
     Dim result As Variant
     Dim mag_avg_price&
             
-    If IsNumeric(in_min_price) And IsNumeric(in_max_price) Then
+    If isNumeric(in_min_price) And isNumeric(in_max_price) Then
         mag_avg_price = Application.WorksheetFunction.Average(in_min_price, in_max_price)
     Else
         mag_avg_price = in_min_price + in_max_price
@@ -403,7 +405,7 @@
             End Select
 
         Case "place"
-            If IsNumeric(in_place) Then
+            If isNumeric(in_place) Then
             in_place = Round(in_place, 0)
             End If
             Select Case in_place
@@ -449,7 +451,7 @@
     '---------------------------------------------------------------------------------------------------------
     Function rnd_num&(in_data)
     Dim result&
-    If IsNumeric(in_data) And Len(in_data) > 0 Then
+    If isNumeric(in_data) And Len(in_data) > 0 Then
         result = Round(in_data, 0)
     Else
         result = 0
@@ -459,7 +461,7 @@
     '---------------------------------------------------------------------------------------------------------
     Function num2num0&(in_data As Variant)
     Dim result&
-    If Len(in_data) > 0 And IsNumeric(in_data) Then
+    If Len(in_data) > 0 And isNumeric(in_data) Then
     result = in_data
     Else
     result = 0
@@ -502,7 +504,7 @@
     
     For f_a = inThisMonth To inThisMonth + 11
         val = Cells(in_row, ar_DataMonthPRTN(f_a))
-        If IsNumeric(val) And val > 0 Then
+        If isNumeric(val) And val > 0 Then
         frqOrder = frqOrder + 1
         sum_CA_LTM = sum_CA_LTM + val
         End If
@@ -549,7 +551,7 @@
     Function getVectoreEV$(in_data#)
     Dim result$
 
-    If IsNumeric(in_data) Then
+    If isNumeric(in_data) Then
         Select Case in_data
         Case Is > 0
             result = "+"
@@ -633,7 +635,7 @@
     Function avgCA&(in_data&, in_month&)
     Dim result&
  
-    If Not IsEmpty(in_data) And IsNumeric(in_data) Then
+    If Not isEmpty(in_data) And isNumeric(in_data) Then
     result = in_data / in_month
     Else
     result = Empty
@@ -647,10 +649,12 @@
     Dim result$
     If Trim(LCase(nm_Srep)) = Trim(LCase(nm_FLSM)) Then
         result = "FLSMasSREP"
-        ElseIf InStr(1, LCase(nm_Srep), "вакан", vbTextCompare) <> 0 Then
+        ElseIf InStr(1, LCase(nm_Srep), "�����", vbTextCompare) <> 0 Then
             result = "vacancy"
-            Else
-            result = "active"
+            ElseIf Len(nm_Srep) = 0 Then
+                result = "vacancy"
+                Else
+                    result = "active"
     End If
     getSREP_type = result
     
@@ -669,32 +673,32 @@
     End Sub
 
 '---------------------------------------------------------------------------------------------------------
-    Sub CloseNoMotherBook()
-        If ActiveWorkbook.Name <> nm_ActWb Then
+    Sub CloseNoMotherBook(ByVal as String)
+        If ActiveWorkbook.Name <> nmActWb Then
         ActiveWindow.Close
         Application.DisplayAlerts = False
           End If
     End Sub
 
-'--------------------------------------------------------------------------------------------------------- 
-    Function getDateEmpty(in_date as Variant) as Variant
-    Dim result as Variant
-    If isDate(in_date) Then 
+'---------------------------------------------------------------------------------------------------------
+    Function getDateEmpty(in_date As Variant) As Variant
+    Dim result As Variant
+    If isDate(in_date) Then
         result = in_date
     Else
         result = Empty
     End If
     ifDateTheDate = result
     End Function
-'--------------------------------------------------------------------------------------------------------- 
+'---------------------------------------------------------------------------------------------------------
 
-    Function getLast4quartal(in_date as Variant, in_ActiveM%, in_ActiveY%) as String
-    Dim result$ 
+    Function getLast4quartal(in_date As Variant, in_ActiveM%, in_ActiveY%) As String
+    Dim result$
     Dim ActDate As Date
-    Dim count_month as Integer
+    Dim count_month As Integer
 
-    If isNumeric(in_ActiveY) and isNumeric(in_ActiveY) and not isEmpty(in_date)  Then
-        ActDate = DateSerial(in_ActiveY, in_ActiveY , 1 )
+    If isNumeric(in_ActiveY) And isNumeric(in_ActiveY) And Not isEmpty(in_date) Then
+        ActDate = DateSerial(in_ActiveY, in_ActiveY, 1)
         count_qurtal = DateDiff("q", in_date, ActDate)
     End If
     Select Case count_qurtal
@@ -707,12 +711,12 @@
     getLast4quartal = result
     End Function
 
-'--------------------------------------------------------------------------------------------------------- 
+'---------------------------------------------------------------------------------------------------------
     Sub sheetActivateCleer(in_sh$)
     Sheets(in_sh).Select
     ActiveSheet.UsedRange.Cells.ClearContents
     End Sub
-'--------------------------------------------------------------------------------------------------------- 
+'---------------------------------------------------------------------------------------------------------
     Function GetHash(ByVal txt$) As String
         Dim oUTF8, oMD5, abyt, i&, k&, hi&, lo&, chHi$, chLo$
         Set oUTF8 = CreateObject("System.Text.UTF8Encoding")
