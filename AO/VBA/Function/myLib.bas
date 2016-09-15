@@ -1,8 +1,5 @@
  Attribute VB_Name = "myLib"
-<<<<<<< HEAD
 
-=======
->>>>>>> dc6b4c5054ff8ce6310224134d7455604d6346d6
   '---------------------------------------------------------------------------------------------------------
     Function Replace_symbols(ByVal txt As String) As String
         St$ = "~!@/\#$%^:?&*=|`;"""
@@ -673,13 +670,9 @@
     End Sub
 
 '---------------------------------------------------------------------------------------------------------
-<<<<<<< HEAD
     Sub CloseNoMotherBook(ByVal ShIn as String)
         If ActiveWorkbook.Name <> ShIn Then
-=======
-    Sub CloseNoMotherBook()
-        If ActiveWorkbook.Name <> nm_ActWb Then
->>>>>>> dc6b4c5054ff8ce6310224134d7455604d6346d6
+
         ActiveWindow.Close
         Application.DisplayAlerts = False
           End If
@@ -702,13 +695,8 @@
     Dim ActDate As Date
     Dim count_month as Integer
 
-<<<<<<< HEAD
     If isNumeric(in_ActiveY) and isNumeric(in_ActiveM) and not isEmpty(in_date)  Then
         ActDate = DateSerial(in_ActiveY, in_ActiveM , 1 )
-=======
-    If isNumeric(in_ActiveY) and isNumeric(in_ActiveY) and not isEmpty(in_date)  Then
-        ActDate = DateSerial(in_ActiveY, in_ActiveY , 1 )
->>>>>>> dc6b4c5054ff8ce6310224134d7455604d6346d6
         count_qurtal = DateDiff("q", in_date, ActDate)
     End If
     Select Case count_qurtal
