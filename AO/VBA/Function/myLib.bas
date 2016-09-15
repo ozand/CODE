@@ -673,8 +673,8 @@
     End Sub
 
 '---------------------------------------------------------------------------------------------------------
-    Sub CloseNoMotherBook()
-        If ActiveWorkbook.Name <> nm_ActWb Then
+    Sub CloseNoMotherBook(ByVal ShIn as String)
+        If ActiveWorkbook.Name <> ShIn Then
         ActiveWindow.Close
         Application.DisplayAlerts = False
           End If
@@ -697,8 +697,8 @@
     Dim ActDate As Date
     Dim count_month as Integer
 
-    If isNumeric(in_ActiveY) and isNumeric(in_ActiveY) and not isEmpty(in_date)  Then
-        ActDate = DateSerial(in_ActiveY, in_ActiveY , 1 )
+    If isNumeric(in_ActiveY) and isNumeric(in_ActiveM) and not isEmpty(in_date)  Then
+        ActDate = DateSerial(in_ActiveY, in_ActiveM , 1 )
         count_qurtal = DateDiff("q", in_date, ActDate)
     End If
     Select Case count_qurtal

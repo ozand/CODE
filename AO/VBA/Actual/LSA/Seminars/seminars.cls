@@ -48,15 +48,15 @@ Public Sub Clear()
 End Sub
 
 Public Sub FillFromSheet(wks As Worksheet)
-    Const cFirstRow = 2, cName = 1, cEduDate = 12, cSeminarName = 14, cEducater = 11
+    Const cFirstRow = 2, cPersonName = 1, cEduDate = 12, cSeminarName = 14, cEducater = 11
 
     Dim i As Long, obj As SeminarUsers
     With wks
         For i = cFirstRow To .Cells(Rows.Count, 1).End(xlUp).Row
             Set obj = New SeminarUsers
-            obj.PersonName = .Cells(i, cName)
+            obj.PersonName = .Cells(i, cPersonName)
             obj.EduDate = .Cells(i, cEduDate)
-            obj.SeminarName = .Cells(i, cSeminarName)
+            obj.SeminarName = LCase(.Cells(i, cSeminarName))
             obj.Educater = .Cells(i, cEducater)
 
             Me.Add obj
