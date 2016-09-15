@@ -1,4 +1,3 @@
-Attribute VB_Name = "get_Contacts"
 
 Sub getKPIfromContact()
 
@@ -9,98 +8,100 @@ Dim cd_Sector&, num_target_CA&
 Dim ar_Brand() As Variant, ar_Data(1 To 500000, 1 To 50) As Variant, ar_nmHead(1 To 50) As Variant
 Dim f_mnth%, f_brnd%, cd_ActualYear%, cd_ActualMonth%, nnnm$, patch$
 Dim Experience As Variant
-Dim dic_People As Variant, dic_LSA as Variant
+Dim dic_People As Variant, dic_SeminarName As Variant
 Dim varKey As Variant, varItem As Variant
-Dim sts_add2dic as Boolean
+Dim sts_add2dic As Boolean
 Dim objUser As UserData
-Dim objLSA As myLSA
 
 Set dic_People = CreateObject("Scripting.Dictionary"): dic_People.RemoveAll
-Set dic_LSA = CreateObject("Scripting.Dictionary"): dic_LSA.RemoveAll
+Set dic_SeminarName = CreateObject("Scripting.Dictionary"): dic_SeminarName.RemoveAll
+Set dic_UserEducated = CreateObject("Scripting.Dictionary"): dic_UserEducated.RemoveAll
 
-nm_ActWb        = ActiveWorkbook.Name
-cd_ActualMonth  = CInt(InputBox("Month"))
-cd_ActualYear   = 2016
-ar_Brand        = Array("MX", "ES", "LP", "KR", "RD")
+nm_ActWb = ActiveWorkbook.Name
+cd_ActualMonth = CInt(InputBox("Month"))
+cd_ActualYear = 2016
+ar_Brand = Array("RD")
 
-nm_ShOutData    = "Contacts"
-nm_ShInData     = "Cnt_Persone"
+nm_ShOutData = "Contacts"
+nm_ShInData = "Cnt_Persone"
 
-MyLib.VBA_Start
-MyLib.CreateSh (nm_ShInData)
+myLib.VBA_Start
+myLib.CreateSh (nm_ShInData)
 iii = 1
 
 For f_mnth = 1 To cd_ActualMonth
     For f_brnd = 0 To UBound(ar_Brand)
         nm_brand = ar_Brand(f_brnd)
             
-            patch           = MyLib.patch_history_TR(nm_brand, cd_ActualYear, cd_ActualMonth, f_mnth)
-            actTR           = MyLib.OpenFile(patch, nm_ShOutData)
-            num_LastRow     = MyLib.getLastRow
-            num_LastColum   = MyLib.getLastColumn
+            patch = myLib.patch_history_TR(nm_brand, cd_ActualYear, cd_ActualMonth, f_mnth)
+            actTR = myLib.OpenFile(patch, nm_ShOutData)
+            num_LastRow = myLib.getLastRow
+            num_LastColum = myLib.getLastColumn
         
           
         For f_rw = 2 To num_LastRow
-            nm_Mreg         = MyLib.getMregWhitoutBrand(Cells(f_rw, 10))
-            nm_Reg          = Trim(Cells(f_rw, 11))
-            nm_mreg_EXT     = MyLib.mreg_lat(MyLib.mreg_ext(nm_Mreg, nm_Reg))
+            nm_Mreg = myLib.getMregWhitoutBrand(Cells(f_rw, 10))
+            nm_Reg = Trim(Cells(f_rw, 11))
+            nm_mreg_EXT = myLib.mreg_lat(myLib.mreg_ext(nm_Mreg, nm_Reg))
             
             If Len(nm_mreg_EXT) > 0 Then
                      
-                nm_Srep             = Trim(Cells(f_rw, 3))
-                nm_FLSM             = Trim(Cells(f_rw, 6))
-                nm_Sector           = Trim(Cells(f_rw, 1))
-                nm_Staff            = Cells(f_rw, 4)
-                cont_email          = Trim(Cells(f_rw, 8))
-                cont_phone          = Trim(Cells(f_rw, 7))
-                Partner             = Trim(Cells(f_rw, 9))
-                Experience          = MyLib.getLast4quartal(Cells(f_rw, 12), cd_ActualMonth, cd_ActualYear)
-                num_target_CA       = MyLib.num2num0(Cells(f_rw, 14))
-                num_orders_SLN      = MyLib.num2num0(Cells(f_rw, 15))
-                num_orders_phone    = MyLib.num2num0(Cells(f_rw, 16))
-                num_visits2act      = MyLib.num2num0(Cells(f_rw, 17))
-                num_visited_act     = MyLib.num2num0(Cells(f_rw, 18))
-                num_visits2cnq      = MyLib.num2num0(Cells(f_rw, 19))
-                num_visited_cnq     = MyLib.num2num0(Cells(f_rw, 20))
-                nm_month            = MyLib.getNameMonthEN(f_mnth)
-                nm_vacancy_status   = MyLib.getSREP_type(nm_Srep, nm_FLSM)
+                nm_Srep = Trim(Cells(f_rw, 3))
+                nm_FLSM = Trim(Cells(f_rw, 6))
+                nm_Sector = Trim(Cells(f_rw, 1))
+                nm_Staff = Cells(f_rw, 4)
+                cont_email = Trim(Cells(f_rw, 8))
+                cont_phone = Trim(Cells(f_rw, 7))
+                Partner = Trim(Cells(f_rw, 9))
+                Experience = myLib.getLast4quartal(Cells(f_rw, 12), f_mnth, cd_ActualYear)
+                num_target_CA = myLib.num2num0(Cells(f_rw, 14))
+                num_orders_SLN = myLib.num2num0(Cells(f_rw, 15))
+                num_orders_phone = myLib.num2num0(Cells(f_rw, 16))
+                num_visits2act = myLib.num2num0(Cells(f_rw, 17))
+                num_visited_act = myLib.num2num0(Cells(f_rw, 18))
+                num_visits2cnq = myLib.num2num0(Cells(f_rw, 19))
+                num_visited_cnq = myLib.num2num0(Cells(f_rw, 20))
+                nm_month = myLib.getNameMonthEN(f_mnth)
+                nm_vacancy_status = myLib.getSREP_type(nm_Srep, nm_FLSM)
                 
                 For f_p = 1 To 2
-                    sts_add2dic = false
+                    sts_add2dic = False
                     Select Case f_p
-                        Case 1: keyUser = nm_month & nm_FLSM: sts_add2dic = true
-                        Case 2: keyUser = nm_month & nm_Srep: If nm_vacancy_status = "active" Then sts_add2dic = true
+                        Case 1: keyUser = nm_month & nm_FLSM: sts_add2dic = True
+                        Case 2: keyUser = nm_month & nm_Srep: If nm_vacancy_status = "active" Then sts_add2dic = True
                     End Select
 
-                    If Not dic_People.Exists(keyUser) and sts_add2dic = true Then
+                    If Not dic_People.Exists(keyUser) And sts_add2dic = True Then
                         Set objUser = New UserData
-                        objUser.cdDateStat    = DateSerial(cd_ActualYear, cd_ActualMonth, 1)
-                        objUser.MegaReg       = nm_mreg_EXT
+                        objUser.cdDateStat = DateSerial(cd_ActualYear, f_mnth, 1)
+                        objUser.MegaReg = nm_mreg_EXT
                         Select Case f_p
                             Case 1
-                                objUser.PersonName       = nm_FLSM
-                                objUser.Role             = "FLSM"
-                                objUser.Experience       = "OLD"
+                                objUser.PersonName = nm_FLSM
+                                objUser.Role = "FLSM"
+                                objUser.Experience = "OLD"
                             Case 2
-                                objUser.PersonName       = nm_Srep
-                                objUser.Status           = nm_Staff
-                                objUser.Mail             = cont_email
-                                objUser.Experience       = Experience
-                                objUser.Role             = "SREP"
+                                objUser.PersonName = nm_Srep
+                                objUser.Status = nm_Staff
+                                objUser.Mail = cont_email
+                                objUser.Experience = Experience
+                                objUser.Role = "SREP"
                         End Select
                         dic_People.Add keyUser, objUser
                     End If
 
-                    If dic_People.Exists(keyUser) Then 
+                    If dic_People.Exists(keyUser) Then
+                    With dic_People
                         Select Case nm_brand
-                            Case "LP": dic_People.Item(keyUser).Brand_LP = nm_brand
-                            Case "MX": dic_People.Item(keyUser).Brand_MX = nm_brand
-                            Case "KR": dic_People.Item(keyUser).Brand_KR = nm_brand
-                            Case "RD": dic_People.Item(keyUser).Brand_RD = nm_brand
-                            Case "ES": dic_People.Item(keyUser).Brand_ES = nm_brand
-                            Case "DE": dic_People.Item(keyUser).Brand_DE = nm_brand
-                            Case "CR": dic_People.Item(keyUser).Brand_CR = nm_brand
+                            Case "LP": .Item(keyUser).Brand_LP = nm_brand
+                            Case "MX": .Item(keyUser).Brand_MX = nm_brand
+                            Case "KR": .Item(keyUser).Brand_KR = nm_brand
+                            Case "RD": .Item(keyUser).Brand_RD = nm_brand
+                            Case "ES": .Item(keyUser).Brand_ES = nm_brand
+                            Case "DE": .Item(keyUser).Brand_DE = nm_brand
+                            Case "CR": .Item(keyUser).Brand_CR = nm_brand
                         End Select
+                    End With
                     End If
                 Next f_p
 
@@ -131,12 +132,12 @@ For f_mnth = 1 To cd_ActualMonth
             End If
 
         Next f_rw
-    myLib.CloseNoMotherBook(nm_ActWb)    
+    myLib.CloseNoMotherBook (nm_ActWb)
     Next f_brnd
 Next f_mnth
 
 Workbooks(nm_ActWb).Activate
-MyLib.sheetActivateCleer(nm_ShInData)
+myLib.sheetActivateCleer (nm_ShInData)
 
 For f_head = 1 To n
     If IsEmpty(ar_nmHead(f_head)) Then
@@ -157,40 +158,37 @@ Cells(2, 16).Select
 ActiveWindow.FreezePanes = True
 ActiveWindow.DisplayGridlines = False
 
-For f_c = 2 to MyLib.getLastRow
 
-    nm_ShInUniqPersone = "Users"
-    MyLib.CreateSh (nm_ShInUniqPersone)
-    MyLib.sheetActivateCleer(nm_ShInUniqPersone)
+nm_ShInUniqPersone = "Users"
+myLib.CreateSh (nm_ShInUniqPersone)
+myLib.sheetActivateCleer (nm_ShInUniqPersone)
 
-    i = 1
-    For Each UserData In dic_People.Items
-        i = i + 1
-        n = 0
-        n = n + 1: Cells(i, n) = MyLib.getNameMonthEN(Month(UserData.cdDateStat))
-        n = n + 1: Cells(i, n) = Year(UserData.cdDateStat)
-        n = n + 1: Cells(i, n) = UserData.Name
-        n = n + 1: Cells(i, n) = UserData.Role
-        n = n + 1: Cells(i, n) = UserData.Status
-        n = n + 1: Cells(i, n) = UserData.Experience
-        n = n + 1: Cells(i, n) = UserData.Brand_LP
-        n = n + 1: Cells(i, n) = UserData.Brand_MX
-        n = n + 1: Cells(i, n) = UserData.Brand_KR
-        n = n + 1: Cells(i, n) = UserData.Brand_RD
-        n = n + 1: Cells(i, n) = UserData.Brand_ES
-        n = n + 1: Cells(i, n) = UserData.Brand_DE
-        n = n + 1: Cells(i, n) = UserData.Brand_CR
-    Next
-Next f_c
-Dim LSADataPatch as String$, ShLSAoutData$
+i = 1
+For Each UserData In dic_People.Items
+    i = i + 1
+    n = 0
+    n = n + 1: Cells(i, n) = myLib.getNameMonthEN(month(UserData.cdDateStat))
+    n = n + 1: Cells(i, n) = year(UserData.cdDateStat)
+    n = n + 1: Cells(i, n) = UserData.PersonName
+    n = n + 1: Cells(i, n) = UserData.Role
+    n = n + 1: Cells(i, n) = UserData.Status
+    n = n + 1: Cells(i, n) = UserData.Experience
+    n = n + 1: Cells(i, n) = UserData.Brand_LP
+    n = n + 1: Cells(i, n) = UserData.Brand_MX
+    n = n + 1: Cells(i, n) = UserData.Brand_KR
+    n = n + 1: Cells(i, n) = UserData.Brand_RD
+    n = n + 1: Cells(i, n) = UserData.Brand_ES
+    n = n + 1: Cells(i, n) = UserData.Brand_DE
+    n = n + 1: Cells(i, n) = UserData.Brand_CR
+Next
+
+Dim LSADataPatch$, ShLSAoutData$
 Dim ShIn$
 Dim smr As Seminars, smu As SeminarUsers
-Dim progress As IProgress
-Dim i As Double
 
 ShLSAoutData = "eduT"
 LSADataPatch = "p:\DPP\Business development\LSA\DATA\EduT.xlsm"
-nmWbLSA = MyLib.OpenFile(LSADataPatch, ShLSAoutData)
+nmWbLSA = myLib.OpenFile(LSADataPatch, ShLSAoutData)
 Workbooks(nmWbLSA).Activate
 Set smr = New Seminars
 ShIn = "eduT"
@@ -198,8 +196,8 @@ ShOut = "Education"
 
 Sheets(ShIn).Select
 smr.FillFromSheet ActiveSheet
-
-Workbooks(nm_ActWb).Activate    
+Workbooks(nmWbLSA).Close
+Workbooks(nm_ActWb).Activate 
 myLib.CreateSh (ShOut)
 myLib.sheetActivateCleer (ShOut)
 
@@ -207,15 +205,182 @@ i = 1
 For Each smu In smr
 i = i + 1
     With smu
-        n = 1: Cells(i, n)      = .PersonName
-        n = n + 1: Cells(i, n)  = .EduDate
-        n = n + 1: Cells(i, n)  = .SeminarName
-        n = n + 1: Cells(i, n)  = .Educater
+        n = 1: Cells(i, n) = .PersonName
+        n = n + 1: Cells(i, n) = .EduDate
+        n = n + 1: Cells(i, n) = .SeminarName
+        n = n + 1: Cells(i, n) = .Educater
+    End With
+
+    With dic_SeminarName
+        If Not .Exists(smu.SeminarName) Then .Add smu.SeminarName, .count + 1
+    End With  
+
+Next
+
+Dim objEduUSR As UserEducated
+
+For Each UserData In dic_People.Items
+    With UserData
+        keyEduUSR = .PersonName & .cdDateStat
+    End With
+    If Not dic_UserEducated.Exists(keyEduUSR) Then
+        Set objEduUSR = New UserEducated
+
+        objEduUSR.cdDateStat        = UserData.cdDateStat
+        objEduUSR.PersonName        = UserData.PersonName
+        objEduUSR.Role              = UserData.Role
+        objEduUSR.Status            = UserData.Status  
+        objEduUSR.Mobile            = UserData.Mobile 
+        objEduUSR.Mail              = UserData.Mail       
+        objEduUSR.Partner           = UserData.Partner 
+        objEduUSR.Experience        = UserData.Experience 
+        objEduUSR.Territory         = UserData.Territory
+        objEduUSR.ParentTerritory   = UserData.ParentTerritory 
+        objEduUSR.Brand_LP          = UserData.Brand_LP          
+        objEduUSR.Brand_MX          = UserData.Brand_MX
+        objEduUSR.Brand_KR          = UserData.Brand_KR
+        objEduUSR.Brand_RD          = UserData.Brand_RD
+        objEduUSR.Brand_ES          = UserData.Brand_ES
+        objEduUSR.Brand_DE          = UserData.Brand_DE
+        objEduUSR.Brand_CR          = UserData.Brand_CR
+        objEduUSR.MegaReg           = UserData.MegaReg
+        objEduUSR.TeamType          = "1"
+        objEduUSR.EduDate           = Empty
+        objEduUSR.diffEduDate       = Empty
+        objEduUSR.EducatedStatus    = Empty
+
+
+        dic_UserEducated.Add keyEduUSR, objEduUSR
+    End if
+Next
+
+For Each smu in smr
+    With smu
+        cdDateStat = DateSerial(Year(.EduDate), Month(.EduDate), 1)
+        keyEduUSR = .PersonName & DateSerial(Year(.EduDate), Month(.EduDate), 1)
+        If Not dic_UserEducated.Exists(keyEduUSR) and Year(.EduDate) = cd_ActualYear  Then
+            Set objEduUSR = New UserEducated
+
+            objEduUSR.cdDateStat        = cdDateStat
+            objEduUSR.PersonName        =smu.PersonName
+            objEduUSR.Brand_Other       = "Other"
+            objEduUSR.Experience        = "OLD"
+            objEduUSR.TeamType          = Empty
+            objEduUSR.EduDate           = Empty
+            objEduUSR.diffEduDate       = Empty
+            objEduUSR.EducatedStatus    = Empty
+            dic_UserEducated.Add keyEduUSR, objEduUSR
+        End If
     End With
 Next
-             
+
+For Each smu in smr
+    With smu
+        dateEduUsr =  DateSerial(Year(.EduDate), Month(.EduDate), 1)
+        numSMR = dic_SeminarName.Item(.SeminarName)
+    End With
+    For f_y = 0 to 35
+        PeriodY3dEduUsr = DateAdd("m", f_y,  dateEduUsr)
+        keyEduUSR = smu.PersonName & PeriodY3dEduUsr
+        Select Case f_y
+            Case 0: diffEduDate = f_y
+            Case Else: diffEduDate = f_y * -1
+        End Select 
+
+        With dic_UserEducated
+        
+            If .Exists(keyEduUSR) Then
+                Select Case numSMR
+                    Case 1: .Item(keyEduUSR).Seminar1 = 1
+                    Case 2: .Item(keyEduUSR).Seminar2 = 1
+                    Case 3: .Item(keyEduUSR).Seminar3 = 1
+                    Case 4: .Item(keyEduUSR).Seminar4 = 1
+                    Case 5: .Item(keyEduUSR).Seminar5 = 1
+                    Case 6: .Item(keyEduUSR).Seminar6 = 1
+                    Case 7: .Item(keyEduUSR).Seminar7 = 1
+                    Case 8: .Item(keyEduUSR).Seminar8 = 1
+                    Case 9: .Item(keyEduUSR).Seminar9 = 1
+                    Case 10: .Item(keyEduUSR).Seminar10 = 1
+                    Case 11: .Item(keyEduUSR).Seminar11 = 1
+                    Case 12: .Item(keyEduUSR).Seminar12 = 1
+                    Case 13: .Item(keyEduUSR).Seminar13 = 1
+                    Case 14: .Item(keyEduUSR).Seminar14 = 1
+                    Case 15: .Item(keyEduUSR).Seminar15 = 1
+                    Case 16: .Item(keyEduUSR).Seminar16 = 1
+                    Case 17: .Item(keyEduUSR).Seminar17 = 1
+                    Case 18: .Item(keyEduUSR).Seminar18 = 1
+                    Case 19: .Item(keyEduUSR).Seminar19 = 1
+                    Case 20: .Item(keyEduUSR).Seminar20 = 1
+                End Select
+                .Item(keyEduUSR).EduDate = smu.EduDate
+                .Item(keyEduUSR).diffEduDate = diffEduDate
+                .Item(keyEduUSR).EducatedStatus = 1
+            End If
+        End With
+    Next f_y
+Next
+
+nm_ShEducatedUsers = "LSA"
+myLib.CreateSh (nm_ShEducatedUsers)
+myLib.sheetActivateCleer (nm_ShEducatedUsers)        
+Sheets(nm_ShEducatedUsers).Select
+
+i = 0   
+SmrCnt = dic_SeminarName.Count
+For Each UserEducated In dic_UserEducated.Items
+    i = i + 1
+    n = 0
+    With UserEducated
+        n = n + 1: Cells(i, n) = IIF(i = 1, "Month", myLib.getNameMonthEN(month(.cdDateStat)))
+        n = n + 1: Cells(i, n) = IIF(i = 1, "Year", year(.cdDateStat))
+        n = n + 1: Cells(i, n) = IIF(i = 1, "PersonName", .PersonName)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "Role", .Role)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "Status", .Status)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "Mobile", .Mobile)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "Mail", .Mail)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "Partner", .Partner)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "Experience", .Experience)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "Territory", .Territory)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "ParentTerritory", .ParentTerritory)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "LP", .Brand_LP)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "MX", .Brand_MX)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "KR", .Brand_KR)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "RD", .Brand_RD)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "ES", .Brand_ES)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "DE", .Brand_DE)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "CR", .Brand_CR)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "Other", .Brand_Other)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "TeamType", .TeamType)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "MegaReg", .MegaReg)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "EduDate", .EduDate)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "diffEduDate", .diffEduDate)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "Educater", .Educater)
+        n = n + 1: Cells(i, n) = IIF(i = 1, "EducatedStatus", .EducatedStatus)
+        On Error Resume Next
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(0), .Seminar1)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(1), .Seminar2)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(2), .Seminar3)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(3), .Seminar4)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(4), .Seminar5)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(5), .Seminar6)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(6), .Seminar7)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(7), .Seminar8)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(8), .Seminar9)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(9), .Seminar10)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(10), .Seminar11)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(11), .Seminar12)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(12), .Seminar13)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(13), .Seminar14)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(14), .Seminar15)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(15), .Seminar16)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(16), .Seminar17)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(17), .Seminar18)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(18), .Seminar19)
+        n = n + 1: Cells(i, n) = IIF(i = 1, dic_SeminarName.Keys()(19), .Seminar20)
+    End  With
+Next
 
 
-MyLib.VBA_End
+myLib.VBA_End
 End Sub
 
