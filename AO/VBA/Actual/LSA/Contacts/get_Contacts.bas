@@ -20,7 +20,7 @@ Set dic_UserEducated = CreateObject("Scripting.Dictionary"): dic_UserEducated.Re
 nm_ActWb = ActiveWorkbook.Name
 cd_ActualMonth = CInt(InputBox("Month"))
 cd_ActualYear = 2016
-ar_Brand = Array("RD")
+ar_Brand = Array("LP", "MX", "KR", "RD", "ES")
 
 nm_ShOutData = "Contacts"
 nm_ShInData = "Cnt_Persone"
@@ -225,30 +225,30 @@ For Each UserData In dic_People.Items
     End With
     If Not dic_UserEducated.Exists(keyEduUSR) Then
         Set objEduUSR = New UserEducated
-
-        objEduUSR.cdDateStat        = UserData.cdDateStat
-        objEduUSR.PersonName        = UserData.PersonName
-        objEduUSR.Role              = UserData.Role
-        objEduUSR.Status            = UserData.Status  
-        objEduUSR.Mobile            = UserData.Mobile 
-        objEduUSR.Mail              = UserData.Mail       
-        objEduUSR.Partner           = UserData.Partner 
-        objEduUSR.Experience        = UserData.Experience 
-        objEduUSR.Territory         = UserData.Territory
-        objEduUSR.ParentTerritory   = UserData.ParentTerritory 
-        objEduUSR.Brand_LP          = UserData.Brand_LP          
-        objEduUSR.Brand_MX          = UserData.Brand_MX
-        objEduUSR.Brand_KR          = UserData.Brand_KR
-        objEduUSR.Brand_RD          = UserData.Brand_RD
-        objEduUSR.Brand_ES          = UserData.Brand_ES
-        objEduUSR.Brand_DE          = UserData.Brand_DE
-        objEduUSR.Brand_CR          = UserData.Brand_CR
-        objEduUSR.MegaReg           = UserData.MegaReg
-        objEduUSR.TeamType          = "1"
-        objEduUSR.EduDate           = Empty
-        objEduUSR.diffEduDate       = Empty
-        objEduUSR.EducatedStatus    = Empty
-
+        With UserData
+            objEduUSR.cdDateStat        = .cdDateStat
+            objEduUSR.PersonName        = .PersonName
+            objEduUSR.Role              = .Role
+            objEduUSR.Status            = .Status  
+            objEduUSR.Mobile            = .Mobile 
+            objEduUSR.Mail              = .Mail       
+            objEduUSR.Partner           = .Partner 
+            objEduUSR.Experience        = .Experience 
+            objEduUSR.Territory         = .Territory
+            objEduUSR.ParentTerritory   = .ParentTerritory 
+            objEduUSR.Brand_LP          = .Brand_LP          
+            objEduUSR.Brand_MX          = .Brand_MX
+            objEduUSR.Brand_KR          = .Brand_KR
+            objEduUSR.Brand_RD          = .Brand_RD
+            objEduUSR.Brand_ES          = .Brand_ES
+            objEduUSR.Brand_DE          = .Brand_DE
+            objEduUSR.Brand_CR          = .Brand_CR
+            objEduUSR.MegaReg           = .MegaReg
+            objEduUSR.TeamType          = "1"
+            objEduUSR.EduDate           = Empty
+            objEduUSR.diffEduDate       = Empty
+            objEduUSR.EducatedStatus    = Empty
+        End With
 
         dic_UserEducated.Add keyEduUSR, objEduUSR
     End if
@@ -262,7 +262,7 @@ For Each smu in smr
             Set objEduUSR = New UserEducated
 
             objEduUSR.cdDateStat        = cdDateStat
-            objEduUSR.PersonName        =smu.PersonName
+            objEduUSR.PersonName        =.PersonName
             objEduUSR.Brand_Other       = "Other"
             objEduUSR.Experience        = "OLD"
             objEduUSR.TeamType          = Empty

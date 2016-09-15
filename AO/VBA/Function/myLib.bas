@@ -729,3 +729,11 @@
         Next
         Set oUTF8 = Nothing: Set oMD5 = Nothing
     End Function
+
+    Function getStatus(in_data as String) as String
+    Dim result$
+    Select Case Trim(LCase(in_data))
+        Case "партнер", "partner"
+        Case "лореаль", "loreal", "l'oreal", "л'ореаль", "зао*"
+        Case "ancore", "анкор", "inter"
+
