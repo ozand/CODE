@@ -99,16 +99,18 @@
     month_form_00 = result
     End Function
     '---------------------------------------------------------------------------------------------------------
-    Function patch_history_TR(brand As String, year As Integer, thisMonth As Integer, ver_month As Integer) As String
+    Function patch_history_TR(brand As String, year As Integer,  ver_year As Integer, thisMonth As Integer, ver_month As Integer) As String
     Dim result As String
     result = Empty
     month00 = month_form_00(ver_month)
-        Select Case ver_month
-            Case thisMonth
-            result = "p:\DPP\Business development\Book commercial\" & brand & "\Top Russia Total " & year & " " & brand & ".xlsm"
-            Case Else
-            result = "p:\DPP\Business development\Book commercial\" & brand & "\" & year & "\History " & year & "\Top Russia Total " & year & "." & month00 & " " & brand & ".xlsm"
-        End Select
+
+    If ver_month = 12 Then
+        result = "p:\DPP\Business development\Book commercial\" & brand & "\Top Russia Total " & ver_year & " " & brand & ".xlsm"
+        ElseIf ver_month & ver_year = thisMonth & year Then
+            result = "p:\DPP\Business development\Book commercial\" & brand & "\Top Russia Total " & ver_year & " " & brand & ".xlsm"
+            Else
+                result = "p:\DPP\Business development\Book commercial\" & brand & "\" & ver_year & "\History " & ver_year & "\Top Russia Total " & ver_year & "." & month00 & " " & brand & ".xlsm"
+    End If
 
     patch_history_TR = result
     End Function
@@ -690,14 +692,21 @@
     End Function
 '--------------------------------------------------------------------------------------------------------- 
 
-    Function getLast4quartal(in_date as Variant, in_ActiveM%, in_ActiveY%) as String
-    Dim result$ 
-    Dim ActDate As Date
-    Dim count_month as Integer
-
-    If isNumeric(in_ActiveY) and isNumeric(in_ActiveM) and not isEmpty(in_date)  Then
-        ActDate = DateSerial(in_ActiveY, in_ActiveM , 1 )
-        count_qurtal = DateDiff("q", in_date, ActDate)
+    Function getLast4quartal(in_date As Variant, in_ActiveM%, in_ActiveY%) As String
+    Dim result$
+    Dim ActDate As Date, in_dateN As Date
+    Dim count_month As Integer
+    
+   
+    If Not IsDate(in_date) Then
+        in_dateN = CDate(in_date)
+        Else
+        in_dateN = in_date
+    End If
+  
+    If IsNumeric(in_ActiveY) And IsNumeric(in_ActiveM) And IsDate(in_date) Then
+        ActDate = DateSerial(in_ActiveY, in_ActiveM, 1)
+        count_qurtal = DateDiff("q", in_dateN, ActDate)
     End If
     Select Case count_qurtal
         Case 1: result = "-1Q"
@@ -730,10 +739,24 @@
         Set oUTF8 = Nothing: Set oMD5 = Nothing
     End Function
 
-    Function getStatus(in_data as String) as String
+ 
+   Function getStatus(in_data As String) As String
     Dim result$
     Select Case Trim(LCase(in_data))
-        Case "партнер", "partner"
-        Case "лореаль", "loreal", "l'oreal", "л'ореаль", "зао*"
-        Case "ancore", "анкор", "inter"
+        Case "партнер", "партнёр", "partner": result = "partner"
+        Case "лореаль", "loreal", "l'oreal", "л'ореаль", "зао л'ореаль": result = "loreal"
+        Case "ancore", "ancor", "анкор", "inter", "агентство": result = "inter"
+        Case Else: result = in_data
+    End Select
+    getStatus = result
+    End Function
 
+    Function fixError (in_data as Variant) as Variant
+    Dim result as Variant
+    If isError(in_data) Then
+    result = Empty
+    Else
+    result  = in_data
+    End If
+    fixError = result
+    End Function
