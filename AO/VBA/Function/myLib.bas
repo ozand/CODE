@@ -1,5 +1,8 @@
  Attribute VB_Name = "myLib"
+<<<<<<< HEAD
 
+=======
+>>>>>>> dc6b4c5054ff8ce6310224134d7455604d6346d6
   '---------------------------------------------------------------------------------------------------------
     Function Replace_symbols(ByVal txt As String) As String
         St$ = "~!@/\#$%^:?&*=|`;"""
@@ -30,7 +33,7 @@
     End With
     End Function
     '---------------------------------------------------------------------------------------------------------
-    Sub CreateSh(ByVal cr_sh As String)
+    Function CreateSh(cr_sh As String) As String
     For Each Sh In ThisWorkbook.Worksheets
         If Sh.Name = cr_sh Then
         chek_name = 1
@@ -40,8 +43,7 @@
         Set Sh = Worksheets.Add()
         Sh.Name = cr_sh
         End If
-        Sheets(cr_sh).Select
-    End Sub
+    End Function
     '---------------------------------------------------------------------------------------------------------
     Function OpenFile(ByRef patch As String, nm_sh As String) As String
     Dim result$
@@ -651,10 +653,8 @@
         result = "FLSMasSREP"
         ElseIf InStr(1, LCase(nm_Srep), "вакан", vbTextCompare) <> 0 Then
             result = "vacancy"
-            ElseIf Len(nm_Srep) = 0 Then
-                result = "vacancy"
-                Else
-                    result = "active"
+            Else
+            result = "active"
     End If
     getSREP_type = result
     
@@ -673,8 +673,13 @@
     End Sub
 
 '---------------------------------------------------------------------------------------------------------
+<<<<<<< HEAD
     Sub CloseNoMotherBook(ByVal ShIn as String)
         If ActiveWorkbook.Name <> ShIn Then
+=======
+    Sub CloseNoMotherBook()
+        If ActiveWorkbook.Name <> nm_ActWb Then
+>>>>>>> dc6b4c5054ff8ce6310224134d7455604d6346d6
         ActiveWindow.Close
         Application.DisplayAlerts = False
           End If
@@ -697,15 +702,20 @@
     Dim ActDate As Date
     Dim count_month as Integer
 
+<<<<<<< HEAD
     If isNumeric(in_ActiveY) and isNumeric(in_ActiveM) and not isEmpty(in_date)  Then
         ActDate = DateSerial(in_ActiveY, in_ActiveM , 1 )
+=======
+    If isNumeric(in_ActiveY) and isNumeric(in_ActiveY) and not isEmpty(in_date)  Then
+        ActDate = DateSerial(in_ActiveY, in_ActiveY , 1 )
+>>>>>>> dc6b4c5054ff8ce6310224134d7455604d6346d6
         count_qurtal = DateDiff("q", in_date, ActDate)
     End If
     Select Case count_qurtal
-        Case 1: result = "Q"
-        Case 2: result = "-1Q"
-        Case 3: result = "-2Q"
-        Case 4: result = "-3Q"
+        Case 1: result = "-1Q"
+        Case 2: result = "-2Q"
+        Case 3: result = "-3Q"
+        Case 4: result = "-4Q"
         Case Else: result = "OLD"
     End Select
     getLast4quartal = result
