@@ -1,4 +1,5 @@
-    Attribute VB_Name = "myLib"
+ Attribute VB_Name = "myLib"
+
   '---------------------------------------------------------------------------------------------------------
     Function Replace_symbols(ByVal txt As String) As String
         St$ = "~!@/\#$%^:?&*=|`;"""
@@ -98,16 +99,18 @@
     month_form_00 = result
     End Function
     '---------------------------------------------------------------------------------------------------------
-    Function patch_history_TR(brand As String, year As Integer, thisMonth As Integer, ver_month As Integer) As String
+    Function patch_history_TR(brand As String, year As Integer,  ver_year As Integer, thisMonth As Integer, ver_month As Integer) As String
     Dim result As String
     result = Empty
     month00 = month_form_00(ver_month)
-        Select Case ver_month
-            Case thisMonth
-            result = "p:\DPP\Business development\Book commercial\" & brand & "\Top Russia Total " & year & " " & brand & ".xlsm"
-            Case Else
-            result = "p:\DPP\Business development\Book commercial\" & brand & "\" & year & "\History " & year & "\Top Russia Total " & year & "." & month00 & " " & brand & ".xlsm"
-        End Select
+
+    If ver_month = 12 Then
+        result = "p:\DPP\Business development\Book commercial\" & brand & "\Top Russia Total " & ver_year & " " & brand & ".xlsm"
+        ElseIf ver_month & ver_year = thisMonth & year Then
+            result = "p:\DPP\Business development\Book commercial\" & brand & "\Top Russia Total " & ver_year & " " & brand & ".xlsm"
+            Else
+                result = "p:\DPP\Business development\Book commercial\" & brand & "\" & ver_year & "\History " & ver_year & "\Top Russia Total " & ver_year & "." & month00 & " " & brand & ".xlsm"
+    End If
 
     patch_history_TR = result
     End Function
@@ -669,8 +672,9 @@
     End Sub
 
 '---------------------------------------------------------------------------------------------------------
-    Sub CloseNoMotherBook()
-        If ActiveWorkbook.Name <> nm_ActWb Then
+    Sub CloseNoMotherBook(ByVal ShIn as String)
+        If ActiveWorkbook.Name <> ShIn Then
+
         ActiveWindow.Close
         Application.DisplayAlerts = False
           End If
@@ -688,20 +692,27 @@
     End Function
 '--------------------------------------------------------------------------------------------------------- 
 
-    Function getLast4quartal(in_date as Variant, in_ActiveM%, in_ActiveY%) as String
-    Dim result$ 
-    Dim ActDate As Date
-    Dim count_month as Integer
-
-    If isNumeric(in_ActiveY) and isNumeric(in_ActiveY) and not isEmpty(in_date)  Then
-        ActDate = DateSerial(in_ActiveY, in_ActiveY , 1 )
-        count_qurtal = DateDiff("q", in_date, ActDate)
+    Function getLast4quartal(in_date As Variant, in_ActiveM%, in_ActiveY%) As String
+    Dim result$
+    Dim ActDate As Date, in_dateN As Date
+    Dim count_month As Integer
+    
+   
+    If Not IsDate(in_date) Then
+        in_dateN = CDate(in_date)
+        Else
+        in_dateN = in_date
+    End If
+  
+    If IsNumeric(in_ActiveY) And IsNumeric(in_ActiveM) And IsDate(in_date) Then
+        ActDate = DateSerial(in_ActiveY, in_ActiveM, 1)
+        count_qurtal = DateDiff("q", in_dateN, ActDate)
     End If
     Select Case count_qurtal
-        Case 1: result = "Q"
-        Case 2: result = "-1Q"
-        Case 3: result = "-2Q"
-        Case 4: result = "-3Q"
+        Case 1: result = "-1Q"
+        Case 2: result = "-2Q"
+        Case 3: result = "-3Q"
+        Case 4: result = "-4Q"
         Case Else: result = "OLD"
     End Select
     getLast4quartal = result
@@ -712,10 +723,40 @@
     Sheets(in_sh).Select
     ActiveSheet.UsedRange.Cells.ClearContents
     End Sub
+'--------------------------------------------------------------------------------------------------------- 
+    Function GetHash(ByVal txt$) As String
+        Dim oUTF8, oMD5, abyt, i&, k&, hi&, lo&, chHi$, chLo$
+        Set oUTF8 = CreateObject("System.Text.UTF8Encoding")
+        Set oMD5 = CreateObject("System.Security.Cryptography.MD5CryptoServiceProvider")
+        abyt = oMD5.ComputeHash_2(oUTF8.GetBytes_4(txt$))
+        For i = 1 To LenB(abyt)
+            k = AscB(MidB(abyt, i, 1))
+            lo = k Mod 16: hi = (k - lo) / 16
+            If hi > 9 Then chHi = Chr(Asc("a") + hi - 10) Else chHi = Chr(Asc("0") + hi)
+            If lo > 9 Then chLo = Chr(Asc("a") + lo - 10) Else chLo = Chr(Asc("0") + lo)
+            GetHash = GetHash & chHi & chLo
+        Next
+        Set oUTF8 = Nothing: Set oMD5 = Nothing
+    End Function
 
+ 
+   Function getStatus(in_data As String) As String
+    Dim result$
+    Select Case Trim(LCase(in_data))
+        Case "партнер", "партнёр", "partner": result = "partner"
+        Case "лореаль", "loreal", "l'oreal", "л'ореаль", "зао л'ореаль": result = "loreal"
+        Case "ancore", "ancor", "анкор", "inter", "агентство": result = "inter"
+        Case Else: result = in_data
+    End Select
+    getStatus = result
+    End Function
 
-    
-
-
-
-
+    Function fixError (in_data as Variant) as Variant
+    Dim result as Variant
+    If isError(in_data) Then
+    result = Empty
+    Else
+    result  = in_data
+    End If
+    fixError = result
+    End Function

@@ -94,11 +94,6 @@ ON
 
 --when 1 then 'LP' when 3 then 'ES' when 5 then 'MX' when 6 then 'KR' when 7 then 'RD'
 --left join salons as slnManag ON usr.id = sln.salon_manager_id 
-
 left join studios as std ON smr.studio_id is not null and smr.studio_id = std.id
-
-
-
 Where   smr.started_at >= '2015-01-01' and  smr.started_at < '2016-09-01'
-
 --group by smr.started_at, smu.user_Id
