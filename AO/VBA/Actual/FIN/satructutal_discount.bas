@@ -10,7 +10,7 @@ myLib.VBA_Start
 shFile = "PRGRM"
 patch = "p:\DPP\Business development\Book commercial\DPP\#Расчётные\1. MONTHLY TASKS\phasage in_out_2016.xlsm"
 wbSISOST = myLib.OpenFile(patch, shFile)    
-Workbooks(wbSISOST).Activat
+Workbooks(wbSISOST).Activate
 Sheets(shFile).Select
 
 Dim prgs As Programs, prg As program

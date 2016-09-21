@@ -14,7 +14,6 @@ Public month As Integer
 Public cd_partners as String
 Public brand as Integer
 Public type_vl as String
-Public concate as String
 Public s_group as String
 Public val as Double
 

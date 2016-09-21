@@ -47,7 +47,7 @@ Public Sub Clear()
 End Sub
 
 Public Sub FillFromSheet(wks As Worksheet)
-    Const cMonth = 1, cCd_partners = 2, cBrand = 3, cType_vl = 4, cS_group = 6, cVal = 7
+    Const cFirstRow = 1, cMonth = 1, cCd_partners = 2, cBrand = 3, cType_vl = 4, cS_group = 6, cVal = 7
 
     Dim i As Long, obj As program
     With wks
